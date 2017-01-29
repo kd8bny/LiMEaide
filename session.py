@@ -4,10 +4,11 @@ import paramiko, logging
 
 
 class Session(object):
-    """Session will take care of all the backend communications"""    
+    """Session will take care of all the backend communications"""
     def __init__(self, client):
         super(Session, self).__init__()
-        self.logger = logging.getLogger()
+        logging.basicConfig(level=logging.INFO)
+        self.logger = logging.getLogger(__name__)
         self.client = client
         self.session = paramiko.SSHClient()
         self.session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -22,7 +23,7 @@ class Session(object):
             stdin.flush()
         else:
             stdin, stdout, stderr = self.session.exec_command(cmd)
-            
+
         if stdout != None:
             for line in stdout:
                 self.logger.info(line.strip('\n'))
