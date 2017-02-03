@@ -1,48 +1,31 @@
 #!/bin/python
 
 import sys, datetime, os, argparse, getpass
-from session import Session
+from lime_deploy import LimeDeploy
 from client import Client
 
 
 class Limeaide(object):
-    """processes all interactions with remote client"""
+    """Deploy LiME LKM to remote host in order to scrape RAM"""
+
+    _version = "1.0.1"
+
     def __init__(self):
         super(Limeaide, self).__init__()
         self.lime_dir = './tools/LiME/src/'
-        self.lime_rdir = './lime/'
+        self.tools_dir = './tools/'
         self.output_dir = './output/'
-        self.lime = ['disk.c', 'lime.h', 'main.c', 'Makefile', 'tcp.c']
-        self.remote_session = None
 
-    def send_lime(self):
-        print("sending LiME")
-        self.remote_session.exec_cmd('mkdir %s' %self.lime_rdir, False)
-        for file in self.lime:
-            self.remote_session.put_sftp(self.lime_dir, self.lime_rdir, file)
-        print("done.")
+    def check_tools(self):
+        if not os.path.isdir(self.output_dir):
+            os.mkdir(self.output_dir)
 
-    def build_lime(self, client):
-        print("building kernel module")
-        self.remote_session.exec_cmd('cd %s; make' %self.lime_rdir, False)
-        self.remote_session.exec_cmd('mv %s/lime*.ko .' %self.lime_rdir, False)
-        self.remote_session.exec_cmd('insmod lime*.ko "path=%s format=raw dio=0"' %client.output, True)
-        print("done.")
+        if not os.path.isdir(self.lime_dir):
+            if not os.path.isdir(self.tools_dir):
+                os.mkdir(self.tools_dir)
+            sys.exit("Please download LiME and place in the ./tools/ dir")
 
-    def get_lime(self, client):
-        print("Changing permissions")
-        self.remote_session.exec_cmd('chmod 755 %s' %client.output, True)
-        print("Beam me up Scotty")
-        self.remote_session.pull_sftp(".", self.output_dir, client.output)
-
-    def clean(self, client):
-        print("cleaning up...")
-        self.remote_session.exec_cmd('rm -r lime* %s' %client.output, True)
-        print("Removing LKM...standby")
-        self.remote_session.exec_cmd('rmmod lime.ko', True)
-        print("Memory extraction is complete")
-
-    def main(self):
+    def get_client(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("remote", help="remote host IP")
 
@@ -58,15 +41,17 @@ class Limeaide(object):
         if args.output != None:
             client.output = args.output
 
+        return client
+
+    def main(self):
+        print("Welcome to LiMEaide v%s " %(self._version))
+        self.check_tools()
+        client = self.get_client()
         print("Attempting secure connection %s@%s" %(client.user, client.ip))
         print("Password for %s:" %client.user)
         client.pass_ = getpass.getpass()
 
-        self.remote_session = Session(client)
-        self.send_lime()
-        self.build_lime(client)
-        self.get_lime(client)
-        self.clean(client)
+        LimeDeploy(client).main()
 
 if __name__ == '__main__':
     Limeaide().main()

@@ -3,18 +3,14 @@
 ## About
 LiMEaide is a python wrapper that will simplify Linux digital forensics in an enterprise environment. All you need to do is feed LiMEaide a remote Linux client IP, sit back, and consume your favorite caffeinated beverage.
 
-## Table of Contents
-* [Dependancies]()
-
-
 ## How To
-### BLUF - bottom line up front
+### TL;DR
 ```
-python limeaide.py <IP>
+python3 limeaide.py <IP>
 ```
-and thats it... :)
+and magic happens
 
-## Deatiled ussage
+### Detailed usage
 ```
 limeaide.py [-h] [-o <outputfile>] [-s <sudoer>] <remote host IP>
 -h show this dialog
@@ -22,12 +18,27 @@ limeaide.py [-h] [-o <outputfile>] [-s <sudoer>] <remote host IP>
 -o Declare name of output file. Default is dump.bin
 ```
 
-# Dependancies
-python-paramiko
+## Set-up
+### Dependancies
+#### python3-paramiko
+- DEB base
+```
+sudo apt-get install python3-paramiko
+```
 
-# Special Thanks and Notes
+- RPM base
+```
+sudo yum install python3-paramiko
+```
+#### LiME
+In order to use LiME you must download and mv the source into the **LiMEaide/tools** directory. Make sure the the LiME folder is named **LiME**. The full path shold be as follows:
+```
+LiMEaide/tools/LiME
+```
+
+## Special Thanks and Notes
 * The idea for this application was built upon the concept dreamed up by and the [Linux Memory Grabber](https://github.com/halpomeranz/lmg) project
 * And of course none of this could be possible without the the amazing [LiME](https://github.com/504ensicsLabs/LiME) project
 
-#TODO
+## TODO
 Add support to create volitility profile
