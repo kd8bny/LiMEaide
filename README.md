@@ -1,5 +1,5 @@
 # LiMEaide
-## v1.0.0
+## v1.0.1
 ## About
 LiMEaide is a python wrapper that will simplify Linux digital forensics in an enterprise environment. All you need to do is feed LiMEaide a remote Linux client IP, sit back, and consume your favorite caffeinated beverage.
 
@@ -12,14 +12,15 @@ and magic happens
 
 ### Detailed usage
 ```
-limeaide.py [-h] [-o <outputfile>] [-s <sudoer>] <remote host IP>
+limeaide.py [-h] [-o <outputfile>] [-s <sudoer>] [--force-clean] <remote host IP>
 -h show this dialog
 -s Execute memory grab as sudoer. This is useful when root privileges are not granted
 -o Declare name of output file. Default is dump.bin
+--force-clean If previous attempt failed then clean up client
 ```
 
 ## Set-up
-### Dependancies
+### Dependencies
 #### python3-paramiko
 - DEB base
 ```
@@ -41,4 +42,4 @@ LiMEaide/tools/LiME
 * And of course none of this could be possible without the the amazing [LiME](https://github.com/504ensicsLabs/LiME) project
 
 ## TODO
-Add support to create volitility profile
+Add support to create volatility profile

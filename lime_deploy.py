@@ -10,11 +10,11 @@ class LimeDeploy(object):
     def __init__(self, client):
         super(LimeDeploy, self).__init__()
         self.client = client
+        self.remote_session = Session(self.client)
         self.lime_dir = './tools/LiME/src/'
         self.lime_rdir = './lime/'
         self.output_dir = './output/'
         self.lime = ['disk.c', 'lime.h', 'main.c', 'Makefile', 'tcp.c']
-        self.remote_session = None
 
     def send_lime(self):
         print("sending LiME")
@@ -41,14 +41,13 @@ class LimeDeploy(object):
         self.remote_session.exec_cmd('rm -r lime* %s' %self.client.output, True)
         print("Removing LKM...standby")
         self.remote_session.exec_cmd('rmmod lime.ko', True)
-        print("Memory extraction is complete\n\n%s is in %s" %(self.client.output, self.output_dir))
 
     def main(self):
-        self.remote_session = Session(self.client)
         self.send_lime()
         self.build_lime()
         self.get_lime()
         self.clean()
+        print("Memory extraction is complete\n\n%s is in %s" %(self.client.output, self.output_dir))
 
 if __name__ == '__main__':
     LimeDeploy().main()

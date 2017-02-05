@@ -15,6 +15,7 @@ class Limeaide(object):
         self.lime_dir = './tools/LiME/src/'
         self.tools_dir = './tools/'
         self.output_dir = './output/'
+        self.args_clean = False
 
     def check_tools(self):
         if not os.path.isdir(self.output_dir):
@@ -31,6 +32,8 @@ class Limeaide(object):
 
         parser.add_argument("-s", "--sudoer", help="use a sudo user instead default: root")
         parser.add_argument("-o", "--output", help="name the outputfile")
+        parser.add_argument("--force-clean",  action="store_true",
+                help="Force clean client after failed deployment")
         args = parser.parse_args()
 
         client = Client()
@@ -38,20 +41,28 @@ class Limeaide(object):
         if args.sudoer != None:
             client.user = args.sudoer
             client.is_sudoer = True
+
         if args.output != None:
             client.output = args.output
+
+        if args.force_clean:
+            self.args_clean = args.force_clean
 
         return client
 
     def main(self):
         print("Welcome to LiMEaide v%s " %(self._version))
+        print("LiMEaide is licensed under GPL-3.0\nLiME is licensed under GPL-2.0")
         self.check_tools()
         client = self.get_client()
         print("Attempting secure connection %s@%s" %(client.user, client.ip))
-        print("Password for %s:" %client.user)
         client.pass_ = getpass.getpass()
 
-        LimeDeploy(client).main()
+        if self.args_clean:
+            LimeDeploy(client).clean()
+            sys.exit("Clean attempt complete")
+        else:
+            LimeDeploy(client).main()
 
 if __name__ == '__main__':
     Limeaide().main()
