@@ -8,7 +8,7 @@ from client import Client
 class Limeaide(object):
     """Deploy LiME LKM to remote host in order to scrape RAM"""
 
-    _version = "1.0.1"
+    _version = "1.1.0"
 
     def __init__(self):
         super(Limeaide, self).__init__()

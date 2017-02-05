@@ -1,5 +1,5 @@
 # LiMEaide
-## v1.0.1
+## v1.1.0
 ## About
 LiMEaide is a python wrapper that will simplify Linux digital forensics in an enterprise environment. All you need to do is feed LiMEaide a remote Linux client IP, sit back, and consume your favorite caffeinated beverage.
 
