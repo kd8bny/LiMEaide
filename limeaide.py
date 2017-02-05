@@ -32,6 +32,8 @@ class Limeaide(object):
 
         parser.add_argument("-s", "--sudoer", help="use a sudo user instead default: root")
         parser.add_argument("-o", "--output", help="name the outputfile")
+        parser.add_argument("-D", "--dont-compress", action="store_true",
+                help="Do NOT compress dump into Bzip2 format")
         parser.add_argument("--force-clean",  action="store_true",
                 help="Force clean client after failed deployment")
         args = parser.parse_args()
@@ -44,6 +46,9 @@ class Limeaide(object):
 
         if args.output != None:
             client.output = args.output
+
+        if args.dont_compress:
+            client.dont_compress = args.dont_compress
 
         if args.force_clean:
             self.args_clean = args.force_clean

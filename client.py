@@ -9,3 +9,4 @@ class Client(object):
         self.ip = None
         self.output = 'dump.bin'
         self.is_sudoer = False
+        self.dont_compress = False

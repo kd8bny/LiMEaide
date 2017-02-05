@@ -27,18 +27,26 @@ class LimeDeploy(object):
         print("building kernel module")
         self.remote_session.exec_cmd('cd %s; make' %self.lime_rdir, False)
         self.remote_session.exec_cmd('mv %s/lime*.ko .' %self.lime_rdir, False)
+        print("Installing LKM and retrieving RAM")
         self.remote_session.exec_cmd('insmod lime*.ko "path=%s format=raw dio=0"' %self.client.output, True) #TODO test on centOS
         print("done.")
 
     def get_lime(self):
         print("Changing permissions")
         self.remote_session.exec_cmd('chmod 755 %s' %self.client.output, True)
-        print("Beam me up Scotty")
-        self.remote_session.pull_sftp(".", self.output_dir, self.client.output)
+        if self.client.dont_compress:
+            print("Beam me up Scotty")
+            self.remote_session.pull_sftp(".", self.output_dir, self.client.output)
+        else:
+            print("Creating Bzip2")
+            self.remote_session.exec_cmd('tar -jv --remove-files -f %s.bz2 -c %s'
+                    %(self.client.output, self.client.output), False)
+            print("Beam me up Scotty")
+            self.remote_session.pull_sftp(".", self.output_dir, self.client.output + ".bz2")
 
     def clean(self):
         print("cleaning up...")
-        self.remote_session.exec_cmd('rm -r lime* %s' %self.client.output, True)
+        self.remote_session.exec_cmd('rm -r lime* %s*' %self.client.output, True)
         print("Removing LKM...standby")
         self.remote_session.exec_cmd('rmmod lime.ko', True)
 

@@ -12,10 +12,20 @@ and magic happens
 
 ### Detailed usage
 ```
-limeaide.py [-h] [-o <outputfile>] [-s <sudoer>] [--force-clean] <remote host IP>
--h show this dialog
--s Execute memory grab as sudoer. This is useful when root privileges are not granted
--o Declare name of output file. Default is dump.bin
+limeaide.py [OPTIONS] REMOTE_IP
+-h, --help
+    show this dialog
+
+-s, --sudoer
+    Execute memory grab as sudoer. This is useful when root privileges are not granted
+
+-o, --output
+    Change name of output file. Default is dump.bin
+
+-D, --dont-compress
+    Do not compress memory file. By default memory is compressed on host. If you
+    experience issues, toggle this flag. In my tests I see a ~60% reduction in file size
+
 --force-clean If previous attempt failed then clean up client
 ```
 
