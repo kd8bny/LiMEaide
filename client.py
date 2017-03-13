@@ -4,9 +4,13 @@ class Client(object):
     """Define client connection"""
     def __init__(self):
         super(Client, self).__init__
-        self.user = 'root'
-        self.pass_ = None
         self.ip = None
-        self.output = 'dump.bin'
+        self.user = 'root'
         self.is_sudoer = False
-        self.dont_compress = False
+        self.pass_ = None
+        
+        self.kver = None
+        self.module = ''
+        self.output = 'dump.bin'
+        self.output_dir = None
+        self.compress = True
