@@ -10,7 +10,7 @@ from deploy_volatility import VolDeploy
 class Limeaide(object):
     """Deploy LiME LKM to remote host in order to scrape RAM"""
 
-    _version = "1.2.0"
+    _version = "1.2.1"
 
     def __init__(self):
         super(Limeaide, self).__init__()
