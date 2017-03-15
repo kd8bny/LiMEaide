@@ -17,10 +17,8 @@ class Session(object):
 
     def _transfer_status(self, filename, bytes_so_far, bytes_total):
         percent = int(100 * bytes_so_far / bytes_total)
-        print(percent%10 == 0)
-        print(percent)
         if percent % 10 == 0 and percent not in self.complete_percent:
-            self.complete_percent.add(percent)
+            self.complete_percent.append(percent)
             print('Transfer of %r is at %d/%d bytes (%.1f%%)'
                   %(filename, bytes_so_far, bytes_total, percent))
 
@@ -61,9 +59,8 @@ class Session(object):
 
         try:
             sftp.stat(filename)
-            #status = functools.partial(self._transfer_status, filename)
-            #sftp.get(filename, ldir + filename, callback=status)
-            sftp.get(filename, ldir + filename)
+            status = functools.partial(self._transfer_status, filename)
+            sftp.get(filename, ldir + filename, callback=status)
 
         except IOError as e:
             print(sftp.listdirs())
@@ -83,7 +80,6 @@ class Session(object):
 
         sftp.put(ldir + filename, filename)
         sftp.close
-
 
     def clean(self):
         print("cleaning up...")
