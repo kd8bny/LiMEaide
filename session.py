@@ -6,7 +6,7 @@ from client import Client
 
 class Session(object):
     """Session will take care of all the backend communications"""
-    
+
     def __init__(self, client):
         super(Session, self).__init__()
         self.client_ = client
@@ -14,7 +14,7 @@ class Session(object):
         self.session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.session.connect(client.ip, username=client.user, password=client.pass_)
         self.complete_percent = []
-        
+
     def _transfer_status(self, filename, bytes_so_far, bytes_total):
         percent = int(100 * bytes_so_far / bytes_total)
         print(percent%10 == 0)
@@ -40,9 +40,11 @@ class Session(object):
         else:
             stdin, stdout, stderr = self.session.exec_command(cmd, get_pty=True)
 
-        stdout = [line.strip('\n') for line in stdout]
-        [print(line) for line in stdout]
-        
+        stdout = [line.strip('\n\r') for line in stdout]
+        for line in stdout:
+            if line != self.client_.pass_:
+                print(line)
+
         if not stderr or self._error_check(stdout):
             [print(line.strip('\n')) for line in stderr]
             sys.exit("Error deploying LiMEaide :(")
@@ -53,7 +55,7 @@ class Session(object):
         """Called when data needs to be pulled from remote system (remote dir, local dir, file)"""
         sftp = self.session.open_sftp()
         is_error = False
-        
+
         if rdir:
             sftp.chdir(rdir)
 
@@ -62,13 +64,13 @@ class Session(object):
             #status = functools.partial(self._transfer_status, filename)
             #sftp.get(filename, ldir + filename, callback=status)
             sftp.get(filename, ldir + filename)
-        
+
         except IOError as e:
             print(sftp.listdirs())
             print(rdir)
             print(filename)
             is_error = True
-        
+
         finally:
             sftp.close()
             return is_error
@@ -81,11 +83,10 @@ class Session(object):
 
         sftp.put(ldir + filename, filename)
         sftp.close
-        
-        
+
+
     def clean(self):
         print("cleaning up...")
         self.exec_cmd('rm -r lime* %s*' %self.client_.output, True)
         print("Removing LKM...standby")
         self.exec_cmd('rmmod lime.ko', True)
-        
