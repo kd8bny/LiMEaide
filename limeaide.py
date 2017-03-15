@@ -71,8 +71,21 @@ class Limeaide(object):
         return client
 
     def main(self):
-        print("Welcome to LiMEaide v%s " %(self._version))
-        print("LiMEaide is licensed under GPL-3.0\nLiME is licensed under GPL-2.0")
+        print("""\
+            .---.                                                     _______
+            |   |.--. __  __   ___         __.....__              .--.\  ___ `'.         __.....__
+            |   ||__||  |/  `.'   `.   .-''         '.            |__| ' |--.\  \    .-''         '.
+            |   |.--.|   .-.  .-.   ' /     .-''"'-.  `.          .--. | |    \  '  /     .-''"'-.  `.
+            |   ||  ||  |  |  |  |  |/     /________\   \    __   |  | | |     |  '/     /________\   |
+            |   ||  ||  |  |  |  |  ||                  | .:--.'. |  | | |     |  ||                  |
+            |   ||  ||  |  |  |  |  |\    .-------------'/ |   \ ||  | | |     ' .'\    .-------------'
+            |   ||  ||  |  |  |  |  | \    '-.____...---.`" __ | ||  | | |___.' /'  \    '-.____...---.
+            |   ||__||__|  |__|  |__|  `.             .'  .'.''| ||__|/_______.'/    `.             .'
+            '---'                        `''-...... -'   / /   | |_   \_______|/       `''-...... -'
+                                                         \ \._,\ '/
+                                                          `--'  `"
+             by kd8bny v%s \n""" %(self._version))
+        print("LiMEaide is licensed under GPL-3.0\nLiME is licensed under GPL-2.0\n")
 
         self.check_tools()
         args = self.get_args()
