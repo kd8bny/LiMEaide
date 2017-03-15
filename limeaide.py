@@ -3,8 +3,8 @@
 import sys, datetime, os, argparse, getpass
 from session import Session
 from client import Client
-from lime_deploy import LimeDeploy
-from volatility_deploy import VolDeploy
+from deploy_lime import LimeDeploy
+from deploy_volatility import VolDeploy
 
 
 class Limeaide(object):
@@ -64,7 +64,7 @@ class Limeaide(object):
 
         if args.force_clean:
             self.args_clean = args.force_clean
-            
+
         if args.version:
             sys.exit(_version)
 
@@ -95,6 +95,6 @@ class Limeaide(object):
 
         session.clean()
         sys.exit("Clean attempt complete")
-        
+
 if __name__ == '__main__':
     Limeaide().main()
