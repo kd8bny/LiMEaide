@@ -27,9 +27,6 @@ class VolDeploy(object):
 
     def get_profile(self):
         print("Obtaining symbols")
-        if self.client.compress:
-            check_output("tar xvf %s" %self.client.output, shell=True) #TODO this
-
         dwarf_file = open(self.client.output_dir + self.client.kver + '.dwarf', 'w+')
         sp = Popen(['dwarfdump', '-d', '-i', self.client.output_dir + self.client.module], stdout=dwarf_file)
         sp.wait()
