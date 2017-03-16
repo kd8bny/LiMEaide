@@ -1,20 +1,22 @@
 # LiMEaide
 ## v1.2.1
 ## About
-LiMEaide is a python wrapper that will simplify Linux digital forensics in an enterprise environment. All you need to do is feed LiMEaide a remote Linux client IP, sit back, and consume your favorite caffeinated beverage.
+LiMEaide is a python application designed to remotely dump RAM of a Linux client and create a volatility profile for later analysis on your local host. I hope that this will simplify Linux digital forensics in a remote environment. In order to use LiMEaide all you need to do is feed a remote Linux client IP address, sit back, and consume your favorite caffeinated beverage.
 
 ## How To
 ### TL;DR
 ```
 python3 limeaide.py <IP>
 ```
-and magic happens
+and magic happens.
+
+For more deatiled usage checkout the [wiki](https://github.com/kd8bny/LiMEaide/wiki)
 
 ### Detailed usage
 ```
 limeaide.py [OPTIONS] REMOTE_IP
 -h, --help
-    show this dialog
+    Shows the help dialog
 
 -s, --sudoer
     Execute memory grab as sudoer. This is useful when root privileges are not granted
@@ -47,7 +49,7 @@ sudo apt-get install python3-paramiko
 sudo yum install python3-paramiko
 ```
 #### LiME
-In order to use LiME you must download and mv the source into the **LiMEaide/tools** directory. Make sure the the LiME folder is named **LiME**. The full path shold be as follows:
+In order to use LiME you must download and mv the source into the **LiMEaide/tools** directory. Make sure the the LiME folder is named **LiME**. The full path should be as follows:
 NOTE: If you would like to build Volatility profiles, you must use my forked version of LiME. This provides debugging symbols used by dwarfdump.
 ```
 LiMEaide/tools/LiME
