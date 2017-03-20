@@ -83,6 +83,6 @@ class Session(object):
 
     def clean(self):
         print("cleaning up...")
-        self.exec_cmd('rm -r lime* %s*' %self.client_.output, True)
+        self.exec_cmd('rm -rf /tmp/lime*', True)
         print("Removing LKM...standby")
         self.exec_cmd('rmmod lime.ko', True)

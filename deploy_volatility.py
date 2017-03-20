@@ -11,7 +11,7 @@ class VolDeploy(object):
         super(VolDeploy, self).__init__()
         self.client = session.client_
         self.remote_session = session
-        self.lime_rdir = './lime/'
+        self.lime_rdir = '/tmp/lime/'
         self.map = 'System.map-%s' %self.client.kver
 
     def get_maps(self):

@@ -11,7 +11,7 @@ class LimeDeploy(object):
         self.client = session.client_
         self.remote_session = session
         self.lime_dir = './tools/LiME/src/'
-        self.lime_rdir = './lime/'
+        self.lime_rdir = '/tmp/lime/'
         self.lime_src = ['disk.c', 'lime.h', 'main.c', 'Makefile']
 
     def send_lime(self):
@@ -27,14 +27,14 @@ class LimeDeploy(object):
         self.client.module = 'lime-%s.ko' %self.client.kver
         print("building kernel module %s" %self.client.kver)
         self.remote_session.exec_cmd('cd %s; make' %self.lime_rdir, False)
-        self.remote_session.exec_cmd('mv %s/%s .' %(self.lime_rdir, self.client.module), False)
         print("Installing LKM and retrieving RAM")
-        self.remote_session.exec_cmd('insmod %s "path=%s format=lime dio=0"' %(self.client.module, self.client.output), True) #TODO test on centOS
+        self.remote_session.exec_cmd('insmod %s%s "path=%s%s format=lime dio=0"' 
+                %(self.lime_rdir, self.client.module, self.lime_rdir, self.client.output), True)
         print("done.")
 
     def get_lime(self):
         print("Changing permissions")
-        self.remote_session.exec_cmd('chmod 755 %s' %self.client.output, True)
+        self.remote_session.exec_cmd('chmod 755 %s%s' %(self.lime_rdir, self.client.output), True)
 
         if self.client.compress:
             print("Creating Bzip2...compressing the following")
@@ -43,8 +43,8 @@ class LimeDeploy(object):
             self.client.output += ".bz2"
 
         print("Beam me up Scotty")
-        self.remote_session.pull_sftp(".", self.client.output_dir, self.client.output)
-        self.remote_session.pull_sftp(".", self.client.output_dir, self.client.module)
+        self.remote_session.pull_sftp(self.lime_rdir, self.client.output_dir, self.client.output)
+        self.remote_session.pull_sftp(self.lime_rdir, self.client.output_dir, self.client.module)
 
     def main(self):
         self.send_lime()
