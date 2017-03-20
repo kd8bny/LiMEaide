@@ -1,6 +1,7 @@
 #!/bin/python
 
-import sys, datetime, os, argparse, getpass
+import sys, os, argparse, getpass
+from datetime import datetime
 from session import Session
 from client import Client
 from deploy_lime import LimeDeploy
