@@ -18,6 +18,7 @@ class Limeaide(object):
         self.lime_dir = './tools/LiME/src/'
         self.tools_dir = './tools/'
         self.output_dir = './output/'
+        self.args_case = ''
         self.args_clean = False
         self.args_volatility = True
 
@@ -40,6 +41,7 @@ class Limeaide(object):
                 help="Do NOT compress dump into Bzip2 format")
         parser.add_argument("-V", "--no-profile", action="store_true",
                 help="Do NOT create volatility profile")
+        parser.add_argument("-c", "--case", help="Append case number to output dir")
         parser.add_argument("--force-clean",  action="store_true",
                 help="Force clean client after failed deployment")
         parser.add_argument("--version",  action="store_true",
@@ -62,6 +64,9 @@ class Limeaide(object):
 
         if args.no_profile:
             self.args_volatility = not self.args_volatility
+            
+        if args.case != None:
+            self.args_case = 'case_%s' %args.case
 
         if args.force_clean:
             self.args_clean = args.force_clean
@@ -97,7 +102,9 @@ class Limeaide(object):
         session = Session(client)
 
         if not self.args_clean:
-            client.output_dir = "%s%s/" %(self.output_dir, datetime.datetime.now().isoformat())
+            client.output_dir = "%s%s%s/" %(self.output_dir, self.args_case, 
+                    datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f"))
+                    
             os.mkdir(client.output_dir)
             LimeDeploy(session).main()
             print("Memory extraction is complete\n\n%s is in %s"
