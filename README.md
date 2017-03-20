@@ -1,5 +1,5 @@
 # LiMEaide
-## v1.2.1
+## v1.2.2
 ## About
 LiMEaide is a python application designed to remotely dump RAM of a Linux client and create a volatility profile for later analysis on your local host. I hope that this will simplify Linux digital forensics in a remote environment. In order to use LiMEaide all you need to do is feed a remote Linux client IP address, sit back, and consume your favorite caffeinated beverage.
 
@@ -23,6 +23,9 @@ limeaide.py [OPTIONS] REMOTE_IP
 
 -o, --output
     Change name of output file. Default is dump.bin
+    
+-c, --case
+    Append case number to front of output dir
 
 -C, --dont-compress
     Do not compress memory file. By default memory is compressed on host. If you
