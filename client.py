@@ -11,6 +11,6 @@ class Client(object):
         
         self.kver = None
         self.module = ''
-        self.output = 'dump.bin'
+        self.output = 'dump.lime'
         self.output_dir = None
         self.compress = True
