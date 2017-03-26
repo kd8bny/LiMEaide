@@ -11,7 +11,7 @@ from deploy_volatility import VolDeploy
 class Limeaide(object):
     """Deploy LiME LKM to remote host in order to scrape RAM"""
 
-    _version = "1.2.2"
+    _version = "1.2.3"
 
     def __init__(self):
         super(Limeaide, self).__init__()
@@ -64,7 +64,7 @@ class Limeaide(object):
 
         if args.no_profile:
             self.args_volatility = not self.args_volatility
-            
+
         if args.case != None:
             self.args_case = 'case_%s' %args.case
 
@@ -102,9 +102,9 @@ class Limeaide(object):
         session = Session(client)
 
         if not self.args_clean:
-            client.output_dir = "%s%s%s/" %(self.output_dir, self.args_case, 
+            client.output_dir = "%s%s%s/" %(self.output_dir, self.args_case,
                     datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f"))
-                    
+
             os.mkdir(client.output_dir)
             LimeDeploy(session).main()
             print("Memory extraction is complete\n\n%s is in %s"
