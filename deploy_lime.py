@@ -28,7 +28,7 @@ class LimeDeploy(object):
         print("building kernel module %s" %self.client.kver)
         self.remote_session.exec_cmd('cd %s; make' %self.lime_rdir, False)
         print("Installing LKM and retrieving RAM")
-        self.remote_session.exec_cmd('insmod %s%s "path=%s%s format=lime dio=0"' 
+        self.remote_session.exec_cmd('insmod %s%s "path=%s%s format=lime dio=0"'
                 %(self.lime_rdir, self.client.module, self.lime_rdir, self.client.output), True)
         print("done.")
 
@@ -38,8 +38,8 @@ class LimeDeploy(object):
 
         if self.client.compress:
             print("Creating Bzip2...compressing the following")
-            self.remote_session.exec_cmd('tar -jv --remove-files -f %s.bz2 -c %s'
-                    %(self.client.output, self.client.output), True)
+            self.remote_session.exec_cmd('tar -jv --remove-files -f %s%s.bz2 -c %s%s'
+                    %(self.lime_rdir, self.client.output, self.lime_rdir, self.client.output), True)
             self.client.output += ".bz2"
 
         print("Beam me up Scotty")
