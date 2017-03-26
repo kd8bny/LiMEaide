@@ -58,6 +58,7 @@ class Session(object):
             sftp.chdir(rdir)
 
         try:
+            self.complete_percent = []
             sftp.stat(filename)
             status = functools.partial(self._transfer_status, filename)
             sftp.get(filename, ldir + filename, callback=status)
