@@ -78,3 +78,7 @@ sudo yum install libdwarf-tools
 ## Special Thanks and Notes
 * The idea for this application was built upon the concept dreamed up by and the [Linux Memory Grabber](https://github.com/halpomeranz/lmg) project
 * And of course none of this could be possible without the the amazing [LiME](https://github.com/504ensicsLabs/LiME) project
+
+## Limits at this time
+- Support on for bash. Use other shells at your own risk
+- Modules must be built on remote client. Therefore remote client must have proper headers installed.
