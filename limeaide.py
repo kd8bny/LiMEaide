@@ -4,9 +4,9 @@ import sys
 import os
 import argparse
 import getpass
-from datetime import datetime
-from session import Session
+import datetime
 
+from session import Session
 from client import Client
 from deploy_lime import LimeDeploy
 from deploy_volatility import VolDeploy
@@ -39,23 +39,23 @@ class Limeaide(object):
             sys.exit("Please download LiME and place in the ./tools/ dir")
 
     def get_args(self):
-        parser = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser(description='Utility designed to \
+            automate GNU/Linux memory forensics')
         parser.add_argument("remote", help="remote host IP")
-        parser.add_argument(
-            "-s", "--sudoer", help="use a sudo user instead default: root")
-        parser.add_argument("-o", "--output", help="name the outputfile")
-
+        parser.add_argument("-s", "--sudoer", help="use a sudo user instead \
+            default: root")
         parser.add_argument(
             "-P", "--no-profiler", default=['false'], action="store_false",
             help="Do NOT run profiler and compile new module/profile for \
             client")
-
         parser.add_argument(
-            "p", "-profile", action='store', type=string, nargs='2')
-
+            "-p", "--profile", nargs=2, metavar=('distro', 'kernel'),
+            help="Provide the profile you know you want to use for the remote \
+            client")
         parser.add_argument(
-            "-C", "--dont-compress", action="store_true",
-            help="Do NOT compress dump into Bzip2 format")
+            "-C", "--dont-compress", action="store_true", help="Do NOT compress\
+            dump into Bzip2 format")
+        parser.add_argument("-o", "--output", help="name the outputfile")
         parser.add_argument(
             "-c", "--case", help="Append case number to output dir")
         parser.add_argument("--force-clean", action="store_true", help="Force \
@@ -81,7 +81,8 @@ class Limeaide(object):
         return client
 
     def main(self):
-        print("""\
+        print(
+            """\
             .---.                                                     _______
             |   |.--. __  __   ___         __.....__              .--.\  ___ `'.         __.....__
             |   ||__||  |/  `.'   `.   .-''         '.            |__| ' |--.\  \    .-''         '.
@@ -95,8 +96,9 @@ class Limeaide(object):
                                                          \ \._,\ '/
                                                           `--'  `"
              by kd8bny v%s \n""" % (self._version))
-        print("LiMEaide is licensed under GPL-3.0\nLiME is licensed under \
-            GPL-2.0\n")
+        print(
+            "LiMEaide is licensed under GPL-3.0\n"
+            "LiME is licensed under GPL-2.0\n")
 
         self.check_tools()
         args = self.get_args()
@@ -108,15 +110,16 @@ class Limeaide(object):
         if args.version:
             sys.exit(_version)
 
-        print("Attempting secure connection %s@%s" % (client.user, client.ip))
+        print("Attempting secure connection {0}@{1}".format(
+            client.user, client.ip))
         client.pass_ = getpass.getpass()
         session = Session(client)
 
         if not args.force_clean:
             distro, kver = None
-            client.output_dir = "%s%s%s/" \
-                % (self.output_dir, self.args_case, datetime.strftime(
-                    datetime.today(), "%Y_%m_%dT%H_%M_%S_%f"))
+            client.output_dir = "{0}{1}{2}/".format(
+                self.output_dir, self.args_case,
+                datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f"))
             os.mkdir(client.output_dir)
 
             if not args.no_profiler:
@@ -126,7 +129,8 @@ class Limeaide(object):
                 if use_profile:
                     distro, kver = profiler.interactive_chooser()
                     if distro is None:
-                        print("No profiles found...Building new")
+                        print("No profiles found... Will build new porfile for\
+                            remote client")
             elif args.profile:
                 distro = args.profile[0]
                 kver = args.profile[1]

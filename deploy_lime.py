@@ -5,50 +5,66 @@ import os
 import datetime
 
 from client import Client
+from Profiler import profiler
 
 
 class LimeDeploy(object):
     """processes all interactions with remote client"""
-    def __init__(self, session):
+    def __init__(self, session, profiler):
         super(LimeDeploy, self).__init__()
-        self.client = session.client_
         self.remote_session = session
+        self.client = session.client_
+        self.profiler = profiler
         self.lime_dir = './tools/LiME/src/'
         self.lime_rdir = '/tmp/lime/'
         self.lime_src = ['disk.c', 'lime.h', 'main.c', 'Makefile']
+        self.profiles_dir = './profiles/'
 
-    def send_lime(self):
-        print("sending LiME")
+    def send_lime(self, new_profile):
+        print("sending LiME to remote client")
         self.remote_session.exec_cmd('mkdir %s' % self.lime_rdir, False)
-        for file in self.lime_src:
-            self.remote_session.put_sftp(self.lime_dir, self.lime_rdir, file)
+        if new_profile:
+            for file in self.lime_src:
+                self.remote_session.put_sftp(
+                    self.lime_dir, self.lime_rdir, file)
+
+            stdout = self.remote_session.exec_cmd('cat /proc/issue', False)
+            distro = stdout[0].strip()
+            stdout = self.remote_session.exec_cmd('uname -r', False)
+            kver = stdout[0].strip()
+            self.client.profile = profiler.save_profile(distro, kver)
+
+            print("building kernel module {}".format(kver))
+            self.remote_session.exec_cmd(
+                'cd {}; make'.format(self.lime_rdir), False)
+        else:
+            self.remote_session.put_sftp(
+                self.lime_dir, self.lime_rdir,
+                self.profiles_dir + self.client.profile["module"])
         print("done.")
 
-    def build_lime(self):
-        stdout = self.remote_session.exec_cmd('uname -r', False)
-        self.client.kver = stdout[0].strip()
-        self.client.module = 'lime-%s.ko' % self.client.kver
-        print("building kernel module %s" % self.client.kver)
-        self.remote_session.exec_cmd('cd %s; make' % self.lime_rdir, False)
+        return
+
+    def get_lime_dump(self):
         print("Installing LKM and retrieving RAM")
         self.remote_session.exec_cmd(
-            'insmod %s%s "path=%s%s format=lime dio=0"'
-            % (self.lime_rdir, self.client.module, self.lime_rdir,
+            "insmod {0}{1} 'path={2}{3} format=lime dio=0'".format(
+                self.lime_rdir, self.client.profile["module"], self.lime_rdir,
                 self.client.output), True)
         print("done.")
-
-    def get_lime(self):
         print("Changing permissions")
         self.remote_session.exec_cmd(
-            'chmod 755 %s%s' % (self.lime_rdir, self.client.output), True)
-
+            "chmod 755 {0}{1}".format(
+                self.lime_rdir, self.client.output), True)
+        print("done.")
         if self.client.compress:
             print("Creating Bzip2...compressing the following")
             self.remote_session.exec_cmd(
-                'tar -jv --remove-files -f %s%s.bz2 -c %s%s'
-                % (self.lime_rdir, self.client.output, self.lime_rdir,
+                'tar -jv --remove-files -f {0}{1}.bz2 -c {2}{3}'.format(
+                    self.lime_rdir, self.client.output, self.lime_rdir,
                     self.client.output), True)
             self.client.output += ".bz2"
+            print("done.")
 
         print("Beam me up Scotty")
         self.remote_session.pull_sftp(
@@ -56,10 +72,10 @@ class LimeDeploy(object):
         self.remote_session.pull_sftp(
             self.lime_rdir, self.client.output_dir, self.client.module)
 
-    def main(self):
-        self.send_lime()
-        self.build_lime()
+    def main(self, new_profile):
+        self.send_lime(new_profile)
         self.get_lime()
+
 
 if __name__ == '__main__':
     LimeDeploy().main()
