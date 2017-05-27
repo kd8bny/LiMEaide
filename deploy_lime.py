@@ -73,7 +73,7 @@ class LimeDeploy(object):
 
     def main(self):
         self.send_lime()
-        self.get_lime()
+        self.get_lime_dump()
 
 
 if __name__ == '__main__':
