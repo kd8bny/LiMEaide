@@ -25,11 +25,10 @@ class Profiler(object):
         """Looks through the output of uname and lsb_release to determine
         versions"""
         distro, kver, arch = '', '', ''
+        kver, arch = uname[0].split()
         for info in lsb_release:
             if "Distributor" in info:
-                disto = info[16:]
-
-        kver, arch = uname[0].split()
+                distro = info[16:].lower()
 
         profile = {
             "distro": distro,
