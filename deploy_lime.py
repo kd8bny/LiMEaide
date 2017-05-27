@@ -71,7 +71,7 @@ class LimeDeploy(object):
         self.remote_session.pull_sftp(
             self.lime_rdir, self.client.output_dir, self.client.output)
         self.remote_session.pull_sftp(
-            self.lime_rdir, self.profile_dir,
+            self.lime_rdir, self.profiles_dir,
             self.client.profile['module'])
 
     def main(self):
