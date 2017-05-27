@@ -45,7 +45,7 @@ class Limeaide(object):
             automate GNU/Linux memory forensics')
         parser.add_argument("remote", help="remote host IP")
         parser.add_argument(
-            "-P", "--no-profiler", default=['false'], action="store_false",
+            "-P", "--no-profiler", action="store_true",
             help="Do NOT run profiler and compile new module/profile for \
             client")
         parser.add_argument(
@@ -127,7 +127,7 @@ class Limeaide(object):
             if not args.no_profiler:
                 use_profile = input("Would you like to select a pre-generated \
                     profile [Y/n]")
-                if use_profile.ascii_lowercase is 'y':
+                if use_profile.lower() is 'y':
                     profile = profiler.interactive_chooser()
                     if profile is None:
                         print("No profiles found... Will build new profile for\
@@ -140,7 +140,7 @@ class Limeaide(object):
                 if profile is None:
                     new_profile = input("No profiles found... Would you like to\
                         build a new profile for the remote client [Y/n]")
-                    if use_profile.ascii_lowercase is 'n':
+                    if use_profile.lower() is 'n':
                         sys.exit()
                 else:
                     self.client.profile = profile
