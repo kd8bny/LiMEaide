@@ -1,6 +1,9 @@
-#/bin/python
+#!/bin/python
 
-import paramiko, sys, functools
+import sys
+import paramiko
+import functools
+
 from client import Client
 
 
@@ -12,15 +15,16 @@ class Session(object):
         self.client_ = client
         self.session = paramiko.SSHClient()
         self.session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        self.session.connect(client.ip, username=client.user, password=client.pass_)
+        self.session.connect(
+            client.ip, username=client.user, password=client.pass_)
         self.complete_percent = []
 
     def _transfer_status(self, filename, bytes_so_far, bytes_total):
         percent = int(100 * bytes_so_far / bytes_total)
         if percent % 10 == 0 and percent not in self.complete_percent:
             self.complete_percent.append(percent)
-            print('Transfer of %r is at %d/%d bytes (%.1f%%)'
-                  %(filename, bytes_so_far, bytes_total, percent))
+            print("Transfer of %r is at %d/%d bytes (%.1f%%)"
+                  % (filename, bytes_so_far, bytes_total, percent))
 
     def _error_check(self, stdout):
         for line in stdout:
@@ -29,14 +33,18 @@ class Session(object):
         return 0
 
     def exec_cmd(self, cmd, requires_privlege):
-        """Called when one wants to exec command on remote system returns result in stdin, stdout, stderr"""
+        """Called when one wants to exec command on remote system returns
+        result in stdin, stdout, stderr.
+        """
         stdout, stderr = None, None
         if self.client_.is_sudoer and requires_privlege:
-            stdin, stdout, stderr = self.session.exec_command('sudo -S -p " " %s' %cmd, get_pty=True)
-            stdin.write(self.client_.pass_ + "\n")
+            stdin, stdout, stderr = self.session.exec_command(
+                "sudo -S -p ' ' {0}".format(cmd), get_pty=True)
+            stdin.write(self.client_.pass_ + '\n')
             stdin.flush()
         else:
-            stdin, stdout, stderr = self.session.exec_command(cmd, get_pty=True)
+            stdin, stdout, stderr = self.session.exec_command(
+                cmd, get_pty=True)
 
         stdout = [line.strip('\n\r') for line in stdout]
         for line in stdout:
@@ -50,7 +58,9 @@ class Session(object):
         return stdout
 
     def pull_sftp(self, rdir, ldir, filename):
-        """Called when data needs to be pulled from remote system (remote dir, local dir, file)"""
+        """Called when data needs to be pulled from remote system
+        (remote dir, local dir, file)
+        """
         sftp = self.session.open_sftp()
         is_error = False
 
@@ -74,7 +84,9 @@ class Session(object):
             return is_error
 
     def put_sftp(self, ldir, rdir, filename):
-        """Called when data is to be sent to remote system (local dir, remote dir, file)"""
+        """Called when data is to be sent to remote system
+        (local dir, remote dir, file)
+        """
         sftp = self.session.open_sftp()
         if rdir:
             sftp.chdir(rdir)
@@ -83,6 +95,7 @@ class Session(object):
         sftp.close
 
     def clean(self):
+        """Called to remove files from remote client."""
         print("cleaning up...")
         self.exec_cmd('rm -rf /tmp/lime*', True)
         print("Removing LKM...standby")
