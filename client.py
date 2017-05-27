@@ -2,7 +2,15 @@
 
 
 class Client(object):
-    """Define client connection"""
+    """Define client connection
+    profile = {
+        "distro": distro,
+        "kver": kver,
+        "arch": arch,
+        "module": "lime.ko",
+        "profile": "vol.zip"
+        }
+    """
     def __init__(self):
         super(Client, self).__init__
 # Client specifics

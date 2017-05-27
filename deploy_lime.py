@@ -5,7 +5,7 @@ import os
 import datetime
 
 from client import Client
-from Profiler import profiler
+from profiler import Profiler
 
 
 class LimeDeploy(object):
@@ -20,19 +20,21 @@ class LimeDeploy(object):
         self.lime_src = ['disk.c', 'lime.h', 'main.c', 'Makefile']
         self.profiles_dir = './profiles/'
 
-    def send_lime(self, new_profile):
+    def send_lime(self):
         print("sending LiME to remote client")
         self.remote_session.exec_cmd('mkdir %s' % self.lime_rdir, False)
-        if new_profile:
+        if self.client.profile is None:
             for file in self.lime_src:
                 self.remote_session.put_sftp(
                     self.lime_dir, self.lime_rdir, file)
 
-            stdout = self.remote_session.exec_cmd('cat /proc/issue', False)
+            stdout = self.remote_session.exec_cmd('cat /etc/issue', False)
             distro = stdout[0].strip()
-            stdout = self.remote_session.exec_cmd('uname -r', False)
+            stdout = self.remote_session.exec_cmd('uname -rm', False)
+            print(stdout)
             kver = stdout[0].strip()
-            self.client.profile = profiler.save_profile(distro, kver)
+            arch = stdout[1].strip()
+            self.client.profile = self.profiler.save_profile(distro, kver, arch)
 
             print("building kernel module {}".format(kver))
             self.remote_session.exec_cmd(
@@ -72,8 +74,8 @@ class LimeDeploy(object):
         self.remote_session.pull_sftp(
             self.lime_rdir, self.client.output_dir, self.client.module)
 
-    def main(self, new_profile):
-        self.send_lime(new_profile)
+    def main(self):
+        self.send_lime()
         self.get_lime()
 
 

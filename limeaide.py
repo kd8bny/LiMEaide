@@ -4,7 +4,7 @@ import sys
 import os
 import argparse
 import getpass
-import datetime
+from datetime import datetime
 
 from session import Session
 from client import Client
@@ -27,6 +27,7 @@ class Limeaide(object):
         self.args_case = ''
 
     def check_tools(self):
+        """Create dirs for profiles, LiME, and output."""
         if not os.path.isdir(self.output_dir):
             os.mkdir(self.output_dir)
 
@@ -39,22 +40,23 @@ class Limeaide(object):
             sys.exit("Please download LiME and place in the ./tools/ dir")
 
     def get_args(self):
+        """Lets take a look at those args."""
         parser = argparse.ArgumentParser(description='Utility designed to \
             automate GNU/Linux memory forensics')
         parser.add_argument("remote", help="remote host IP")
-        parser.add_argument("-s", "--sudoer", help="use a sudo user instead \
-            default: root")
         parser.add_argument(
             "-P", "--no-profiler", default=['false'], action="store_false",
             help="Do NOT run profiler and compile new module/profile for \
             client")
         parser.add_argument(
-            "-p", "--profile", nargs=2, metavar=('distro', 'kernel'),
-            help="Provide the profile you know you want to use for the remote \
-            client")
-        parser.add_argument(
             "-C", "--dont-compress", action="store_true", help="Do NOT compress\
             dump into Bzip2 format")
+        parser.add_argument("-s", "--sudoer", help="use a sudo user instead \
+            default: root")
+        parser.add_argument(
+            "-m", "--module", nargs=3, metavar=('distro', 'kernel', 'arch'),
+            help="Provide the profile you know you want to use for the remote \
+            client")
         parser.add_argument("-o", "--output", help="name the outputfile")
         parser.add_argument(
             "-c", "--case", help="Append case number to output dir")
@@ -95,7 +97,7 @@ class Limeaide(object):
             '---'                        `''-...... -'   / /   | |_   \_______|/       `''-...... -'
                                                          \ \._,\ '/
                                                           `--'  `"
-             by kd8bny v%s \n""" % (self._version))
+             by kd8bny v{0} \n""".format(self._version))
         print(
             "LiMEaide is licensed under GPL-3.0\n"
             "LiME is licensed under GPL-2.0\n")
@@ -114,30 +116,36 @@ class Limeaide(object):
             client.user, client.ip))
         client.pass_ = getpass.getpass()
         session = Session(client)
+        profiler = Profiler().main()
 
         if not args.force_clean:
-            distro, kver = None
             client.output_dir = "{0}{1}{2}/".format(
                 self.output_dir, self.args_case,
                 datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f"))
             os.mkdir(client.output_dir)
 
             if not args.no_profiler:
-                profiler = Profiler.main()
                 use_profile = input("Would you like to select a pre-generated \
-                    profile [y/n]")
-                if use_profile:
-                    distro, kver = profiler.interactive_chooser()
-                    if distro is None:
-                        print("No profiles found... Will build new porfile for\
+                    profile [Y/n]")
+                if use_profile.ascii_lowercase is 'y':
+                    profile = profiler.interactive_chooser()
+                    if profile is None:
+                        print("No profiles found... Will build new profile for\
                             remote client")
-            elif args.profile:
-                distro = args.profile[0]
-                kver = args.profile[1]
-            else:
-                pass
+                    else:
+                        self.client.profile = profile
+            elif args.module is not None:
+                profile = profiler.select_profile(
+                    args.profile[0], args.profile[1], args.profile[2])
+                if profile is None:
+                    new_profile = input("No profiles found... Would you like to\
+                        build a new profile for the remote client [Y/n]")
+                    if use_profile.ascii_lowercase is 'n':
+                        sys.exit()
+                else:
+                    self.client.profile = profile
 
-            LimeDeploy(session).main()
+            LimeDeploy(session, profiler).main()
             print(
                 "Memory extraction is complete\n\n%s is in %s"
                 % (client.output, client.output_dir))
