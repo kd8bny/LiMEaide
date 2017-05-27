@@ -116,7 +116,7 @@ class Limeaide(object):
             client.user, client.ip))
         client.pass_ = getpass.getpass()
         session = Session(client)
-        profiler = Profiler().main()
+        profiler = Profiler()
 
         if not args.force_clean:
             client.output_dir = "{0}{1}{2}/".format(

@@ -3,10 +3,6 @@
 import sys
 import os
 import json
-import getpass
-import datetime
-
-from client import Client
 
 
 class Profiler(object):
@@ -25,16 +21,24 @@ class Profiler(object):
         except FileNotFoundError as e:
             pass
 
-    def save_profile(self, distro, kver, arch):
-        if profile is None:
-            profile = {
-                "distro": distro,
-                "kver": kver,
-                "arch": arch,
-                "module": "lime-{0}-{1}.ko".format(distro, kver),
-                "profile": "vol-{0}-{1}.zip".format(distro, kver)
-                }
-            self.profiles.append(profile)
+    def create_profile(self, lsb_release, uname):
+        """Looks through the output of uname and lsb_release to determine
+        versions"""
+        distro, kver, arch = '', '', ''
+        for info in lsb_release:
+            if "Distributor" in info:
+                disto = info[16:]
+
+        kver, arch = uname[0].split()
+
+        profile = {
+            "distro": distro,
+            "kver": kver,
+            "arch": arch,
+            "module": "lime-{0}-{1}-{2}.ko".format(distro, kver, arch),
+            "profile": "vol-{0}-{1}-{2}.zip".format(distro, kver, arch)
+            }
+        self.profiles.append(profile)
         json.dump(self.profiles, open(self.profiles_dir + self.manifest, 'w'))
 
         return profile
@@ -72,3 +76,6 @@ class Profiler(object):
 
     def main(self):
         self.load_profiles()
+
+if __name__ == '__main__':
+    Profiler().main()

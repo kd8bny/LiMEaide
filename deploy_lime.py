@@ -28,15 +28,12 @@ class LimeDeploy(object):
                 self.remote_session.put_sftp(
                     self.lime_dir, self.lime_rdir, file)
 
-            stdout = self.remote_session.exec_cmd('cat /etc/issue', False)
-            distro = stdout[0].strip()
-            stdout = self.remote_session.exec_cmd('uname -rm', False)
-            print(stdout)
-            kver = stdout[0].strip()
-            arch = stdout[1].strip()
-            self.client.profile = self.profiler.save_profile(distro, kver, arch)
+            lsb_release = self.remote_session.exec_cmd('lsb_release -a', False)
+            uname = self.remote_session.exec_cmd('uname -rm', False)
+            self.client.profile = self.profiler.create_profile(
+                lsb_release, uname)
 
-            print("building kernel module {}".format(kver))
+            print("building kernel module")
             self.remote_session.exec_cmd(
                 'cd {}; make'.format(self.lime_rdir), False)
         else:
