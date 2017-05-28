@@ -52,9 +52,9 @@ class Profiler(object):
                         "%i) %s, %s, %s\t" %
                         (i, profile['distro'], profile['kver'],
                          profile['arch']))
-                profile_val = input(
+                profile_val = int(input(
                     "Please select a profile. " +
-                    "Enter [{}] to exit: ".format(num_profiles))
+                    "Enter [{}] to exit: ".format(num_profiles)))
                 if profile_val == num_profiles:
                     return None
                 elif profile_val > 1 or profile_val < num_profiles:
