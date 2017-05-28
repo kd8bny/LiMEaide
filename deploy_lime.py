@@ -7,7 +7,8 @@ from profiler import Profiler
 
 
 class LimeDeploy(object):
-    """processes all interactions with remote client"""
+    """Send LiME and retrieve the RAM dump from a remote client."""
+
     def __init__(self, session, profiler):
         super(LimeDeploy, self).__init__()
         self.remote_session = session
@@ -22,6 +23,7 @@ class LimeDeploy(object):
         self.new_profile = False
 
     def send_lime(self):
+        """Send LiME to remote client. Uses percompiled module if supplied."""
         print("sending LiME to remote client")
         self.remote_session.exec_cmd('mkdir %s' % self.lime_rdir, False)
         if new_profile:
@@ -46,6 +48,7 @@ class LimeDeploy(object):
         return
 
     def get_lime_dump(self):
+        """Will install LiME and dump RAM."""
         print("Installing LKM and retrieving RAM")
         self.remote_session.exec_cmd("mv {0}lime.ko {0}{1}".format(
                 self.lime_rdir, self.client.profile["module"]), False)
@@ -77,6 +80,7 @@ class LimeDeploy(object):
                 self.client.profile['module'])
 
     def main(self):
+        """Begin the process of transporting LiME and dumping the RAM."""
         if self.client.profile is None:
             self.new_profile = True
         self.send_lime()

@@ -5,7 +5,8 @@ from client import Client
 
 
 class VolDeploy(object):
-    """Develops Volatility profile to analyze dump"""
+    """Develops Volatility profile to analyze RAM dump."""
+
     def __init__(self, session):
         super(VolDeploy, self).__init__()
         self.client = session.client_
@@ -14,6 +15,7 @@ class VolDeploy(object):
         self.map = 'System.map-%s' % self.client.kver
 
     def get_maps(self):
+        """Grab system maps from remote client."""
         print("Obtaining System.maps")
         self.remote_session.exec_cmd(
             "cp /boot/%s %s" % (self.map, self.lime_rdir), True)
@@ -28,20 +30,25 @@ class VolDeploy(object):
         print("done.")
 
     def get_profile(self):
+        """Obtain symbols from module and zip the profile."""
         print("Obtaining symbols")
         dwarf_file = open(
             self.client.output_dir + self.client.kver + '.dwarf', 'w+')
         sp = Popen(
-            ['dwarfdump', '-d', '-i', self.client.output_dir + self.client.module],
-             stdout=dwarf_file)
+            ['dwarfdump', '-d', '-i',
+                self.client.output_dir + self.client.module],
+            stdout=dwarf_file)
         sp.wait()
         dwarf_file.flush()
 
-        Popen(['zip', '-j', self.client.output_dir + self.client.kver + '.zip',
-                self.client.output_dir + self.client.kver + '.dwarf', self.client.output_dir + self.map])
+        Popen(
+            ['zip', '-j', self.client.output_dir + self.client.kver + '.zip',
+                self.client.output_dir + self.client.kver + '.dwarf',
+                    self.client.output_dir + self.map])
         print("done.")
 
     def main(self):
+        """Start building a Volatility profile."""
         print("Attempting to grab files for volatility profile")
         self.get_maps()
         self.get_profile()

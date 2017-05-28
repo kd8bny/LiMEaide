@@ -6,7 +6,7 @@ from client import Client
 
 
 class Session(object):
-    """Session will take care of all the backend communications"""
+    """Session will take care of all the backend communications."""
 
     def __init__(self, client):
         super(Session, self).__init__()
@@ -31,8 +31,9 @@ class Session(object):
         return 0
 
     def exec_cmd(self, cmd, requires_privlege):
-        """Called when one wants to exec command on remote system returns
-        result in stdin, stdout, stderr.
+        """Called to exec command on remote system.
+
+        returns stdin, stdout, stderr.
         """
         stdout, stderr = None, None
         if self.client_.is_sudoer and requires_privlege:
@@ -56,7 +57,8 @@ class Session(object):
         return stdout
 
     def pull_sftp(self, rdir, ldir, filename):
-        """Called when data needs to be pulled from remote system
+        """Called when data needs to be pulled from remote system.
+
         (remote dir, local dir, file)
         """
         sftp = self.session.open_sftp()
@@ -82,7 +84,8 @@ class Session(object):
             return is_error
 
     def put_sftp(self, ldir, rdir, filename):
-        """Called when data is to be sent to remote system
+        """Called when data is to be sent to remote system.
+
         (local dir, remote dir, file)
         """
         sftp = self.session.open_sftp()

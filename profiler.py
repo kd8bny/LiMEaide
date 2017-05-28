@@ -4,7 +4,7 @@ import json
 
 
 class Profiler(object):
-    """Maintain and impliment built profiles. Call main to init the profiles."""
+    """Maintain and impliment precomiled modules and profiles."""
 
     def __init__(self):
         super(Profiler, self).__init__()
@@ -13,6 +13,7 @@ class Profiler(object):
         self.manifest = 'manifest.json'
 
     def load_profiles(self):
+        """Load dict from JSON manifest."""
         try:
             self.profiles = json.load(
                 open(self.profiles_dir + self.manifest, 'r'))
@@ -20,8 +21,11 @@ class Profiler(object):
             print(e)
 
     def create_profile(self, lsb_release, uname):
-        """Looks through the output of uname and lsb_release to determine
-        versions"""
+        """Create a new profile a save to manifest.
+
+        Look through the output of uname and lsb_release to determine
+        versions.
+        """
         distro, kver, arch = '', '', ''
         kver, arch = uname[0].split()
         for info in lsb_release:
@@ -41,15 +45,15 @@ class Profiler(object):
         return profile
 
     def interactive_chooser(self):
-        """Interactive CLI mode for choosing pre-compiled modules. The profiles
-        are a list of dicts."""
+        """Interactive CLI mode for choosing pre-compiled modules."""
         profile_dict = None
         if len(self.profiles) > 0:
             while True:
                 for i, profile in enumerate(self.profiles):
                     print(
                         "%i) %s, %s, %s\t" %
-                        (i, profile['distro'], profile['kver'], profile['arch']))
+                        (i, profile['distro'], profile['kver'],
+                            profile['arch']))
                 profile_val = input(
                     "Please select a profile. Press [q] to exit: ")
                 if profile_val == 'q':
@@ -70,4 +74,5 @@ class Profiler(object):
                     return None
 
     def main(self):
+        """Load profiles from manifest."""
         self.load_profiles()

@@ -14,7 +14,7 @@ from profiler import Profiler
 
 
 class Limeaide(object):
-    """Deploy LiME LKM to remote host in order to scrape RAM"""
+    """Deploy LiME LKM to remote host in order to scrape RAM."""
 
     _version = "1.2.3"
 
@@ -40,7 +40,7 @@ class Limeaide(object):
             sys.exit("Please download LiME and place in the ./tools/ dir")
 
     def get_args(self):
-        """Lets take a look at those args."""
+        """Take a look at those args."""
         parser = argparse.ArgumentParser(description='Utility designed to \
             automate GNU/Linux memory forensics')
         parser.add_argument("remote", help="remote host IP")
@@ -68,6 +68,7 @@ class Limeaide(object):
         return parser.parse_args()
 
     def get_client(self, args):
+        """Return instantiated client."""
         client = Client()
         client.ip = args.remote
         if args.sudoer is not None:
@@ -83,6 +84,7 @@ class Limeaide(object):
         return client
 
     def main(self):
+        """Start the interactive session for LiMEaide."""
         print(
             """\
             .---.                                                     _______
@@ -140,7 +142,9 @@ class Limeaide(object):
                 profile = profiler.select_profile(
                     args.profile[0], args.profile[1], args.profile[2])
                 if profile is None:
-                    new_profile = input("No profiles found... Would you like to build a new profile for the remote client [Y/n]")
+                    new_profile = input(
+                        "No profiles found... Would you like to build a new" +
+                        "profile for the remote client [Y/n]")
                     if use_profile.lower() == 'n':
                         sys.exit()
                 else:

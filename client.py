@@ -1,5 +1,7 @@
 class Client(object):
-    """Define client connection
+    """All client attributes including the profile.
+
+    The profile format is stored as json as such
     profile = {
         "distro": distro,
         "kver": kver,
@@ -8,7 +10,9 @@ class Client(object):
         "profile": "vol.zip"
         }
     """
+
     def __init__(self):
+        """Instantiate client attributes."""
         super(Client, self).__init__
 # Client specifics
         self.ip = None
