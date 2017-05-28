@@ -68,7 +68,8 @@ class Limeaide(object):
 
         return parser.parse_args()
 
-    def get_client(self, args):
+    @staticmethod
+    def get_client(args):
         """Return instantiated client."""
         client = Client()
         client.ip = args.remote
@@ -113,7 +114,7 @@ class Limeaide(object):
             self.args_case = 'case_%s' % (args.case)
 
         if args.version:
-            sys.exit(_version)
+            sys.exit()
 
         print("Attempting secure connection {0}@{1}".format(
             client.user, client.ip))
