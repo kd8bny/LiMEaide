@@ -12,8 +12,7 @@ class Client(object):
     """
 
     def __init__(self):
-        """Instantiate client attributes."""
-        super(Client, self).__init__
+        super(Client, self).__init__()
 # Client specifics
         self.ip = None
         self.user = 'root'

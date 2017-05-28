@@ -1,11 +1,3 @@
-import sys
-import os
-import datetime
-
-from client import Client
-from profiler import Profiler
-
-
 class LimeDeploy(object):
     """Send LiME and retrieve the RAM dump from a remote client."""
 
@@ -26,7 +18,7 @@ class LimeDeploy(object):
         """Send LiME to remote client. Uses percompiled module if supplied."""
         print("sending LiME to remote client")
         self.remote_session.exec_cmd('mkdir %s' % self.lime_rdir, False)
-        if new_profile:
+        if self.new_profile:
             for file in self.lime_src:
                 self.remote_session.put_sftp(
                     self.lime_dir, self.lime_rdir, file)
@@ -51,7 +43,7 @@ class LimeDeploy(object):
         """Will install LiME and dump RAM."""
         print("Installing LKM and retrieving RAM")
         self.remote_session.exec_cmd("mv {0}lime.ko {0}{1}".format(
-                self.lime_rdir, self.client.profile["module"]), False)
+            self.lime_rdir, self.client.profile["module"]), False)
         self.remote_session.exec_cmd(
             "insmod {0}{1} 'path={2}{3} format=lime dio=0'".format(
                 self.lime_rdir, self.client.profile["module"], self.lime_rdir,
@@ -74,7 +66,7 @@ class LimeDeploy(object):
         print("Beam me up Scotty")
         self.remote_session.pull_sftp(
             self.lime_rdir, self.client.output_dir, self.client.output)
-        if new_profile:
+        if self.new_profile:
             self.remote_session.pull_sftp(
                 self.lime_rdir, self.profiles_dir,
                 self.client.profile['module'])
@@ -85,7 +77,3 @@ class LimeDeploy(object):
             self.new_profile = True
         self.send_lime()
         self.get_lime_dump()
-
-
-if __name__ == '__main__':
-    LimeDeploy().main()

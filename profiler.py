@@ -1,5 +1,3 @@
-import sys
-import os
 import json
 
 
@@ -46,32 +44,33 @@ class Profiler(object):
 
     def interactive_chooser(self):
         """Interactive CLI mode for choosing pre-compiled modules."""
-        profile_dict = None
-        if len(self.profiles) > 0:
+        num_profiles = len(self.profiles)
+        if num_profiles > 0:
             while True:
                 for i, profile in enumerate(self.profiles):
                     print(
                         "%i) %s, %s, %s\t" %
                         (i, profile['distro'], profile['kver'],
-                            profile['arch']))
+                         profile['arch']))
                 profile_val = input(
-                    "Please select a profile. Press [q] to exit: ")
-                if profile_val == 'q':
+                    "Please select a profile. " +
+                    "Enter [{}] to exit: ".format(num_profiles))
+                if profile_val == num_profiles:
                     return None
-                elif int(profile_val) > 1 or int(profile_val) < len(self.profiles):
+                elif profile_val > 1 or profile_val < num_profiles:
                     return profile
                 else:
                     print("Please select a correct value and try agin")
 
     def select_profile(self, distro, kver, arch):
         """Select a profile to have the client use."""
-        if len(self.profiles) > 0:
-            for i, profile in enumerate(self.profiles):
+        num_profiles = len(self.profiles)
+        if num_profiles > 0:
+            for profile in self.profiles:
                 if profile['distro'] is distro and profile['kver'] is kver and profile['arch'] is arch:
                     return profile
 
-                else:
-                    return None
+            return None
 
     def main(self):
         """Load profiles from manifest."""

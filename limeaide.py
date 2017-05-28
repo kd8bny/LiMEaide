@@ -39,7 +39,8 @@ class Limeaide(object):
                 os.mkdir(self.tools_dir)
             sys.exit("Please download LiME and place in the ./tools/ dir")
 
-    def get_args(self):
+    @staticmethod
+    def get_args():
         """Take a look at those args."""
         parser = argparse.ArgumentParser(description='Utility designed to \
             automate GNU/Linux memory forensics')
@@ -62,7 +63,7 @@ class Limeaide(object):
             "-c", "--case", help="Append case number to output dir")
         parser.add_argument("--force-clean", action="store_true", help="Force \
             clean client after failed deployment")
-        parser.add_argument("--version",  action="store_true", help="Version \
+        parser.add_argument("--version", action="store_true", help="Version \
             information")
 
         return parser.parse_args()
@@ -128,14 +129,13 @@ class Limeaide(object):
             os.mkdir(client.output_dir)
 
             if not args.no_profiler:
-                use_profile = input("Would you like to select a pre-generated \
-                    profile [Y/n]")
-                print(use_profile)
+                use_profile = input(
+                    "Would you like to select a pre-generated profile [Y/n]")
                 if use_profile.lower() == 'y':
                     profile = profiler.interactive_chooser()
                     if profile is None:
-                        print("No profiles found... Will build new profile for\
-                            remote client")
+                        print("No profiles found... Will build new profile" +
+                              "for remote client")
                     else:
                         client.profile = profile
             elif args.module is not None:
@@ -145,7 +145,7 @@ class Limeaide(object):
                     new_profile = input(
                         "No profiles found... Would you like to build a new" +
                         "profile for the remote client [Y/n]")
-                    if use_profile.lower() == 'n':
+                    if new_profile.lower() == 'n':
                         sys.exit()
                 else:
                     client.profile = profile
@@ -154,6 +154,10 @@ class Limeaide(object):
             print(
                 "Memory extraction is complete\n\n%s is in %s"
                 % (client.output, client.output_dir))
+
+            VolDeploy(session).main()
+            print("Profile complete place in volatility/plugins/overlays/" +
+                  "linux/ in order to use")
 
         else:
             session.clean()

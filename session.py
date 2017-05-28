@@ -1,8 +1,6 @@
 import sys
-import paramiko
 import functools
-
-from client import Client
+import paramiko
 
 
 class Session(object):
@@ -17,18 +15,19 @@ class Session(object):
             client.ip, username=client.user, password=client.pass_)
         self.complete_percent = []
 
+    @staticmethod
+    def _error_check(stdout):
+        for line in stdout:
+            if "error" in line.lower():
+                return 1
+        return 0
+
     def _transfer_status(self, filename, bytes_so_far, bytes_total):
         percent = int(100 * bytes_so_far / bytes_total)
         if percent % 10 == 0 and percent not in self.complete_percent:
             self.complete_percent.append(percent)
             print("Transfer of %r is at %d/%d bytes (%.1f%%)"
                   % (filename, bytes_so_far, bytes_total, percent))
-
-    def _error_check(self, stdout):
-        for line in stdout:
-            if "error" in line.lower():
-                return 1
-        return 0
 
     def exec_cmd(self, cmd, requires_privlege):
         """Called to exec command on remote system.
@@ -93,7 +92,7 @@ class Session(object):
             sftp.chdir(rdir)
 
         sftp.put(ldir + filename, filename)
-        sftp.close
+        sftp.close()
 
     def clean(self):
         """Called to remove files from remote client."""

@@ -1,7 +1,5 @@
 import sys
-import os
-from subprocess import Popen, PIPE
-from client import Client
+from subprocess import Popen
 
 
 class VolDeploy(object):
@@ -11,16 +9,19 @@ class VolDeploy(object):
         super(VolDeploy, self).__init__()
         self.client = session.client_
         self.remote_session = session
+
+        self.profiles_dir = './profiles/'
         self.lime_rdir = '/tmp/lime/'
-        self.map = 'System.map-%s' % self.client.kver
+        self.map = 'System.map-%s' % self.client.profile['kver']
 
     def get_maps(self):
         """Grab system maps from remote client."""
+        print("Attempting to grab files for volatility profile")
         print("Obtaining System.maps")
         self.remote_session.exec_cmd(
-            "cp /boot/%s %s" % (self.map, self.lime_rdir), True)
+            "cp /boot/{0} {1}".format(self.map, self.lime_rdir), True)
         self.remote_session.exec_cmd(
-            "chmod 744 %s%s" % (self.lime_rdir, self.map), True)
+            "chmod 744 {0}{1}".format(self.lime_rdir, self.map), True)
         error = self.remote_session.pull_sftp(
             self.lime_rdir, self.client.output_dir, self.map)
 
@@ -33,28 +34,22 @@ class VolDeploy(object):
         """Obtain symbols from module and zip the profile."""
         print("Obtaining symbols")
         dwarf_file = open(
-            self.client.output_dir + self.client.kver + '.dwarf', 'w+')
+            self.client.output_dir + self.client.profile['kver'] +
+            '.dwarf', 'w+')
         sp = Popen(
             ['dwarfdump', '-d', '-i',
-                self.client.output_dir + self.client.module],
+             self.profiles_dir + self.client.profile['module']],
             stdout=dwarf_file)
         sp.wait()
         dwarf_file.flush()
 
         Popen(
-            ['zip', '-j', self.client.output_dir + self.client.kver + '.zip',
-                self.client.output_dir + self.client.kver + '.dwarf',
-                    self.client.output_dir + self.map])
+            ['zip', '-j', self.profiles_dir + self.client.profile['profile'],
+             self.client.output_dir + self.client.profile['kver'] + '.dwarf',
+             self.client.output_dir + self.map])
         print("done.")
 
     def main(self):
         """Start building a Volatility profile."""
-        print("Attempting to grab files for volatility profile")
         self.get_maps()
         self.get_profile()
-        print("Profile complete place in volatility/plugins/overlays/linux/ in\
-            order to use")
-
-
-if __name__ == '__main__':
-    VolDeploy().main()
