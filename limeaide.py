@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/env python3
 
 import sys
 import os
@@ -119,6 +119,7 @@ class Limeaide(object):
         profiler = Profiler()
 
         if not args.force_clean:
+            profiler.main()
             client.output_dir = "{0}{1}{2}/".format(
                 self.output_dir, self.args_case,
                 datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f"))
@@ -127,23 +128,23 @@ class Limeaide(object):
             if not args.no_profiler:
                 use_profile = input("Would you like to select a pre-generated \
                     profile [Y/n]")
-                if use_profile.lower() is 'y':
+                print(use_profile)
+                if use_profile.lower() == 'y':
                     profile = profiler.interactive_chooser()
                     if profile is None:
                         print("No profiles found... Will build new profile for\
                             remote client")
                     else:
-                        self.client.profile = profile
+                        client.profile = profile
             elif args.module is not None:
                 profile = profiler.select_profile(
                     args.profile[0], args.profile[1], args.profile[2])
                 if profile is None:
-                    new_profile = input("No profiles found... Would you like to\
-                        build a new profile for the remote client [Y/n]")
-                    if use_profile.lower() is 'n':
+                    new_profile = input("No profiles found... Would you like to build a new profile for the remote client [Y/n]")
+                    if use_profile.lower() == 'n':
                         sys.exit()
                 else:
-                    self.client.profile = profile
+                    client.profile = profile
 
             LimeDeploy(session, profiler).main()
             print(

@@ -1,5 +1,3 @@
-#!/bin/python
-
 import sys
 import os
 import datetime
@@ -15,15 +13,18 @@ class LimeDeploy(object):
         self.remote_session = session
         self.client = session.client_
         self.profiler = profiler
+
         self.lime_dir = './tools/LiME/src/'
         self.lime_rdir = '/tmp/lime/'
         self.lime_src = ['disk.c', 'lime.h', 'main.c', 'Makefile']
         self.profiles_dir = './profiles/'
 
+        self.new_profile = False
+
     def send_lime(self):
         print("sending LiME to remote client")
         self.remote_session.exec_cmd('mkdir %s' % self.lime_rdir, False)
-        if self.client.profile is None:
+        if new_profile:
             for file in self.lime_src:
                 self.remote_session.put_sftp(
                     self.lime_dir, self.lime_rdir, file)
@@ -38,8 +39,8 @@ class LimeDeploy(object):
                 'cd {}; make'.format(self.lime_rdir), False)
         else:
             self.remote_session.put_sftp(
-                self.lime_dir, self.lime_rdir,
-                self.profiles_dir + self.client.profile["module"])
+                self.profiles_dir, self.lime_rdir,
+                self.client.profile["module"])
         print("done.")
 
         return
@@ -70,11 +71,14 @@ class LimeDeploy(object):
         print("Beam me up Scotty")
         self.remote_session.pull_sftp(
             self.lime_rdir, self.client.output_dir, self.client.output)
-        self.remote_session.pull_sftp(
-            self.lime_rdir, self.profiles_dir,
-            self.client.profile['module'])
+        if new_profile:
+            self.remote_session.pull_sftp(
+                self.lime_rdir, self.profiles_dir,
+                self.client.profile['module'])
 
     def main(self):
+        if self.client.profile is None:
+            self.new_profile = True
         self.send_lime()
         self.get_lime_dump()
 

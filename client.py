@@ -1,6 +1,3 @@
-#!/bin/python
-
-
 class Client(object):
     """Define client connection
     profile = {

@@ -1,5 +1,3 @@
-#!/bin/python
-
 import sys
 import os
 import json
@@ -17,9 +15,9 @@ class Profiler(object):
     def load_profiles(self):
         try:
             self.profiles = json.load(
-                open(self.profiles_dir + self.manifest, 'r').close())
+                open(self.profiles_dir + self.manifest, 'r'))
         except FileNotFoundError as e:
-            pass
+            print(e)
 
     def create_profile(self, lsb_release, uname):
         """Looks through the output of uname and lsb_release to determine
@@ -54,14 +52,12 @@ class Profiler(object):
                         (i, profile['distro'], profile['kver'], profile['arch']))
                 profile_val = input(
                     "Please select a profile. Press [q] to exit: ")
-                if profile_val > 1 or profile_val < len(self.profiles):
+                if profile_val == 'q':
+                    return None
+                elif int(profile_val) > 1 or int(profile_val) < len(self.profiles):
                     return profile
-
                 else:
-                    if distro_val == 'q':
-                        return None
-                    else:
-                        print("Please select a correct value and try agin")
+                    print("Please select a correct value and try agin")
 
     def select_profile(self, distro, kver, arch):
         """Select a profile to have the client use."""
@@ -75,6 +71,3 @@ class Profiler(object):
 
     def main(self):
         self.load_profiles()
-
-if __name__ == '__main__':
-    Profiler().main()
