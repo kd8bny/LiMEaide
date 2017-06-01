@@ -10,7 +10,7 @@ class VolDeploy(object):
         self.client = session.client_
         self.remote_session = session
 
-        self.profiles_dir = './profiles/'
+        self.output_dir = './profiles/'
         self.lime_rdir = '/tmp/lime/'
         self.map = 'System.map-%s' % self.client.profile['kver']
 
@@ -38,18 +38,20 @@ class VolDeploy(object):
             '.dwarf', 'w+')
         sp = Popen(
             ['dwarfdump', '-d', '-i',
-             self.profiles_dir + self.client.profile['module']],
+             self.output_dir + self.client.profile['module']],
             stdout=dwarf_file)
         sp.wait()
         dwarf_file.flush()
 
         Popen(
-            ['zip', '-j', self.profiles_dir + self.client.profile['profile'],
+            ['zip', '-j', self.output_dir + self.client.profile['profile'],
              self.client.output_dir + self.client.profile['kver'] + '.dwarf',
              self.client.output_dir + self.map])
         print("done.")
 
-    def main(self):
+    def main(self, vol_path):
         """Start building a Volatility profile."""
+        if vol_path != 'None':
+            self.output_dir = vol_path
         self.get_maps()
         self.get_profile()

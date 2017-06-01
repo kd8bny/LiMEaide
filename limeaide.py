@@ -2,6 +2,7 @@
 
 import sys
 import os
+import configparser
 import argparse
 import getpass
 from datetime import datetime
@@ -20,24 +21,12 @@ class Limeaide(object):
 
     def __init__(self):
         super(Limeaide, self).__init__()
+        self.volatility_profile_dir = '/volatility/plugins/linux/'
         self.lime_dir = './tools/LiME/src/'
         self.tools_dir = './tools/'
         self.output_dir = './output/'
         self.profile_dir = './profiles/'
         self.args_case = ''
-
-    def check_tools(self):
-        """Create dirs for profiles, LiME, and output."""
-        if not os.path.isdir(self.output_dir):
-            os.mkdir(self.output_dir)
-
-        if not os.path.isdir(self.profile_dir):
-            os.mkdir(self.profile_dir)
-
-        if not os.path.isdir(self.lime_dir):
-            if not os.path.isdir(self.tools_dir):
-                os.mkdir(self.tools_dir)
-            sys.exit("Please download LiME and place in the ./tools/ dir")
 
     @staticmethod
     def get_args():
@@ -45,20 +34,20 @@ class Limeaide(object):
         parser = argparse.ArgumentParser(description='Utility designed to \
             automate GNU/Linux memory forensics')
         parser.add_argument("remote", help="remote host IP")
+        parser.add_argument("-s", "--sudoer", help="use a sudo user instead \
+        default: root")
         parser.add_argument(
-            "-P", "--no-profiler", action="store_true",
-            help="Do NOT run profiler and compile new module/profile for \
+            "-N", "--no-profiler", action="store_true",
+            help="Do NOT run profiler and force compile new module/profile for \
             client")
+        parser.add_argument(
+            "-p", "--profile", nargs=3, metavar=('disto', 'kver', 'arch'),
+            help="Skip the profiler by providing the distribution, kernel\
+            version, and architecture of the remote client.")
         parser.add_argument(
             "-C", "--dont-compress", action="store_true", help="Do NOT compress\
             dump into Bzip2 format")
-        parser.add_argument("-s", "--sudoer", help="use a sudo user instead \
-            default: root")
-        parser.add_argument(
-            "-m", "--module", nargs=3, metavar=('distro', 'kernel', 'arch'),
-            help="Provide the profile you know you want to use for the remote \
-            client")
-        parser.add_argument("-o", "--output", help="name the outputfile")
+        parser.add_argument("-o", "--output", help="name the output file")
         parser.add_argument(
             "-c", "--case", help="Append case number to output dir")
         parser.add_argument("--force-clean", action="store_true", help="Force \
@@ -68,20 +57,52 @@ class Limeaide(object):
 
         return parser.parse_args()
 
+    def check_tools(self, config):
+        """Create dirs for profiles, LiME, and output."""
+        if not os.path.isdir(self.output_dir):
+            os.mkdir(self.output_dir)
+
+        if not os.path.isdir(self.profile_dir):
+            os.mkdir(self.profile_dir)
+
+        print(config['DEFAULT']['volatility'])
+        config_vol_dir = config['DEFAULT']['volatility']
+        if vol_dir is '' or not os.path.isdir(vol_dir):
+            path = input(
+                "Volatility directory missing. Please provide a path to " +
+                "Volatility directory. \n[q] to never ask again: ")
+            if path != 'q':
+                path = 'None'
+
+            config['DEFAULT']['volatility'] = path
+            with open('.limeaide', 'w') as configfile:
+                config.write(configfile)
+        else:
+            self.volatility_profile_dir = config_vol_dir + self.volatility_profile_dir
+
+        if not os.path.isdir(self.lime_dir):
+            if not os.path.isdir(self.tools_dir):
+                os.mkdir(self.tools_dir)
+            sys.exit("Please download LiME and place in the ./tools/ dir")
+
     @staticmethod
-    def get_client(args):
-        """Return instantiated client."""
+    def get_client(args, config):
+        """Return instantiated client.
+        Config will provide global overrides.
+        """
         client = Client()
         client.ip = args.remote
         if args.sudoer is not None:
             client.user = args.sudoer
             client.is_sudoer = True
 
-        if args.output is not None:
-            client.output = args.output
+        if config['DEFAULT']['output'] is '':
+            if args.output is not None:
+                client.output = args.output
 
-        if args.dont_compress:
-            client.compress = not client.compress
+        if config['DEFAULT']['compress'] is '':
+            if args.dont_compress:
+                client.compress = not client.compress
 
         return client
 
@@ -106,15 +127,16 @@ class Limeaide(object):
             "LiMEaide is licensed under GPL-3.0\n"
             "LiME is licensed under GPL-2.0\n")
 
-        self.check_tools()
         args = self.get_args()
-        client = self.get_client(args)
+        config = configparser.ConfigParser().read('.limeaide')
+        self.check_tools(config)
+        client = self.get_client(args, config)
 
         if args.case is not None:
             self.args_case = 'case_%s' % (args.case)
 
         if args.version:
-            sys.exit()
+            sys.exit(_version)
 
         print("Attempting secure connection {0}@{1}".format(
             client.user, client.ip))
@@ -156,7 +178,7 @@ class Limeaide(object):
                 "Memory extraction is complete\n\n%s is in %s"
                 % (client.output, client.output_dir))
 
-            VolDeploy(session).main()
+            VolDeploy(session).main(self.volatility_profile_dir)
             print("Profile complete place in volatility/plugins/overlays/" +
                   "linux/ in order to use")
 
