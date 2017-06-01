@@ -1,0 +1,6 @@
+# Warning! Values contained here will override arguments given
+# Simply uncomment keys and fill a value
+[DEFAULT]
+volatility =                # Location of your Volatility directory </someplace/volatility>
+#output = dump.lime         # something not dump.lime
+#compress = false           # Set to false to never compress dump
