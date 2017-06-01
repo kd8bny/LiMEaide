@@ -10,7 +10,7 @@ python3 limeaide.py <IP>
 ```
 and magic happens.
 
-For more deatiled usage checkout the [wiki](https://github.com/kd8bny/LiMEaide/wiki)
+For more detailed usage checkout the [wiki](https://github.com/kd8bny/LiMEaide/wiki)
 
 ### Detailed usage
 ```
@@ -18,22 +18,23 @@ limeaide.py [OPTIONS] REMOTE_IP
 -h, --help
     Shows the help dialog
 
+-N, --no-profiler
+    Do NOT run profiler and force creation new module/profile for client.
+
 -s, --sudoer
-    Execute memory grab as sudoer. This is useful when root privileges are not granted
+    Execute memory grab as sudoer. This is useful when root privileges are not granted.
+
+-p, --profile
+    Skip the profiler by providing the distribution, kernel version, and architecture of the remote client.
 
 -o, --output
     Change name of output file. Default is dump.bin
 
 -c, --case
-    Append case number to front of output dir
+    Append case number to front of output directory.
 
 -C, --dont-compress
-    Do not compress memory file. By default memory is compressed on host. If you
-    experience issues, toggle this flag. In my tests I see a ~60% reduction in file size
-
--V, --no-profile
-    Do not create a volatility profile and do not include files for volatility.
-    Volatility profile is generated on local machine
+    Do not compress memory file. By default memory is compressed on host. If you experience issues, toggle this flag. In my tests I see a ~60% reduction in file size
 
 --force-clean
     If previous attempt failed then clean up client
@@ -52,7 +53,7 @@ sudo apt-get install python3-paramiko
 sudo yum install python3-paramiko
 ```
 #### LiME
-In order to use LiME you must download and mv the source into the **LiMEaide/tools** directory. Make sure the the LiME folder is named **LiME**. The full path should be as follows:
+In order to use LiME you must download and move the source into the **LiMEaide/tools** directory. Make sure the the LiME folder is named **LiME**. The full path should be as follows:
 NOTE: If you would like to build Volatility profiles, you must use my forked version of LiME. This provides debugging symbols used by dwarfdump.
 ```
 LiMEaide/tools/LiME
