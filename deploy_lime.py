@@ -1,7 +1,9 @@
+import time
+
 class LimeDeploy(object):
     """Send LiME and retrieve the RAM dump from a remote client."""
 
-    def __init__(self, session, profiler):
+    def __init__(self, session, profiler, schedule):
         super(LimeDeploy, self).__init__()
         self.remote_session = session
         self.client = session.client_
@@ -9,8 +11,9 @@ class LimeDeploy(object):
 
         self.lime_dir = './tools/LiME/src/'
         self.lime_rdir = '/tmp/lime/'
-        self.lime_src = ['disk.c', 'lime.h', 'main.c', 'Makefile']
+        self.lime_src = ['disk.c', 'lime.h', 'main.c', 'Makefile', 'tcp.c']
         self.profiles_dir = './profiles/'
+        self.schedule = int(schedule)
 
         self.new_profile = False
 
@@ -37,9 +40,6 @@ class LimeDeploy(object):
                 self.client.profile["module"])
         print("done.")
 
-        return
-
-    def get_lime_dump(self):
         """Will install LiME and dump RAM."""
         print("Installing LKM and retrieving RAM")
         self.remote_session.exec_cmd("mv {0}lime.ko {0}{1}".format(
@@ -63,6 +63,7 @@ class LimeDeploy(object):
             self.client.output += ".bz2"
             print("done.")
 
+    def get_lime_dump(self):
         print("Beam me up Scotty")
         self.remote_session.pull_sftp(
             self.lime_rdir, self.client.output_dir, self.client.output)
@@ -76,4 +77,8 @@ class LimeDeploy(object):
         if self.client.profile is None:
             self.new_profile = True
         self.send_lime()
+
+        if self.schedule > 0:
+            pause = self.schedule * 60
+            time.sleep(pause)
         self.get_lime_dump()

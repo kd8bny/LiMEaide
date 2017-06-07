@@ -4,6 +4,9 @@ import sys
 import os
 import argparse
 import getpass
+import threading
+import logging
+import time
 from datetime import datetime
 
 from session import Session
@@ -11,7 +14,7 @@ from client import Client
 from deploy_lime import LimeDeploy
 from deploy_volatility import VolDeploy
 from profiler import Profiler
-
+from liMEaide_control import MasterControl
 
 class Limeaide(object):
     """Deploy LiME LKM to remote host in order to scrape RAM."""
@@ -25,9 +28,10 @@ class Limeaide(object):
         self.output_dir = './output/'
         self.profile_dir = './profiles/'
         self.args_case = ''
+        self.log_dir = './logs'
 
     def check_tools(self):
-        """Create dirs for profiles, LiME, and output."""
+        """Create dirs for profiles, LiME, logging, and output."""
         if not os.path.isdir(self.output_dir):
             os.mkdir(self.output_dir)
 
@@ -38,6 +42,9 @@ class Limeaide(object):
             if not os.path.isdir(self.tools_dir):
                 os.mkdir(self.tools_dir)
             sys.exit("Please download LiME and place in the ./tools/ dir")
+        if not os.path.isdir(self.log_dir):
+            os.mkdir(self.log_dir)
+        LOG_FILENAME = ''
 
     @staticmethod
     def get_args():
@@ -61,12 +68,16 @@ class Limeaide(object):
         parser.add_argument("-o", "--output", help="name the outputfile")
         parser.add_argument(
             "-c", "--case", help="Append case number to output dir")
+        parser.add_argument("-B","--background", help="Enter wait time in minutes")
         parser.add_argument("--force-clean", action="store_true", help="Force \
             clean client after failed deployment")
         parser.add_argument("--version", action="store_true", help="Version \
             information")
 
         return parser.parse_args()
+
+    def log_init(log_type, message):
+        logging.b
 
     def get_client(self, args):
         """Return instantiated client."""
@@ -83,6 +94,11 @@ class Limeaide(object):
             client.compress = not client.compress
 
         return client
+
+    def lime_deploy_worker(self, session, profiler,schedule):
+        """worker for threading lime deploy"""
+        LimeDeploy(session,profiler,schedule)
+
 
     def main(self):
         """Start the interactive session for LiMEaide."""
@@ -104,10 +120,17 @@ class Limeaide(object):
         print(
             "LiMEaide is licensed under GPL-3.0\n"
             "LiME is licensed under GPL-2.0\n")
+        #set up logging file
+        log_file = '{}-debug-limeaide.log'.format(datetime.strftime(datetime.today(),
+             "%Y_%m_%dT%H_%M_%S_%f"))
+        logging.basicConfig(filename=log_file,level=logging.DEBUG)
 
         self.check_tools()
         args = self.get_args()
         client = self.get_client(args)
+
+        """used to hold sleep time for background jobs"""
+        schedule = args.background
 
         if args.case is not None:
             self.args_case = 'case_%s' % (args.case)
@@ -118,7 +141,7 @@ class Limeaide(object):
         print("Attempting secure connection {0}@{1}".format(
             client.user, client.ip))
         client.pass_ = getpass.getpass()
-        session = Session(client)
+        session = Session(client, args.background)
         profiler = Profiler()
 
         if not args.force_clean:
@@ -149,20 +172,23 @@ class Limeaide(object):
                         sys.exit()
                 else:
                     client.profile = profile
-
-            LimeDeploy(session, profiler).main()
+            getmem = LimeDeploy(session,profiler,schedule)
+            getmem_name = "{0}-{1}-worker".format(client.ip,
+                datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f"))
+            getmem_thread = MasterControl(name=getmem_name,target=getmem.main, daemon=True)
+            getmem_thread.start()
+            #LimeDeploy(session, profiler).main()
             print(
-                "Memory extraction is complete\n\n%s is in %s"
+               "Memory extraction is complete\n\n%s is in %s"
                 % (client.output, client.output_dir))
-
             VolDeploy(session).main()
             print("Profile complete place in volatility/plugins/overlays/" +
-                  "linux/ in order to use")
-
+                      "linux/ in order to use")
         else:
             session.clean()
             sys.exit("Clean attempt complete")
 
 
 if __name__ == '__main__':
+    #thread = threading.Thread(target=Limeaide().main(), name='limeAide-test')
     Limeaide().main()

@@ -33,8 +33,8 @@ class Profiler(object):
         profile = {
             "distro": distro,
             "kver": kver,
-            "arch": arch,
-            "module": "lime-{0}-{1}-{2}.ko".format(distro, kver, arch),
+            "arch": arch,   #change order of kver & distro, add arch after test
+            "module": "lime-{0}-{1}-{2}.ko".format(kver, distro, arch),
             "profile": "vol-{0}-{1}-{2}.zip".format(distro, kver, arch)
             }
         self.profiles.append(profile)
