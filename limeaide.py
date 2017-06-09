@@ -75,7 +75,7 @@ class Limeaide(object):
         parser.add_argument(
             "-c", "--case", help="Append case number to output dir")
         parser.add_argument("--delayed-pickup", action="store_true",help="Used to store job for future pickup")
-        parser.add_argument("-p","--pickup",help="Enter stored job json file")
+        parser.add_argument("-p","--pickup",help="Enter stored job file")
         parser.add_argument("--force-clean", action="store_true", help="Force \
             clean client after failed deployment")
         parser.add_argument("--version", action="store_true", help="Version \
