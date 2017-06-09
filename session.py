@@ -1,6 +1,9 @@
 import sys
 import functools
 import paramiko
+import io
+import json
+
 
 
 class Session(object):

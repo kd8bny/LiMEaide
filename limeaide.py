@@ -7,6 +7,7 @@ import getpass
 import threading
 import logging
 import time
+import pickle
 from datetime import datetime
 
 from session import Session
@@ -16,10 +17,11 @@ from deploy_volatility import VolDeploy
 from profiler import Profiler
 from liMEaide_control import MasterControl
 
+
 class Limeaide(object):
     """Deploy LiME LKM to remote host in order to scrape RAM."""
 
-    _version = "1.2.3"
+    _version = ":prototype-delayedJobs"
 
     def __init__(self):
         super(Limeaide, self).__init__()
@@ -29,9 +31,10 @@ class Limeaide(object):
         self.profile_dir = './profiles/'
         self.args_case = ''
         self.log_dir = './logs'
+        self.scheduled_pickup_dir = './scheduled_jobs'
 
     def check_tools(self):
-        """Create dirs for profiles, LiME, logging, and output."""
+        """Create dirs for profiles, LiME, logging, scheduled_jobs and output."""
         if not os.path.isdir(self.output_dir):
             os.mkdir(self.output_dir)
 
@@ -42,9 +45,12 @@ class Limeaide(object):
             if not os.path.isdir(self.tools_dir):
                 os.mkdir(self.tools_dir)
             sys.exit("Please download LiME and place in the ./tools/ dir")
+        
         if not os.path.isdir(self.log_dir):
             os.mkdir(self.log_dir)
-        LOG_FILENAME = ''
+        
+        if not os.path.isdir(self.scheduled_pickup_dir):
+            os.mkdir(self.scheduled_pickup_dir)
 
     @staticmethod
     def get_args():
@@ -68,16 +74,14 @@ class Limeaide(object):
         parser.add_argument("-o", "--output", help="name the outputfile")
         parser.add_argument(
             "-c", "--case", help="Append case number to output dir")
-        parser.add_argument("-B","--background", help="Enter wait time in minutes")
+        parser.add_argument("--delayed-pickup", action="store_true",help="Used to store job for future pickup")
+        parser.add_argument("-p","--pickup",help="Enter stored job json file")
         parser.add_argument("--force-clean", action="store_true", help="Force \
             clean client after failed deployment")
         parser.add_argument("--version", action="store_true", help="Version \
             information")
 
         return parser.parse_args()
-
-    def log_init(log_type, message):
-        logging.b
 
     def get_client(self, args):
         """Return instantiated client."""
@@ -86,18 +90,31 @@ class Limeaide(object):
         if args.sudoer is not None:
             client.user = args.sudoer
             client.is_sudoer = True
-
         if args.output is not None:
             client.output = args.output
-
         if args.dont_compress:
             client.compress = not client.compress
-
         return client
 
-    def lime_deploy_worker(self, session, profiler,schedule):
-        """worker for threading lime deploy"""
-        LimeDeploy(session,profiler,schedule)
+    def saveJob(self, client, jobname):
+        pickle.dump(client, open(("{0}{1}.dat".format('scheduled_jobs/',
+            jobname)),'wb'))
+
+    def getSavedJob(self, stored_client): 
+        restored_client = pickle.load(open(stored_client,'rb'))
+        print("Client restored!")
+        return restored_client
+
+    def finishSavedJob(self, client):
+        print("Retrieving RAM dump {}".format(client.output))
+        if not os.path.isdir(client.output_dir):
+            os.mkdir(client.output_dir)
+        savedSession = Session(client, None)
+        delayedProfiler = Profiler()
+        execSavedJob = LimeDeploy(savedSession, delayedProfiler, None,
+            client.jobname).get_lime_dump()
+        savedSession.clean()
+        print("Job {} pickup has been completed!".format(client.output))
 
 
     def main(self):
@@ -120,17 +137,25 @@ class Limeaide(object):
         print(
             "LiMEaide is licensed under GPL-3.0\n"
             "LiME is licensed under GPL-2.0\n")
-        #set up logging file
-        log_file = '{}-debug-limeaide.log'.format(datetime.strftime(datetime.today(),
-             "%Y_%m_%dT%H_%M_%S_%f"))
-        logging.basicConfig(filename=log_file,level=logging.DEBUG)
 
         self.check_tools()
+
+        #set up logging file
+        log_dir = './logs'
+        info_log_file = './logs/{1}-info-limeaide.log'.format(log_dir,datetime.strftime(datetime.today(),
+             "%Y_%m_%dT%H_%M_%S_%f"))
+        debug_log_file = './logs/{1}-debug-limeaide.log'.format(log_dir,datetime.strftime(datetime.today(),
+             "%Y_%m_%dT%H_%M_%S_%f"))
+        logging.basicConfig(filename=info_log_file,level=logging.INFO)
+        logging.basicConfig(filename=debug_log_file,level=logging.DEBUG)
+
         args = self.get_args()
         client = self.get_client(args)
 
-        """used to hold sleep time for background jobs"""
-        schedule = args.background
+        if args.pickup:
+            job = self.getSavedJob(args.pickup)
+            getJob = self.finishSavedJob(job)
+            sys.exit("goodbye")
 
         if args.case is not None:
             self.args_case = 'case_%s' % (args.case)
@@ -141,7 +166,10 @@ class Limeaide(object):
         print("Attempting secure connection {0}@{1}".format(
             client.user, client.ip))
         client.pass_ = getpass.getpass()
-        session = Session(client, args.background)
+        getmem_name = "{0}-{1}-worker".format(client.ip,
+            datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f"))
+        client.jobname = getmem_name
+        session = Session(client, args.delayed_pickup)
         profiler = Profiler()
 
         if not args.force_clean:
@@ -172,23 +200,20 @@ class Limeaide(object):
                         sys.exit()
                 else:
                     client.profile = profile
-            getmem = LimeDeploy(session,profiler,schedule)
-            getmem_name = "{0}-{1}-worker".format(client.ip,
-                datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f"))
-            getmem_thread = MasterControl(name=getmem_name,target=getmem.main, daemon=True)
-            getmem_thread.start()
-            #LimeDeploy(session, profiler).main()
-            print(
-               "Memory extraction is complete\n\n%s is in %s"
-                % (client.output, client.output_dir))
-            VolDeploy(session).main()
-            print("Profile complete place in volatility/plugins/overlays/" +
-                      "linux/ in order to use")
+
+            #Threading session
+            getmem = LimeDeploy(session,profiler,args.delayed_pickup,getmem_name).main()
+            '''getmem_thread = MasterControl(name=getmem_name,target=getmem.main)
+            getmem_thread.start()'''
+
+            if args.delayed_pickup:
+                self.saveJob(client, client.jobname)
+                print("Job schedule created")
+
         else:
             session.clean()
             sys.exit("Clean attempt complete")
 
 
 if __name__ == '__main__':
-    #thread = threading.Thread(target=Limeaide().main(), name='limeAide-test')
     Limeaide().main()
