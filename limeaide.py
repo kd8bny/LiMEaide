@@ -42,7 +42,7 @@ class Limeaide(object):
             automate GNU/Linux memory forensics')
         parser.add_argument("remote", help="remote host IP")
         parser.add_argument("-s", "--sudoer", help="use a sudo user instead \
-        default: root")
+            default: root")
         parser.add_argument(
             "-N", "--no-profiler", action="store_true",
             help="Do NOT run profiler and force compile new module/profile for \
@@ -165,16 +165,17 @@ class Limeaide(object):
             "LiME is licensed under GPL-2.0\n")
 
         date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
-        # Set up logging file
-        info_log_file = '{0}{1}-info-limeaide.log'.format(self.log_dir, date)
-        debug_log_file = '{0}{1}-debug-limeaide.log'.format(self.log_dir, date)
-        logging.basicConfig(filename=info_log_file, level=logging.INFO)
-        logging.basicConfig(filename=debug_log_file, level=logging.DEBUG)
 
         args = self.get_args()
         config = configparser.ConfigParser().read('.limeaide')
         self.check_tools(config)
         client = self.get_client(args, config)
+
+        # Set up logging files
+        info_log_file = '{0}{1}-info-limeaide.log'.format(self.log_dir, date)
+        debug_log_file = '{0}{1}-debug-limeaide.log'.format(self.log_dir, date)
+        logging.basicConfig(filename=info_log_file, level=logging.INFO)
+        logging.basicConfig(filename=debug_log_file, level=logging.DEBUG)
 
         if args.pickup:
             job = self.get_saved_job(args.pickup)
