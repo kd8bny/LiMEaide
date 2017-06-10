@@ -5,6 +5,10 @@ import os
 import configparser
 import argparse
 import getpass
+import threading
+import logging
+import time
+import pickle
 from datetime import datetime
 
 from session import Session
@@ -12,12 +16,13 @@ from client import Client
 from deploy_lime import LimeDeploy
 from deploy_volatility import VolDeploy
 from profiler import Profiler
+from liMEaide_control import MasterControl
 
 
 class Limeaide(object):
     """Deploy LiME LKM to remote host in order to scrape RAM."""
 
-    _version = "1.2.3"
+    _version = ":prototype-delayedJobs"
 
     def __init__(self):
         super(Limeaide, self).__init__()
@@ -26,6 +31,8 @@ class Limeaide(object):
         self.tools_dir = './tools/'
         self.output_dir = './output/'
         self.profile_dir = './profiles/'
+        self.log_dir = './logs/'
+        self.scheduled_pickup_dir = './scheduled_jobs/'
         self.args_case = ''
 
     @staticmethod
@@ -50,6 +57,9 @@ class Limeaide(object):
         parser.add_argument("-o", "--output", help="name the output file")
         parser.add_argument(
             "-c", "--case", help="Append case number to output dir")
+        parser.add_argument("--delayed-pickup", action="store_true",
+                            help="Used to store job for future pickup")
+        parser.add_argument("-p", "--pickup", help="Enter stored job file")
         parser.add_argument("--force-clean", action="store_true", help="Force \
             clean client after failed deployment")
         parser.add_argument("--version", action="store_true", help="Version \
@@ -58,7 +68,7 @@ class Limeaide(object):
         return parser.parse_args()
 
     def check_tools(self, config):
-        """Create dirs for profiles, LiME, and output."""
+        """Check for required tools and directories."""
         if not os.path.isdir(self.output_dir):
             os.mkdir(self.output_dir)
 
@@ -85,6 +95,12 @@ class Limeaide(object):
                 os.mkdir(self.tools_dir)
             sys.exit("Please download LiME and place in the ./tools/ dir")
 
+        if not os.path.isdir(self.log_dir):
+            os.mkdir(self.log_dir)
+
+        if not os.path.isdir(self.scheduled_pickup_dir):
+            os.mkdir(self.scheduled_pickup_dir)
+
     @staticmethod
     def get_client(args, config):
         """Return instantiated client.
@@ -105,6 +121,27 @@ class Limeaide(object):
                 client.compress = not client.compress
 
         return client
+
+    def save_job(self, client, jobname):
+        pickle.dump(client, open(("{0}{1}.dat".format(
+            'scheduled_jobs/', jobname)), 'wb'))
+
+    def get_saved_job(self, stored_client):
+        restored_client = pickle.load(open(stored_client, 'rb'))
+        print("Client restored!")
+
+        return restored_client
+
+    def finish_saved_job(self, client):
+        print("Retrieving RAM dump {}".format(client.output))
+        if not os.path.isdir(client.output_dir):
+            os.mkdir(client.output_dir)
+        savedSession = Session(client, None)
+        delayedProfiler = Profiler()
+        execSavedJob = LimeDeploy(
+            savedSession, delayedProfiler, None, client.jobname).get_lime_dump()
+        savedSession.clean()
+        print("Job {} pickup has been completed!".format(client.output))
 
     def main(self):
         """Start the interactive session for LiMEaide."""
@@ -127,10 +164,22 @@ class Limeaide(object):
             "LiMEaide is licensed under GPL-3.0\n"
             "LiME is licensed under GPL-2.0\n")
 
+        date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
+        # Set up logging file
+        info_log_file = '{0}{1}-info-limeaide.log'.format(self.log_dir, date)
+        debug_log_file = '{0}{1}-debug-limeaide.log'.format(self.log_dir, date)
+        logging.basicConfig(filename=info_log_file, level=logging.INFO)
+        logging.basicConfig(filename=debug_log_file, level=logging.DEBUG)
+
         args = self.get_args()
         config = configparser.ConfigParser().read('.limeaide')
         self.check_tools(config)
         client = self.get_client(args, config)
+
+        if args.pickup:
+            job = self.get_saved_job(args.pickup)
+            getJob = self.finish_saved_job(job)
+            sys.exit("goodbye")
 
         if args.case is not None:
             self.args_case = 'case_%s' % (args.case)
@@ -141,7 +190,9 @@ class Limeaide(object):
         print("Attempting secure connection {0}@{1}".format(
             client.user, client.ip))
         client.pass_ = getpass.getpass()
-        session = Session(client)
+        getmem_name = "{0}-{1}-worker".format(client.ip, date)
+        client.jobname = getmem_name
+        session = Session(client, args.delayed_pickup)
         profiler = Profiler()
 
         if not args.force_clean:
@@ -173,14 +224,19 @@ class Limeaide(object):
                 else:
                     client.profile = profile
 
-            LimeDeploy(session, profiler).main()
-            print(
-                "Memory extraction is complete\n\n%s is in %s"
-                % (client.output, client.output_dir))
+            # Threading session
+            getmem = LimeDeploy(
+                session, profiler, args.delayed_pickup, getmem_name).main()
+            '''getmem_thread = MasterControl(name=getmem_name,target=getmem.main)
+            getmem_thread.start()'''
 
             VolDeploy(session).main(self.volatility_profile_dir)
             print("Profile complete place in volatility/plugins/overlays/" +
                   "linux/ in order to use")
+
+            if args.delayed_pickup:
+                self.save_job(client, client.jobname)
+                print("Job schedule created")
 
         else:
             session.clean()

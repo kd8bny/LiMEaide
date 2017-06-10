@@ -1,7 +1,10 @@
+import time
+import sys
+
 class LimeDeploy(object):
     """Send LiME and retrieve the RAM dump from a remote client."""
 
-    def __init__(self, session, profiler):
+    def __init__(self, session, profiler, schedule, jobname):
         super(LimeDeploy, self).__init__()
         self.remote_session = session
         self.client = session.client_
@@ -9,9 +12,10 @@ class LimeDeploy(object):
 
         self.lime_dir = './tools/LiME/src/'
         self.lime_rdir = '/tmp/lime/'
-        self.lime_src = ['disk.c', 'lime.h', 'main.c', 'Makefile']
+        self.lime_src = ['disk.c', 'lime.h', 'main.c', 'Makefile', 'tcp.c']
         self.profiles_dir = './profiles/'
-
+        self.schedule = schedule
+        self.jobname = jobname
         self.new_profile = False
 
     def send_lime(self):
@@ -37,9 +41,6 @@ class LimeDeploy(object):
                 self.client.profile["module"])
         print("done.")
 
-        return
-
-    def get_lime_dump(self):
         """Will install LiME and dump RAM."""
         print("Installing LKM and retrieving RAM")
         self.remote_session.exec_cmd("mv {0}lime.ko {0}{1}".format(
@@ -55,14 +56,15 @@ class LimeDeploy(object):
                 self.lime_rdir, self.client.output), True)
         print("done.")
         if self.client.compress:
-            print("Creating Bzip2...compressing the following")
+            print("Creating Bzip2...compressing the RAM dump")
             self.remote_session.exec_cmd(
-                'tar -jv --remove-files -f {0}{1}.bz2 -c {2}{3}'.format(
-                    self.lime_rdir, self.client.output, self.lime_rdir,
+                'tar -jv --remove-files -f {0}{1}-{2}.bz2 -c {3}{4}'.format(
+                    self.lime_rdir, self.client.output, self.client.ip, self.lime_rdir,
                     self.client.output), True)
-            self.client.output += ".bz2"
+            self.client.output += "-{}.bz2".format(self.client.ip)
             print("done.")
 
+    def get_lime_dump(self):
         print("Beam me up Scotty")
         self.remote_session.pull_sftp(
             self.lime_rdir, self.client.output_dir, self.client.output)
@@ -70,10 +72,15 @@ class LimeDeploy(object):
             self.remote_session.pull_sftp(
                 self.lime_rdir, self.profiles_dir,
                 self.client.profile['module'])
+        print("Memory extraction is complete\n\n%s is in %s"
+            %(self.client.output, self.client.output_dir))
 
     def main(self):
         """Begin the process of transporting LiME and dumping the RAM."""
         if self.client.profile is None:
             self.new_profile = True
         self.send_lime()
-        self.get_lime_dump()
+        if self.schedule:
+            print("RAM dump retrieval is postponed 0_0\nLATERZ!")
+        else:
+            self.get_lime_dump()

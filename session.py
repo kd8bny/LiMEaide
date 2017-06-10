@@ -1,12 +1,15 @@
 import sys
 import functools
 import paramiko
+import io
+import json
+
 
 
 class Session(object):
     """Session will take care of all the backend communications."""
 
-    def __init__(self, client):
+    def __init__(self, client, schedule):
         super(Session, self).__init__()
         self.client_ = client
         self.session = paramiko.SSHClient()
@@ -14,6 +17,7 @@ class Session(object):
         self.session.connect(
             client.ip, username=client.user, password=client.pass_)
         self.complete_percent = []
+        self.schedule = schedule
 
     @staticmethod
     def _error_check(stdout):
