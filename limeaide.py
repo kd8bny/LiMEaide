@@ -41,7 +41,7 @@ class Limeaide(object):
         parser = argparse.ArgumentParser(description='Utility designed to \
             automate GNU/Linux memory forensics')
         parser.add_argument("remote", help="remote host IP")
-        parser.add_argument("-s", "--sudoer", help="use a sudo user instead \
+        parser.add_argument("-u", "--user", help="use a sudo user instead \
             default: root")
         parser.add_argument(
             "-N", "--no-profiler", action="store_true",
@@ -59,7 +59,7 @@ class Limeaide(object):
             "-c", "--case", help="Append case number to output dir")
         parser.add_argument("--delayed-pickup", action="store_true",
                             help="Used to store job for future pickup")
-        parser.add_argument("-p", "--pickup", help="Enter stored job file")
+        parser.add_argument("-P", "--pickup", help="Enter stored job file")
         parser.add_argument("--force-clean", action="store_true", help="Force \
             clean client after failed deployment")
         parser.add_argument("--version", action="store_true", help="Version \
