@@ -35,6 +35,11 @@ limeaide.py [OPTIONS] REMOTE_IP
     Do not create a volatility profile and do not include files for volatility.
     Volatility profile is generated on local machine
 
+-p, --pickup
+    Pick up a job you previously ran with the --delayed-pickup switch.
+    The file that follows this switch is located in the scheduled_jobs/ directory
+    and ends in .dat
+
 --force-clean
     If previous attempt failed then clean up client
 ```
