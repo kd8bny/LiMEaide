@@ -39,6 +39,10 @@ limeaide.py [OPTIONS] REMOTE_IP
     Pick up a job you previously ran with the --delayed-pickup switch.
     The file that follows this switch is located in the scheduled_jobs/ directory
     and ends in .dat
+    
+--delayed-pickup
+    Execute a job to create a RAM dump on target system that you will retrieve later.  The stored job
+    is located in the scheduled_jobs/ dir that ends in .dat
 
 --force-clean
     If previous attempt failed then clean up client
