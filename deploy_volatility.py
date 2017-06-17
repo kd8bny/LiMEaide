@@ -1,4 +1,5 @@
 import sys
+import shutil
 from subprocess import Popen
 
 
@@ -49,9 +50,12 @@ class VolDeploy(object):
              self.client.output_dir + self.map])
         print("done.")
 
-    def main(self, vol_path):
+    def main(self, vol_dir):
         """Start building a Volatility profile."""
-        if vol_path != 'None':
-            self.output_dir = vol_path
         self.get_maps()
         self.get_profile()
+
+        if vol_dir != 'None':
+            shutil.move(self.output_dir +
+                        self.client.profile['profile'], vol_dir +
+                        self.client.profile['profile'])

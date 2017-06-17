@@ -1,5 +1,3 @@
-from datetime import datetime
-
 class Client(object):
     """All client attributes including the profile.
 
@@ -15,20 +13,16 @@ class Client(object):
 
     def __init__(self):
         super(Client, self).__init__()
-# Client specifics
+        # Client specifics
         self.ip = None
         self.user = 'root'
         self.is_sudoer = False
         self.pass_ = None
-        self.jobname = None
+        self.job_name = None
 
-# Profile and options
+        # Profile and options
         self.profile = None
-        self.output = '{}.lime'.format(
-            datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f"))
+        self.output = 'dump.lime'
         self.output_dir = None
         self.compress = True
-        self.attr = []
-
-    def setJobName(jobname):
-        self.jobname = jobname
+        self.delay_pickup = False
