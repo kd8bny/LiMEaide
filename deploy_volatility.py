@@ -44,10 +44,11 @@ class VolDeploy(object):
         sp.wait()
         dwarf_file.flush()
 
-        Popen(
+        pf = Popen(
             ['zip', '-j', self.output_dir + self.client.profile['profile'],
              self.client.output_dir + self.client.profile['kver'] + '.dwarf',
              self.client.output_dir + self.map])
+        pf.wait()
         print("done.")
 
     def main(self, vol_dir):
