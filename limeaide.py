@@ -23,7 +23,7 @@ class Limeaide(object):
 
     def __init__(self):
         super(Limeaide, self).__init__()
-        self.volatility_profile_dir = '/volatility/plugins/linux/'
+        self.volatility_profile_dir = None
         self.lime_dir = './tools/LiME/src/'
         self.tools_dir = './tools/'
         self.output_dir = './output/'
@@ -73,20 +73,6 @@ class Limeaide(object):
         if not os.path.isdir(self.profile_dir):
             os.mkdir(self.profile_dir)
 
-        config_vol_dir = config['DEFAULT']['volatility']
-        if config_vol_dir is '' or not os.path.isdir(config_vol_dir):
-            path = input(
-                "Volatility directory missing. Please provide a path to " +
-                "Volatility directory. \n[q] to never ask again: ")
-            if path == 'q':
-                path = 'None'
-
-            config.set('DEFAULT', 'volatility', path)
-            with open('.limeaide', 'w') as configfile:
-                config.write(configfile)
-        else:
-            self.volatility_profile_dir = config_vol_dir + self.volatility_profile_dir
-
         if not os.path.isdir(self.lime_dir):
             if not os.path.isdir(self.tools_dir):
                 os.mkdir(self.tools_dir)
@@ -97,6 +83,22 @@ class Limeaide(object):
 
         if not os.path.isdir(self.scheduled_pickup_dir):
             os.mkdir(self.scheduled_pickup_dir)
+
+        # Check to see if a volatility directory exists
+        config_vol_dir = config['DEFAULT']['volatility']
+        if config_vol_dir is '' or not os.path.isdir(config_vol_dir):
+            path = input(
+                "Volatility directory missing. Please provide a path to " +
+                "your Volatility directory. \n[q] to never ask again: ")
+            if path == 'q':
+                path = 'None'
+
+            config.set('DEFAULT', 'volatility', path +
+                       '/volatility/plugins/linux/')
+            with open('.limeaide', 'w') as configfile:
+                config.write(configfile)
+
+        self.volatility_profile_dir = config_vol_dir
 
     @staticmethod
     def get_client(args, config):
