@@ -235,9 +235,11 @@ class Limeaide(object):
             print("Profile complete place in volatility/plugins/overlays/" +
                   "linux/ in order to use")
 
-            if args.delayed_pickup:
+            if args.delay_pickup:
                 self.save_job(client, client.jobname)
                 print("RAM dump retrieval is postponed 0_0\nLATERZ!")
+            else:
+                session.clean()
 
         else:
             session.clean()

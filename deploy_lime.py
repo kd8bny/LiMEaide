@@ -18,6 +18,8 @@ class LimeDeploy(object):
         """Send LiME to remote client. Uses percompiled module if supplied."""
         print("sending LiME to remote client")
         self.remote_session.exec_cmd('mkdir %s' % self.lime_rdir, False)
+
+        # Generate information to create a new profile
         if self.new_profile:
             for file in self.lime_src:
                 self.remote_session.put_sftp(
@@ -31,6 +33,7 @@ class LimeDeploy(object):
             print("building kernel module")
             self.remote_session.exec_cmd(
                 'cd {}; make'.format(self.lime_rdir), False)
+        # Use an old profile
         else:
             self.remote_session.put_sftp(
                 self.profiles_dir, self.lime_rdir,
@@ -80,6 +83,7 @@ class LimeDeploy(object):
             self.new_profile = True
 
         self.send_lime()
+        self.get_lime_dump()
 
         if not self.client.delay_pickup:
             self.transfer_dump()
