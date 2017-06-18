@@ -25,12 +25,10 @@ class Session(object):
 
     def _transfer_status(self, filename, bytes_so_far, bytes_total):
         percent = int(100 * bytes_so_far / bytes_total)
-        if len(self.complete_percent) < 0:
-            print('\n')
-        elif percent % 10 == 0 and percent not in self.complete_percent:
+        if percent % 10 == 0 and percent not in self.complete_percent:
             self.complete_percent.append(percent)
             print(colored("Transfer of %r is at %d/%d bytes (%.0f%%)\r".format()
-                   % (filename, bytes_so_far, bytes_total, percent), 'cyan'), end='\r')
+                   % (filename, bytes_so_far, bytes_total, percent), 'cyan'), end='\r', flush=True)
 
     def exec_cmd(self, cmd, requires_privlege):
         """Called to exec command on remote system.
@@ -82,6 +80,7 @@ class Session(object):
             is_error = True
 
         finally:
+            print('\n')
             sftp.close()
             return is_error
 
