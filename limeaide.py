@@ -154,6 +154,7 @@ class Limeaide(object):
         print(
             "Job {} pickup has been completed!".format(restored_client.output))
         saved_session.clean()
+        os.remove(jobname)
 
     def main(self):
         """Start the interactive session for LiMEaide."""
