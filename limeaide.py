@@ -154,8 +154,6 @@ class Limeaide(object):
         delayed_profiler = Profiler()
         LimeDeploy(saved_session, delayed_profiler).transfer_dump()
         VolDeploy(saved_session).main(self.volatility_profile_dir)
-        cprint("Profile generation complete run 'vol.py --info | grep Linux '" +
-               "to see your profile", 'green', atts=['blink'])
         cprint(
             "Job {} pickup has been completed!".format(
                 restored_client.output), 'green')
@@ -248,8 +246,6 @@ class Limeaide(object):
         else:
             # Now that's taken care of, lets do work
             VolDeploy(session).main(self.volatility_profile_dir)
-            cprint("Profile generation complete run 'vol.py --info | " +
-                   "grep Linux' to see your profile", 'green', attrs=['blink'])
             session.clean()
 
 

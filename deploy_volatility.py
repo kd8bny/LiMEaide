@@ -1,6 +1,7 @@
 import sys
 import shutil
 from subprocess import Popen
+from termcolor import colored, cprint
 
 
 class VolDeploy(object):
@@ -17,8 +18,8 @@ class VolDeploy(object):
 
     def get_maps(self):
         """Grab system maps from remote client."""
-        print("Attempting to grab files for volatility profile")
-        print("Obtaining System.maps")
+        cprint("Attempting to grab files for volatility profile", 'blue')
+        cprint("Obtaining System.maps", 'blue')
         self.remote_session.exec_cmd(
             "cp /boot/{0} {1}".format(self.map, self.lime_rdir), True)
         self.remote_session.exec_cmd(
@@ -27,13 +28,11 @@ class VolDeploy(object):
             self.lime_rdir, self.client.output_dir, self.map)
 
         if error:
-            sys.exit("Map not found cannot build profile")
-
-        print("done.")
+            sys.exit(colored("Map not found cannot build profile", 'red'))
 
     def get_profile(self):
         """Obtain symbols from module and zip the profile."""
-        print("Obtaining symbols")
+        cprint("Obtaining symbols", 'blue')
         dwarf_file = open(
             self.client.output_dir + self.client.profile['kver'] +
             '.dwarf', 'w+')
@@ -49,7 +48,6 @@ class VolDeploy(object):
              self.client.output_dir + self.client.profile['kver'] + '.dwarf',
              self.client.output_dir + self.map])
         pf.wait()
-        print("done.")
 
     def main(self, vol_dir):
         """Start building a Volatility profile."""
@@ -60,3 +58,5 @@ class VolDeploy(object):
             shutil.move(self.output_dir +
                         self.client.profile['profile'], vol_dir +
                         self.client.profile['profile'])
+        cprint("Profile generation complete run 'vol.py --info | " +
+                   "grep Linux' to see your profile", 'green', attrs=['blink'])

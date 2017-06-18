@@ -1,3 +1,6 @@
+from termcolor import colored, cprint
+
+
 class LimeDeploy(object):
     """Send LiME and retrieve the RAM dump from a remote client."""
 
@@ -16,7 +19,7 @@ class LimeDeploy(object):
 
     def send_lime(self):
         """Send LiME to remote client. Uses percompiled module if supplied."""
-        print("sending LiME to remote client")
+        cprint("sending LiME to remote client", 'blue')
         self.remote_session.exec_cmd('mkdir %s' % self.lime_rdir, False)
 
         # Generate information to create a new profile
@@ -30,7 +33,7 @@ class LimeDeploy(object):
             self.client.profile = self.profiler.create_profile(
                 lsb_release, uname)
 
-            print("building kernel module")
+            cprint("building kernel module", 'blue')
             self.remote_session.exec_cmd(
                 'cd {}; make'.format(self.lime_rdir), False)
         # Use an old profile
@@ -38,25 +41,24 @@ class LimeDeploy(object):
             self.remote_session.put_sftp(
                 self.profiles_dir, self.lime_rdir,
                 self.client.profile["module"])
-        print("done.")
 
     def get_lime_dump(self):
         """Will install LiME and dump RAM."""
-        print("Installing LKM and retrieving RAM")
+        cprint("Installing LKM and retrieving RAM", 'blue')
         self.remote_session.exec_cmd("mv {0}lime.ko {0}{1}".format(
             self.lime_rdir, self.client.profile["module"]), False)
         self.remote_session.exec_cmd(
             "insmod {0}{1} 'path={2}{3} format=lime dio=0'".format(
                 self.lime_rdir, self.client.profile["module"], self.lime_rdir,
                 self.client.output), True)
-        print("done.")
-        print("Changing permissions")
+
+        cprint("Changing permissions", 'blue')
         self.remote_session.exec_cmd(
             "chmod 755 {0}{1}".format(
                 self.lime_rdir, self.client.output), True)
-        print("done.")
+
         if self.client.compress:
-            print("Creating Bzip2...compressing the RAM dump")
+            cprint("Creating Bzip2...compressing the RAM dump", 'blue')
             self.remote_session.exec_cmd(
                 'tar -jv --remove-files -f {0}{1}-{2}.bz2 -c {3}{4}'.format(
                     self.lime_rdir, self.client.output, self.client.ip, self.lime_rdir,
@@ -66,7 +68,7 @@ class LimeDeploy(object):
 
     def transfer_dump(self):
         """Retrieve files from remote client."""
-        print("Beam me up Scotty")
+        cprint("Beam me up Scotty", 'blue')
         self.remote_session.pull_sftp(
             self.lime_rdir, self.client.output_dir, self.client.output)
 
@@ -74,8 +76,8 @@ class LimeDeploy(object):
             self.remote_session.pull_sftp(
                 self.lime_rdir, self.profiles_dir,
                 self.client.profile['module'])
-        print("Memory extraction is complete\n\n%s is in %s"
-              % (self.client.output, self.client.output_dir))
+        cprint("Memory extraction is complete\n\n{0} is in {1}".format(
+            self.client.output, self.client.output_dir), 'green')
 
     def main(self):
         """Begin the process of transporting LiME and dumping the RAM."""

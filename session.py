@@ -1,6 +1,7 @@
 import sys
 import functools
 import paramiko
+from termcolor import colored, cprint
 
 
 class Session(object):
@@ -24,10 +25,12 @@ class Session(object):
 
     def _transfer_status(self, filename, bytes_so_far, bytes_total):
         percent = int(100 * bytes_so_far / bytes_total)
-        if percent % 10 == 0 and percent not in self.complete_percent:
+        if len(self.complete_percent) < 0:
+            print('\n')
+        elif percent % 10 == 0 and percent not in self.complete_percent:
             self.complete_percent.append(percent)
-            print("Transfer of %r is at %d/%d bytes (%.1f%%)"
-                  % (filename, bytes_so_far, bytes_total, percent))
+            print(colored("Transfer of %r is at %d/%d bytes (%.0f%%)\r".format()
+                   % (filename, bytes_so_far, bytes_total, percent), 'cyan'), end='\r')
 
     def exec_cmd(self, cmd, requires_privlege):
         """Called to exec command on remote system.
@@ -96,7 +99,7 @@ class Session(object):
 
     def clean(self):
         """Called to remove files from remote client."""
-        print("cleaning up...")
+        cprint("cleaning up...", 'blue')
         self.exec_cmd('rm -rf /tmp/lime*', True)
-        print("Removing LKM...standby")
+        cprint("Removing LKM...standby", 'blue')
         self.exec_cmd('rmmod lime.ko', True)
