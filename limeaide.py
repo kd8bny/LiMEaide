@@ -114,11 +114,11 @@ class Limeaide(object):
         if args.delay_pickup is not None:
             client.delay_pickup
 
-        if config['DEFAULT']['output'] is '':
+        if config['DEFAULT']['output'] is not '':
             if args.output is not None:
                 client.output = args.output
 
-        if config['DEFAULT']['compress'] is '':
+        if config['DEFAULT']['compress'] is not '':
             if args.dont_compress:
                 client.compress = not client.compress
 
