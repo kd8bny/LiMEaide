@@ -7,6 +7,7 @@ import argparse
 import getpass
 import logging
 import pickle
+from termcolor import colored, cprint
 from datetime import datetime
 
 from session import Session
@@ -85,9 +86,10 @@ class Limeaide(object):
         # Check to see if a volatility directory exists
         config_vol_dir = config['DEFAULT']['volatility']
         if config_vol_dir is '' or not os.path.isdir(config_vol_dir):
-            path = input(
-                "Volatility directory missing. Please provide a path to " +
-                "your Volatility directory. \n[q] to never ask again: ")
+            ctext = colored("Volatility directory missing. Please provide a " +
+                            "path to your Volatility directory." +
+                            "\n[q] to never ask again: ", 'green')
+            path = input(ctext)
             if path == 'q':
                 path = 'None'
 
@@ -125,8 +127,8 @@ class Limeaide(object):
             if args.dont_compress:
                 client.compress = not client.compress
 
-        print("Establishing secure connection {0}@{1}".format(
-            client.user, client.ip))
+        cprint("Establishing secure connection {0}@{1}".format(
+            client.user, client.ip), 'blue')
         client.pass_ = getpass.getpass()
 
         return client
@@ -142,8 +144,8 @@ class Limeaide(object):
     def finish_saved_job(self, jobname):
         """Restore client with pickle. Transfer dump."""
         restored_client = pickle.load(open(jobname, 'rb'))
-        print("Client restored!")
-        print("Retrieving RAM dump {}".format(restored_client.output))
+        cprint("Client restored!", 'green')
+        cprint("Retrieving RAM dump {}".format(restored_client.output), 'blue')
 
         if not os.path.isdir(restored_client.output_dir):
             os.mkdir(restored_client.output_dir)
@@ -151,14 +153,18 @@ class Limeaide(object):
         saved_session = Session(restored_client)
         delayed_profiler = Profiler()
         LimeDeploy(saved_session, delayed_profiler).transfer_dump()
-        print(
-            "Job {} pickup has been completed!".format(restored_client.output))
+        VolDeploy(saved_session).main(self.volatility_profile_dir)
+        cprint("Profile generation complete run 'vol.py --info | grep Linux '" +
+               "to see your profile", 'green', atts=['blink'])
+        cprint(
+            "Job {} pickup has been completed!".format(
+                restored_client.output), 'green')
         saved_session.clean()
         os.remove(jobname)
 
     def main(self):
         """Start the interactive session for LiMEaide."""
-        print(
+        cprint(
             """\
             .---.                                                     _______
             |   |.--. __  __   ___         __.....__              .--.\  ___ `'.         __.....__
@@ -172,7 +178,7 @@ class Limeaide(object):
             '---'                        `''-...... -'   / /   | |_   \_______|/       `''-...... -'
                                                          \ \._,\ '/
                                                           `--'  `"
-             by kd8bny v{0} \n""".format(self._version))
+             by kd8bny v{0} \n""".format(self._version), 'green', attrs=['bold'])
         print(
             "LiMEaide is licensed under GPL-3.0\n"
             "LiME is licensed under GPL-2.0\n")
@@ -211,13 +217,14 @@ class Limeaide(object):
             sys.exit("Clean attempt complete")
 
         if not args.no_profiler:
-            use_profile = input(
-                "Would you like to select a pre-generated profile [Y/n]")
+            use_profile = input(colored(
+                "Would you like to select a pre-generated profile " +
+                "[Y/n]", 'green'))
             if use_profile.lower() == 'y':
                 profile = profiler.interactive_chooser()
                 if profile is None:
-                    print("No profiles found... Will build new profile" +
-                          "for remote client")
+                    cprint("No profiles found... Will build new profile" +
+                           "for remote client", 'red')
                 else:
                     client.profile = profile
 
@@ -225,26 +232,25 @@ class Limeaide(object):
             profile = profiler.select_profile(
                 args.profile[0], args.profile[1], args.profile[2])
             if profile is None:
-                new_profile = input(
+                new_profile = input(colored(
                     "No profiles found... Would you like to build a new" +
-                    "profile for the remote client [Y/n]")
+                    "profile for the remote client [Y/n]", 'red'))
                 if new_profile.lower() == 'n':
                     sys.exit()
             else:
                 client.profile = profile
 
-        if args.delay_pickup:
-            self.save_job(client, client.jobname)
-            print("RAM dump retrieval is postponed 0_0\nLATERZ!")
-        else:
-            session.clean()
-
-        # Now that's taken care of, lets do work
         LimeDeploy(session, profiler).main()
 
-        VolDeploy(session).main(self.volatility_profile_dir)
-        print("Profile generation complete run 'vol.py --info | grep Linux '" +
-            "to see your profile")
+        if args.delay_pickup:
+            self.save_job(client, client.jobname)
+            cprint("RAM dump retrieval is postponed 0_0\nLATERZ!", 'blue')
+        else:
+            # Now that's taken care of, lets do work
+            VolDeploy(session).main(self.volatility_profile_dir)
+            cprint("Profile generation complete run 'vol.py --info | " +
+                   "grep Linux' to see your profile", 'green', attrs=['blink'])
+            session.clean()
 
 
 if __name__ == '__main__':
