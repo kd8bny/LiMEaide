@@ -111,8 +111,8 @@ class Limeaide(object):
             client.user = args.user
             client.is_sudoer = True
 
-        if args.delay_pickup is not None:
-            client.delay_pickup
+        if args.delay_pickup:
+            client.delay_pickup = True
 
         if config['DEFAULT']['output'] is not '':
             if args.output is not None:
@@ -138,12 +138,11 @@ class Limeaide(object):
         print("Retrieving RAM dump {}".format(client.output))
         if not os.path.isdir(client.output_dir):
             os.mkdir(client.output_dir)
-        savedSession = Session(client, None)
+        savedSession = Session(client)
         delayedProfiler = Profiler()
-        LimeDeploy(
-            savedSession, delayedProfiler, None, client.jobname).get_lime_dump()
-        savedSession.clean()
+        LimeDeploy(savedSession, delayedProfiler).transfer_dump()
         print("Job {} pickup has been completed!".format(client.output))
+        savedSession.clean()
 
     def main(self):
         """Start the interactive session for LiMEaide."""
