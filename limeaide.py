@@ -60,8 +60,6 @@ class Limeaide(object):
         parser.add_argument("-P", "--pickup", help="Enter stored job file")
         parser.add_argument("--force-clean", action="store_true", help="Force \
             clean client after failed deployment")
-        parser.add_argument("--version", action="store_true", help="Version \
-            information")
 
         return parser.parse_args()
 
@@ -103,10 +101,15 @@ class Limeaide(object):
     @staticmethod
     def get_client(args, config):
         """Return instantiated client.
+
         Config will provide global overrides.
         """
         client = Client()
+        date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
+
         client.ip = args.remote
+        client.jobname = "{0}-{1}-worker".format(client.ip, date)
+
         if args.user is not None:
             client.user = args.user
             client.is_sudoer = True
@@ -122,27 +125,35 @@ class Limeaide(object):
             if args.dont_compress:
                 client.compress = not client.compress
 
+        print("Establishing secure connection {0}@{1}".format(
+            client.user, client.ip))
+        client.pass_ = getpass.getpass()
+
         return client
 
     def save_job(self, client, jobname):
+        """Save client with pickle.
+
+        Format will be <date>-worker.dat
+        """
         pickle.dump(client, open(("{0}{1}.dat".format(
             self.scheduled_pickup_dir, jobname)), 'wb'))
 
-    def get_saved_job(self, stored_client):
-        restored_client = pickle.load(open(stored_client, 'rb'))
+    def finish_saved_job(self, jobname):
+        """Restore client with pickle. Transfer dump."""
+        restored_client = pickle.load(open(jobname, 'rb'))
         print("Client restored!")
+        print("Retrieving RAM dump {}".format(restored_client.output))
 
-        return restored_client
+        if not os.path.isdir(restored_client.output_dir):
+            os.mkdir(restored_client.output_dir)
 
-    def finish_saved_job(self, client):
-        print("Retrieving RAM dump {}".format(client.output))
-        if not os.path.isdir(client.output_dir):
-            os.mkdir(client.output_dir)
-        savedSession = Session(client)
-        delayedProfiler = Profiler()
-        LimeDeploy(savedSession, delayedProfiler).transfer_dump()
-        print("Job {} pickup has been completed!".format(client.output))
-        savedSession.clean()
+        saved_session = Session(restored_client)
+        delayed_profiler = Profiler()
+        LimeDeploy(saved_session, delayed_profiler).transfer_dump()
+        print(
+            "Job {} pickup has been completed!".format(restored_client.output))
+        saved_session.clean()
 
     def main(self):
         """Start the interactive session for LiMEaide."""
@@ -165,13 +176,13 @@ class Limeaide(object):
             "LiMEaide is licensed under GPL-3.0\n"
             "LiME is licensed under GPL-2.0\n")
 
-        date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
-
         args = self.get_args()
         config = configparser.ConfigParser()
         config.read('.limeaide')
+
         self.check_tools(config)
         client = self.get_client(args, config)
+        date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
 
         # Set up logging files
         info_log_file = '{0}{1}-info-limeaide.log'.format(self.log_dir, date)
@@ -180,69 +191,59 @@ class Limeaide(object):
         logging.basicConfig(filename=debug_log_file, level=logging.DEBUG)
 
         if args.pickup:
-            job = self.get_saved_job(args.pickup)
-            self.finish_saved_job(job)
+            self.finish_saved_job(args.pickup)
             sys.exit("goodbye")
 
         if args.case is not None:
             self.args_case = 'case_%s' % (args.case)
 
-        if args.version:
-            sys.exit(self._version)
-
-        print("Attempting secure connection {0}@{1}".format(
-            client.user, client.ip))
-        client.pass_ = getpass.getpass()
-
-        client.jobname = "{0}-{1}-worker".format(client.ip, date)
-
+        # Start session
         session = Session(client)
         profiler = Profiler()
+        profiler.main()
+        client.output_dir = "{0}{1}{2}/".format(
+            self.output_dir, self.args_case, date)
+        os.mkdir(client.output_dir)
 
-        if not args.force_clean:
-            profiler.main()
-            client.output_dir = "{0}{1}{2}/".format(
-                self.output_dir, self.args_case, date)
-            os.mkdir(client.output_dir)
+        if args.force_clean:
+            session.clean()
+            sys.exit("Clean attempt complete")
 
-            if not args.no_profiler:
-                use_profile = input(
-                    "Would you like to select a pre-generated profile [Y/n]")
-                if use_profile.lower() == 'y':
-                    profile = profiler.interactive_chooser()
-                    if profile is None:
-                        print("No profiles found... Will build new profile" +
-                              "for remote client")
-                    else:
-                        client.profile = profile
-
-            elif args.module is not None:
-                profile = profiler.select_profile(
-                    args.profile[0], args.profile[1], args.profile[2])
+        if not args.no_profiler:
+            use_profile = input(
+                "Would you like to select a pre-generated profile [Y/n]")
+            if use_profile.lower() == 'y':
+                profile = profiler.interactive_chooser()
                 if profile is None:
-                    new_profile = input(
-                        "No profiles found... Would you like to build a new" +
-                        "profile for the remote client [Y/n]")
-                    if new_profile.lower() == 'n':
-                        sys.exit()
+                    print("No profiles found... Will build new profile" +
+                          "for remote client")
                 else:
                     client.profile = profile
 
-            LimeDeploy(session, profiler).main()
-
-            VolDeploy(session).main(self.volatility_profile_dir)
-            print("Profile complete place in volatility/plugins/overlays/" +
-                  "linux/ in order to use")
-
-            if args.delay_pickup:
-                self.save_job(client, client.jobname)
-                print("RAM dump retrieval is postponed 0_0\nLATERZ!")
+        elif args.module is not None:
+            profile = profiler.select_profile(
+                args.profile[0], args.profile[1], args.profile[2])
+            if profile is None:
+                new_profile = input(
+                    "No profiles found... Would you like to build a new" +
+                    "profile for the remote client [Y/n]")
+                if new_profile.lower() == 'n':
+                    sys.exit()
             else:
-                session.clean()
+                client.profile = profile
 
+        if args.delay_pickup:
+            self.save_job(client, client.jobname)
+            print("RAM dump retrieval is postponed 0_0\nLATERZ!")
         else:
             session.clean()
-            sys.exit("Clean attempt complete")
+
+        # Now that's taken care of, lets do work
+        LimeDeploy(session, profiler).main()
+
+        VolDeploy(session).main(self.volatility_profile_dir)
+        print("Profile generation complete run 'vol.py --info | grep Linux '" +
+            "to see your profile")
 
 
 if __name__ == '__main__':
