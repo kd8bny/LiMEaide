@@ -91,3 +91,8 @@ ENV/
 # dirs
 tools/
 output/
+profiles/
+scheduled_jobs/
+
+# project configs
+!/.limeaide
