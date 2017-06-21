@@ -40,7 +40,7 @@ limeaide.py [OPTIONS] REMOTE_IP
     Pick up a job you previously ran with the --delayed-pickup switch.
     The file that follows this switch is located in the scheduled_jobs/ directory
     and ends in .dat
-    
+
 --delayed-pickup
     Execute a job to create a RAM dump on target system that you will retrieve later.  The stored job
     is located in the scheduled_jobs/ dir that ends in .dat
@@ -65,13 +65,14 @@ sudo yum install python3-paramiko
 In order to use LiME you must download and move the source into the **LiMEaide/tools** directory. Make sure the the LiME folder is named **LiME**. The full path should be as follows:
 NOTE: If you would like to build Volatility profiles, you must use my forked version of LiME. This provides debugging symbols used by dwarfdump.
 ```
-LiMEaide/tools/LiME
+LiMEaide/tools/LiME/
 ```
-- How to...
-```
-cd tools
-git clone https://github.com/kd8bny/LiME.git
-```
+How to...
+
+ 1. Download [LiME v1.7.8](https://github.com/kd8bny/LiME/archive/v1.7.8.zip)
+ 2. Extract into `LiMEaide/tools/`
+ 3. Rename folder to `LiME`
+
 #### dwarfdump
 In order to build a volatility profile we need to be able to read the debugging symbols in the LKM. For this we need to install dwarfdump.
 If you encounter any issues finding/installing dwarfdump see the volatility page [here](https://github.com/volatilityfoundation/volatility/wiki/Linux#creating-a-new-profile)
