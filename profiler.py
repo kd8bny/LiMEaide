@@ -1,3 +1,6 @@
+import os
+import fnmatch
+import contextlib
 import json
 
 
@@ -10,6 +13,38 @@ class Profiler(object):
         self.profiles_dir = './profiles/'
         self.manifest = 'manifest.json'
 
+    def _clean_manifest(self):
+        """Determine if profile need to be cleaned.
+
+        Returns bool notifying the need to reload profiles.
+        """
+        os.chdir(self.profiles_dir)
+        num_profiles = len(fnmatch.filter(
+            os.listdir(), 'lime-*.ko'))
+
+        if num_profiles != len(self.profiles):
+            print("Cleaning profile manifest")
+            existing_profiles = []
+            for profile in self.profiles:
+                if profile in existing_profiles:
+                    print("cont" + str(profile))
+                    continue
+                elif ((os.path.isfile(profile['module'])) and
+                        (os.path.isfile(profile['profile']))):
+                    existing_profiles.append(profile)
+                    print(existing_profiles)
+                else:
+                    with contextlib.suppress(FileNotFoundError):
+                        os.remove(profile['module'])
+                        os.remove(profile['profile'])
+
+            self.profiles = existing_profiles
+            json.dump(self.profiles, open(self.manifest, 'w'))
+
+            return True
+
+        return False
+
     def load_profiles(self):
         """Load dict from JSON manifest."""
         try:
@@ -17,6 +52,10 @@ class Profiler(object):
                 open(self.profiles_dir + self.manifest, 'r'))
         except FileNotFoundError as e:
             print(e)
+
+        reload_profiles = self._clean_manifest()
+        if reload_profiles:
+            self.load_profiles()
 
     def create_profile(self, lsb_release, uname):
         """Create a new profile a save to manifest.
@@ -33,10 +72,10 @@ class Profiler(object):
         profile = {
             "distro": distro,
             "kver": kver,
-            "arch": arch,   #change order of kver & distro, add arch after test
+            "arch": arch,
             "module": "lime-{0}-{1}-{2}.ko".format(kver, distro, arch),
-            "profile": "vol-{0}-{1}-{2}.zip".format(distro, kver, arch)
-            }
+            "profile": "vol-{0}-{1}-{2}.zip".format(distro, kver, arch)}
+
         self.profiles.append(profile)
         json.dump(self.profiles, open(self.profiles_dir + self.manifest, 'w'))
 
@@ -67,11 +106,9 @@ class Profiler(object):
         num_profiles = len(self.profiles)
         if num_profiles > 0:
             for profile in self.profiles:
-                if profile['distro'] is distro and profile['kver'] is kver and profile['arch'] is arch:
-                    return profile
+                if profile['distro'] is distro:
+                    if profile['kver'] is kver:
+                        if profile['arch'] is arch:
+                            return profile
 
-            return None
-
-    def main(self):
-        """Load profiles from manifest."""
-        self.load_profiles()
+        return None

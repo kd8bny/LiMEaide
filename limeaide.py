@@ -176,7 +176,8 @@ class Limeaide(object):
             '---'                        `''-...... -'   / /   | |_   \_______|/       `''-...... -'
                                                          \ \._,\ '/
                                                           `--'  `"
-             by kd8bny v{0} \n""".format(self._version), 'green', attrs=['bold'])
+             by kd8bny v{0}\n""".format(
+                self._version), 'green', attrs=['bold'])
         print(
             "LiMEaide is licensed under GPL-3.0\n"
             "LiME is licensed under GPL-2.0\n")
@@ -186,6 +187,8 @@ class Limeaide(object):
         config.read('.limeaide')
 
         self.check_tools(config)
+        profiler = Profiler()
+        profiler.load_profiles()
         client = self.get_client(args, config)
         date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
 
@@ -204,8 +207,6 @@ class Limeaide(object):
 
         # Start session
         session = Session(client)
-        profiler = Profiler()
-        profiler.main()
         client.output_dir = "{0}{1}{2}/".format(
             self.output_dir, self.args_case, date)
         os.mkdir(client.output_dir)
