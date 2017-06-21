@@ -10,10 +10,8 @@ class Session(object):
     def __init__(self, client):
         super(Session, self).__init__()
         self.client_ = client
-        self.session = paramiko.SSHClient()
-        self.session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        self.session.connect(
-            client.ip, username=client.user, password=client.pass_)
+        self.session = None
+
         self.complete_percent = []
 
     @staticmethod
@@ -27,8 +25,21 @@ class Session(object):
         percent = int(100 * bytes_so_far / bytes_total)
         if percent % 10 == 0 and percent not in self.complete_percent:
             self.complete_percent.append(percent)
-            print(colored("Transfer of %r is at %d/%d bytes (%.0f%%)\r".format()
+            print(
+                colored("Transfer of %r is at %d/%d bytes (%.0f%%)\r"
                    % (filename, bytes_so_far, bytes_total, percent), 'cyan'), end='\r', flush=True)
+
+    def connect(self):
+        """Call to set connection with remote client."""
+        try:
+            self.session = paramiko.SSHClient()
+            self.session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            self.session.connect(
+                self.client_.ip, username=self.client_.user,
+                password=self.client_.pass_)
+        except paramiko.AuthenticationException as e:
+            print(colored("{}".format(e), 'red'))
+            sys.exit()
 
     def exec_cmd(self, cmd, requires_privlege):
         """Called to exec command on remote system.

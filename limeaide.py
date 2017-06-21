@@ -207,6 +207,7 @@ class Limeaide(object):
 
         # Start session
         session = Session(client)
+        session.connect()
         client.output_dir = "{0}{1}{2}/".format(
             self.output_dir, self.args_case, date)
         os.mkdir(client.output_dir)
