@@ -72,7 +72,7 @@ class Profiler(object):
             "distro": distro,
             "kver": kver,
             "arch": arch,
-            "module": "lime-{0}-{1}-{2}.ko".format(kver, distro, arch),
+            "module": "lime-{0}-{1}-{2}.ko".format(distro, kver, arch),
             "profile": "vol-{0}-{1}-{2}.zip".format(distro, kver, arch)}
 
         self.profiles.append(profile)
