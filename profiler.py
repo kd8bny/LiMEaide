@@ -29,7 +29,7 @@ class Profiler(object):
                     continue
 
                 elif ((os.path.isfile(self.profiles_dir + profile['module'])) and
-                        (os.path.isfile(self.profiles_dir + profile['profile']))):
+                      (os.path.isfile(self.profiles_dir + profile['profile']))):
                     existing_profiles.append(profile)
                 else:
                     with contextlib.suppress(FileNotFoundError):
@@ -53,8 +53,8 @@ class Profiler(object):
             print(e)
 
         reload_profiles = self._clean_manifest()
-        #if reload_profiles:
-        #    self.load_profiles()
+        if reload_profiles:
+            self.load_profiles()
 
     def create_profile(self, lsb_release, uname):
         """Create a new profile a save to manifest.
