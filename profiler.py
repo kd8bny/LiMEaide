@@ -18,28 +18,27 @@ class Profiler(object):
 
         Returns bool notifying the need to reload profiles.
         """
-        os.chdir(self.profiles_dir)
         num_profiles = len(fnmatch.filter(
-            os.listdir(), 'lime-*.ko'))
+            os.listdir(self.profiles_dir), 'lime-*.ko'))
 
         if num_profiles != len(self.profiles):
             print("Cleaning profile manifest")
             existing_profiles = []
             for profile in self.profiles:
                 if profile in existing_profiles:
-                    print("cont" + str(profile))
                     continue
-                elif ((os.path.isfile(profile['module'])) and
-                        (os.path.isfile(profile['profile']))):
+
+                elif ((os.path.isfile(self.profiles_dir + profile['module'])) and
+                        (os.path.isfile(self.profiles_dir + profile['profile']))):
                     existing_profiles.append(profile)
-                    print(existing_profiles)
                 else:
                     with contextlib.suppress(FileNotFoundError):
-                        os.remove(profile['module'])
-                        os.remove(profile['profile'])
+                        os.remove(self.profiles_dir + profile['module'])
+                        os.remove(self.profiles_dir + profile['profile'])
 
             self.profiles = existing_profiles
-            json.dump(self.profiles, open(self.manifest, 'w'))
+            json.dump(
+                self.profiles, open(self.profiles_dir + self.manifest, 'w'))
 
             return True
 
@@ -54,8 +53,8 @@ class Profiler(object):
             print(e)
 
         reload_profiles = self._clean_manifest()
-        if reload_profiles:
-            self.load_profiles()
+        #if reload_profiles:
+        #    self.load_profiles()
 
     def create_profile(self, lsb_release, uname):
         """Create a new profile a save to manifest.
