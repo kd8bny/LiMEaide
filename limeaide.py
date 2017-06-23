@@ -20,7 +20,7 @@ from profiler import Profiler
 class Limeaide(object):
     """Deploy LiME LKM to remote host in order to scrape RAM."""
 
-    _version = "v1.3.0-beta_1"
+    _version = "v1.3.0-beta_2"
 
     def __init__(self):
         super(Limeaide, self).__init__()
