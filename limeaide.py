@@ -7,8 +7,8 @@ import argparse
 import getpass
 import logging
 import pickle
-from termcolor import colored, cprint
 from datetime import datetime
+from termcolor import colored, cprint
 
 from session import Session
 from client import Client
@@ -85,7 +85,7 @@ class Limeaide(object):
 
         # Check to see if a volatility directory exists
         config_vol_dir = config['DEFAULT']['volatility']
-        if config_vol_dir is '' or not os.path.isdir(config_vol_dir):
+        if not config_vol_dir or not os.path.isdir(config_vol_dir):
             ctext = colored("Volatility directory missing. Please provide a " +
                             "path to your Volatility directory." +
                             "\n[q] to never ask again: ", 'green')
@@ -119,11 +119,12 @@ class Limeaide(object):
         if args.delay_pickup:
             client.delay_pickup = True
 
-        if config['DEFAULT']['output'] is not '':
+        if not config['DEFAULT']['output']:
             if args.output is not None:
                 client.output = args.output
-
-        if config['DEFAULT']['compress'] is not '':
+        print(config['DEFAULT']['compress'])
+        if not config['DEFAULT']['compress']:
+            print(config['DEFAULT']['compress'])
             if args.dont_compress:
                 client.compress = not client.compress
 
@@ -177,7 +178,7 @@ class Limeaide(object):
                                                          \ \._,\ '/
                                                           `--'  `"
              by kd8bny v{0}\n""".format(
-                self._version), 'green', attrs=['bold'])
+                 self._version), 'green', attrs=['bold'])
         print(
             "LiMEaide is licensed under GPL-3.0\n"
             "LiME is licensed under GPL-2.0\n")
@@ -216,19 +217,7 @@ class Limeaide(object):
             session.clean()
             sys.exit("Clean attempt complete")
 
-        if not args.no_profiler:
-            use_profile = input(colored(
-                "Would you like to select a pre-generated profile " +
-                "[Y/n]", 'green'))
-            if use_profile.lower() == 'y':
-                profile = profiler.interactive_chooser()
-                if profile is None:
-                    cprint("No profiles found... Will build new profile" +
-                           "for remote client", 'red')
-                else:
-                    client.profile = profile
-
-        elif args.module is not None:
+        if args.profile is not None:
             profile = profiler.select_profile(
                 args.profile[0], args.profile[1], args.profile[2])
             if profile is None:
@@ -239,6 +228,19 @@ class Limeaide(object):
                     sys.exit()
             else:
                 client.profile = profile
+                cprint("Profile found!", 'green')
+
+        elif not args.no_profiler:
+            use_profile = input(colored(
+                "Would you like to select a pre-generated profile " +
+                "[Y/n]", 'green'))
+            if use_profile.lower() == 'y':
+                profile = profiler.interactive_chooser()
+                if profile is None:
+                    cprint("No profiles found... Will build new profile" +
+                           "for remote client", 'red')
+                else:
+                    client.profile = profile
 
         LimeDeploy(session, profiler).main()
 
