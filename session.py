@@ -85,15 +85,14 @@ class Session(object):
             sftp.get(filename, ldir + filename, callback=status)
 
         except IOError as e:
-            print(sftp.listdirs())
-            print(rdir)
-            print(filename)
+            print(e)
             is_error = True
 
         finally:
             print('\n')
             sftp.close()
-            return is_error
+
+        return is_error
 
     def put_sftp(self, ldir, rdir, filename):
         """Called when data is to be sent to remote system.

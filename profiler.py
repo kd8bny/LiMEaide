@@ -72,7 +72,7 @@ class Profiler(object):
             "distro": distro,
             "kver": kver,
             "arch": arch,
-            "module": "lime-{0}-{1}-{2}.ko".format(kver, distro, arch),
+            "module": "lime-{0}-{1}-{2}.ko".format(distro, kver, arch),
             "profile": "vol-{0}-{1}-{2}.zip".format(distro, kver, arch)}
 
         self.profiles.append(profile)
@@ -81,7 +81,10 @@ class Profiler(object):
         return profile
 
     def interactive_chooser(self):
-        """Interactive CLI mode for choosing pre-compiled modules."""
+        """Interactive CLI mode for choosing pre-compiled modules.
+
+        :return None to exit, otherwise it returns a json profile
+        """
         num_profiles = len(self.profiles)
         if num_profiles > 0:
             while True:
@@ -90,13 +93,15 @@ class Profiler(object):
                         "%i) %s, %s, %s\t" %
                         (i, profile['distro'], profile['kver'],
                          profile['arch']))
+
                 profile_val = int(input(
                     "Please select a profile. " +
                     "Enter [{}] to exit: ".format(num_profiles)))
+
                 if profile_val == num_profiles:
                     return None
                 elif profile_val > 1 or profile_val < num_profiles:
-                    return profile
+                    return self.profiles[profile_val]
                 else:
                     print("Please select a correct value and try agin")
 
@@ -105,9 +110,9 @@ class Profiler(object):
         num_profiles = len(self.profiles)
         if num_profiles > 0:
             for profile in self.profiles:
-                if profile['distro'] is distro:
-                    if profile['kver'] is kver:
-                        if profile['arch'] is arch:
+                if profile['distro'] == distro:
+                    if profile['kver'] == kver:
+                        if profile['arch'] == arch:
                             return profile
 
         return None
