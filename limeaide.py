@@ -122,7 +122,7 @@ class Limeaide(object):
         if not config['DEFAULT']['output']:
             if args.output is not None:
                 client.output = args.output
-        print(config['DEFAULT']['compress'])
+
         if not config['DEFAULT']['compress']:
             print(config['DEFAULT']['compress'])
             if args.dont_compress:

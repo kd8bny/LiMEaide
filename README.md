@@ -18,32 +18,32 @@ limeaide.py [OPTIONS] REMOTE_IP
 -h, --help
     Shows the help dialog
 
--N, --no-profiler
-    Do NOT run profiler and force creation new module/profile for client.
+-u, --user : <user>
+    Execute memory grab as sudo user. This is useful when root privileges are not granted.
 
--s, --sudoer
-    Execute memory grab as sudoer. This is useful when root privileges are not granted.
-
--p, --profile
+-p, --profile : <distro> <kernel version> <arch>
     Skip the profiler by providing the distribution, kernel version, and architecture of the remote client.
 
--o, --output
-    Change name of output file. Default is dump.bin
-
--c, --case
-    Append case number to front of output directory.
+-N, --no-profiler
+    Do NOT run profiler and force the creation of a new module/profile for the client.
 
 -C, --dont-compress
     Do not compress memory file. By default memory is compressed on host. If you experience issues, toggle this flag. In my tests I see a ~60% reduction in file size
 
--p, --pickup
+--delay-pickup
+    Execute a job to create a RAM dump on target system that you will retrieve later.  The stored job
+    is located in the scheduled_jobs/ dir that ends in .dat
+
+-P, --pickup <path to job file .dat>
     Pick up a job you previously ran with the --delayed-pickup switch.
     The file that follows this switch is located in the scheduled_jobs/ directory
     and ends in .dat
 
---delayed-pickup
-    Execute a job to create a RAM dump on target system that you will retrieve later.  The stored job
-    is located in the scheduled_jobs/ dir that ends in .dat
+-o, --output : <name>
+    Change name of output file. Default is dump.bin
+
+-c, --case : <case num>
+    Append case number to front of output directory.
 
 --force-clean
     If previous attempt failed then clean up client
@@ -51,15 +51,19 @@ limeaide.py [OPTIONS] REMOTE_IP
 
 ## Set-up
 ### Dependencies
-#### python3-paramiko
+#### python
 - DEB base
 ```
-sudo apt-get install python3-paramiko
+sudo apt-get install python3-paramiko python3-termcolor
 ```
 
 - RPM base
 ```
-sudo yum install python3-paramiko
+sudo yum install python3-paramiko python3-termcolor
+```
+- pip3
+```
+sudo pip3 install paramiko termcolor
 ```
 #### LiME
 In order to use LiME you must download and move the source into the **LiMEaide/tools** directory. Make sure the the LiME folder is named **LiME**. The full path should be as follows:
