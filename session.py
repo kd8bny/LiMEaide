@@ -74,8 +74,6 @@ class Session(object):
         :param local_dir ppath to output dir on local machine
         :param filename file to transfer
         """
-        if remote_dir:
-            self.SFTP.chdir(remote_dir)
 
         self.complete_percent = []
         if self.get_file_stat(remote_dir, filename):
@@ -92,10 +90,7 @@ class Session(object):
         :param local_dir ppath to output dir on local machine
         :param filename file to transfer
         """
-        if remote_dir:
-            self.SFTP.chdir(remote_dir)
-
-        self.SFTP.put(local_dir + filename, filename)
+        self.SFTP.put(local_dir + filename, remote_dir + filename)
 
     def get_file_stat(self, remote_dir, filename):
         """Check to see if remote file exists and size is greater than 0.
@@ -105,9 +100,6 @@ class Session(object):
         :return If the file exists
         """
         file_exists = False
-
-        if remote_dir:
-            self.SFTP.chdir(remote_dir)
 
         try:
             attributes = self.SFTP.stat(filename)
@@ -122,7 +114,7 @@ class Session(object):
     def disconnect(self):
         """Call to end session and remove files from remote client."""
         cprint("cleaning up...", 'blue')
-        self.session.rmdir('/tmp/lime/')
+        self.exec_cmd('rm -rf ./.limeaide/', True)
 
         cprint("Removing LKM...standby", 'blue')
         self.exec_cmd('rmmod lime.ko', True)

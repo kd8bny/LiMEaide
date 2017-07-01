@@ -11,7 +11,7 @@ class LimeDeploy(object):
         self.profiler = profiler
 
         self.lime_dir = './tools/LiME/src/'
-        self.lime_rdir = '/tmp/lime/'
+        self.lime_rdir = './.limeaide/'
         self.lime_src = ['disk.c', 'lime.h', 'main.c', 'Makefile']
         self.profiles_dir = './profiles/'
 
