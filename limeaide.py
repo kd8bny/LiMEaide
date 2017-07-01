@@ -124,7 +124,6 @@ class Limeaide(object):
                 client.output = args.output
 
         if not config['DEFAULT']['compress']:
-            print(config['DEFAULT']['compress'])
             if args.dont_compress:
                 client.compress = not client.compress
 
@@ -214,7 +213,7 @@ class Limeaide(object):
         os.mkdir(client.output_dir)
 
         if args.force_clean:
-            session.clean()
+            session.disconnect()
             sys.exit("Clean attempt complete")
 
         if args.profile is not None:
@@ -250,7 +249,7 @@ class Limeaide(object):
         else:
             # Now that's taken care of, lets do work
             VolDeploy(session).main(self.volatility_profile_dir)
-            session.clean()
+            session.disconnect()
 
 
 if __name__ == '__main__':
