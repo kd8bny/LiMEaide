@@ -102,7 +102,7 @@ class Session(object):
         file_exists = False
 
         try:
-            attributes = self.SFTP.stat(filename)
+            attributes = self.SFTP.stat(remote_dir + filename)
             if attributes.st_size > 0:
                 file_exists = True
 
