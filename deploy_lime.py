@@ -11,7 +11,7 @@ class LimeDeploy(object):
         self.profiler = profiler
 
         self.lime_dir = './tools/LiME/src/'
-        self.lime_rdir = '/tmp/lime/'
+        self.lime_rdir = './.limeaide/'
         self.lime_src = ['disk.c', 'lime.h', 'main.c', 'Makefile']
         self.profiles_dir = './profiles/'
 
@@ -28,10 +28,8 @@ class LimeDeploy(object):
                 self.remote_session.put_sftp(
                     self.lime_dir, self.lime_rdir, file)
 
-            lsb_release = self.remote_session.exec_cmd('lsb_release -a', False)
-            uname = self.remote_session.exec_cmd('uname -rm', False)
             self.client.profile = self.profiler.create_profile(
-                lsb_release, uname)
+                self.remote_session)
 
             cprint("building kernel module", 'blue')
             self.remote_session.exec_cmd(

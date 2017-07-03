@@ -2,6 +2,7 @@ import os
 import fnmatch
 import contextlib
 import json
+from termcolor import colored, cprint
 
 
 class Profiler(object):
@@ -56,17 +57,45 @@ class Profiler(object):
         if reload_profiles:
             self.load_profiles()
 
-    def create_profile(self, lsb_release, uname):
+    def create_profile(self, remote_session):
         """Create a new profile a save to manifest.
 
         Look through the output of uname and lsb_release to determine
         versions.
         """
         distro, kver, arch = '', '', ''
+        if remote_session.get_file_stat('/etc/', 'os-release'):
+            lsb_release = remote_session.exec_cmd(
+                "cat /etc/{}".format('os-release'), False)
+
+            d_id = list(filter(lambda val: 'ID=' in val, lsb_release))
+            d_id = d_id[0].split('=')
+            distro = d_id[1].lower()
+
+        if not distro:
+            releases = remote_session.exec_cmd("cd /etc/; ls *-release", False)
+            releases = releases[0].split()
+            if len(releases) >= 1:
+                if 'lsb-release' in releases:
+                    lsb_release = remote_session.exec_cmd(
+                        "cat /etc/{}".format('lsb-release'), False)
+
+                    d_id = list(filter(lambda val: 'DISTRIB_ID' in val, lsb_release))
+                    d_id = d_id[0].split('=')
+                    distro = d_id[1].lower()
+
+                else:
+                    gen_release = remote_session.exec_cmd(
+                        "cat /etc/{}".format(releases[0]), False)
+                    distro = gen_release[0][:10]
+
+        if not distro:
+            distro = input(colored("Cannot determine distribution. Please " +
+                                   "enter distribution name: ", 'red'))
+
+        uname = remote_session.exec_cmd('uname -rm', False)
         kver, arch = uname[0].split()
-        for info in lsb_release:
-            if "Distributor" in info:
-                distro = info[16:].lower()
+
 
         profile = {
             "distro": distro,
