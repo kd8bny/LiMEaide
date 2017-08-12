@@ -20,7 +20,8 @@ from profiler import Profiler
 class Limeaide(object):
     """Deploy LiME LKM to remote host in order to scrape RAM."""
 
-    _version = "1.3.0-alpha"
+    __version__ = "1.3.0-alpha"
+    __author__ = "kd8bny@gmail.com"
 
     def __init__(self):
         super(Limeaide, self).__init__()
@@ -86,15 +87,18 @@ class Limeaide(object):
         # Check to see if a volatility directory exists
         config_vol_dir = config['DEFAULT']['volatility']
         if not config_vol_dir or not os.path.isdir(config_vol_dir):
-            ctext = colored("Volatility directory missing. Please provide a " +
-                            "path to your Volatility directory." +
-                            "\n[q] to never ask again: ", 'green')
-            path = input(ctext)
+            cprint(
+                "Volatility directory missing. Current direcotry is:", 'red')
+            cprint("{}".format(config_vol_dir), 'blue')
+            cprint("Please provide a path to your Volatility directory." +
+                   "\ne.g. '~/volatility/'" +
+                   "\n[q] to never ask again: ", 'green')
+            path = input(":")
             if path == 'q':
                 path = 'None'
 
             config.set('DEFAULT', 'volatility', path +
-                       '/volatility/plugins/linux/')
+                       '/volatility/plugins/overlays/linux/')
             with open('.limeaide', 'w') as configfile:
                 config.write(configfile)
 
@@ -157,7 +161,7 @@ class Limeaide(object):
         cprint(
             "Job {} pickup has been completed!".format(
                 restored_client.output), 'green')
-        saved_session.clean()
+        saved_session.disconnect()
         os.remove(jobname)
 
     def main(self):
@@ -177,7 +181,7 @@ class Limeaide(object):
                                                          \ \._,\ '/
                                                           `--'  `"
              by kd8bny v{0}\n""".format(
-                 self._version), 'green', attrs=['bold'])
+                 self.__version__), 'green', attrs=['bold'])
         print(
             "LiMEaide is licensed under GPL-3.0\n"
             "LiME is licensed under GPL-2.0\n")
