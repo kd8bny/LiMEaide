@@ -10,17 +10,18 @@ import pickle
 from datetime import datetime
 from termcolor import colored, cprint
 
-from session import Session
-from client import Client
-from deploy_lime import LimeDeploy
-from deploy_volatility import VolDeploy
-from profiler import Profiler
+from lib.session import Session
+from lib.client import Client
+from lib.deploy_lime import LimeDeploy
+from lib.deploy_volatility import VolDeploy
+from lib.profiler import Profiler
 
 
 class Limeaide(object):
     """Deploy LiME LKM to remote host in order to scrape RAM."""
 
-    _version = "v1.3.0-beta_3"
+    __version__ = "v1.3.0-beta_4"
+    __author__ = "kd8bny@gmail.com"
 
     def __init__(self):
         super(Limeaide, self).__init__()
@@ -86,15 +87,18 @@ class Limeaide(object):
         # Check to see if a volatility directory exists
         config_vol_dir = config['DEFAULT']['volatility']
         if not config_vol_dir or not os.path.isdir(config_vol_dir):
-            ctext = colored("Volatility directory missing. Please provide a " +
-                            "path to your Volatility directory." +
-                            "\n[q] to never ask again: ", 'green')
-            path = input(ctext)
+            cprint(
+                "Volatility directory missing. Current direcotry is:", 'red')
+            cprint("{}".format(config_vol_dir), 'blue')
+            cprint("Please provide a path to your Volatility directory." +
+                   "\ne.g. '~/volatility/'" +
+                   "\n[q] to never ask again: ", 'green')
+            path = input(":")
             if path == 'q':
                 path = 'None'
 
             config.set('DEFAULT', 'volatility', path +
-                       '/volatility/plugins/linux/')
+                       '/volatility/plugins/overlays/linux/')
             with open('.limeaide', 'w') as configfile:
                 config.write(configfile)
 
@@ -157,7 +161,7 @@ class Limeaide(object):
         cprint(
             "Job {} pickup has been completed!".format(
                 restored_client.output), 'green')
-        saved_session.clean()
+        saved_session.disconnect()
         os.remove(jobname)
 
     def main(self):
@@ -177,7 +181,7 @@ class Limeaide(object):
                                                          \ \._,\ '/
                                                           `--'  `"
              by kd8bny v{0}\n""".format(
-                 self._version), 'green', attrs=['bold'])
+                 self.__version__), 'green', attrs=['bold'])
         print(
             "LiMEaide is licensed under GPL-3.0\n"
             "LiME is licensed under GPL-2.0\n")

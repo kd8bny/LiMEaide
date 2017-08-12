@@ -1,5 +1,6 @@
 # LiMEaide
-## v1.3.0-beta_3
+## v1.3.0-beta_4
+
 ## About
 LiMEaide is a python application designed to remotely dump RAM of a Linux client and create a volatility profile for later analysis on your local host. I hope that this will simplify Linux digital forensics in a remote environment. In order to use LiMEaide all you need to do is feed a remote Linux client IP address, sit back, and consume your favorite caffeinated beverage.
 
@@ -11,6 +12,7 @@ python3 limeaide.py <IP>
 and magic happens.
 
 For more detailed usage checkout the [wiki](https://github.com/kd8bny/LiMEaide/wiki)
+For editing the configuration file see [here]()
 
 ### Detailed usage
 ```
@@ -93,7 +95,7 @@ sudo yum install libdwarf-tools
 
 ## Special Thanks and Notes
 * The idea for this application was built upon the concept dreamed up by and the [Linux Memory Grabber](https://github.com/halpomeranz/lmg) project
-* And of course none of this could be possible without the the amazing [LiME](https://github.com/504ensicsLabs/LiME) project
+* And of course none of this could be possible without the amazing [LiME](https://github.com/504ensicsLabs/LiME) project
 
 ## Limits at this time
 - Support on for bash. Use other shells at your own risk

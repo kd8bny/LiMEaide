@@ -1,4 +1,5 @@
 import os
+import re
 import fnmatch
 import contextlib
 import json
@@ -29,8 +30,10 @@ class Profiler(object):
                 if profile in existing_profiles:
                     continue
 
-                elif ((os.path.isfile(self.profiles_dir + profile['module'])) and
-                      (os.path.isfile(self.profiles_dir + profile['profile']))):
+                elif ((os.path.isfile(
+                        self.profiles_dir + profile['module'])) and
+                      (os.path.isfile(
+                          self.profiles_dir + profile['profile']))):
                     existing_profiles.append(profile)
                 else:
                     with contextlib.suppress(FileNotFoundError):
@@ -65,12 +68,14 @@ class Profiler(object):
         """
         distro, kver, arch = '', '', ''
         if remote_session.get_file_stat('/etc/', 'os-release'):
-            lsb_release = remote_session.exec_cmd(
+            os_release = remote_session.exec_cmd(
                 "cat /etc/{}".format('os-release'), False)
 
-            d_id = list(filter(lambda val: 'ID=' in val, lsb_release))
-            d_id = d_id[0].split('=')
-            distro = d_id[1].lower()
+            d_id = list(filter(lambda val: 'ID=' in val, os_release))
+            d_id = d_id[len(d_id) - 1].split('=')
+            d_version = list(filter(lambda val: 'VERSION=' in val, os_release))
+            d_version = d_version[0].split('=')
+            distro = "{0}-{1}".format(d_id[1].lower(), d_version[1].lower())
 
         if not distro:
             releases = remote_session.exec_cmd("cd /etc/; ls *-release", False)
@@ -80,7 +85,8 @@ class Profiler(object):
                     lsb_release = remote_session.exec_cmd(
                         "cat /etc/{}".format('lsb-release'), False)
 
-                    d_id = list(filter(lambda val: 'DISTRIB_ID' in val, lsb_release))
+                    d_id = list(filter(
+                        lambda val: 'DISTRIB_ID' in val, lsb_release))
                     d_id = d_id[0].split('=')
                     distro = d_id[1].lower()
 
@@ -95,7 +101,7 @@ class Profiler(object):
 
         uname = remote_session.exec_cmd('uname -rm', False)
         kver, arch = uname[0].split()
-
+        distro = re.sub('[^a-zA-Z0-9-_*.]', '', distro)
 
         profile = {
             "distro": distro,

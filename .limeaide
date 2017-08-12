@@ -1,4 +1,4 @@
 [DEFAULT]
-volatility =
+volatility = 
 output =
 compress =

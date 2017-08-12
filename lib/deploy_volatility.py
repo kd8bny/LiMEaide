@@ -59,4 +59,4 @@ class VolDeploy(object):
                         self.client.profile['profile'], vol_dir +
                         self.client.profile['profile'])
         cprint("Profile generation complete run 'vol.py --info | " +
-                   "grep Linux' to see your profile", 'green', attrs=['blink'])
+               "grep Linux' to see your profile", 'green', attrs=['blink'])

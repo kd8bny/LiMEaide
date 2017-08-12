@@ -95,4 +95,4 @@ profiles/
 scheduled_jobs/
 
 # project configs
-!/.limeaide
+.limeaide
