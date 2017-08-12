@@ -1,4 +1,5 @@
 [DEFAULT]
-volatility =
-output =
-compress =
+volatility = /home/kd8bny/Dropbox/projects/volatility//volatility/plugins/overlays/linux/
+output = 
+compress = 
+

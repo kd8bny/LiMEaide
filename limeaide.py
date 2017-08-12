@@ -10,11 +10,11 @@ import pickle
 from datetime import datetime
 from termcolor import colored, cprint
 
-from session import Session
-from client import Client
-from deploy_lime import LimeDeploy
-from deploy_volatility import VolDeploy
-from profiler import Profiler
+from lib.session import Session
+from lib.client import Client
+from lib.deploy_lime import LimeDeploy
+from lib.deploy_volatility import VolDeploy
+from lib.profiler import Profiler
 
 
 class Limeaide(object):
