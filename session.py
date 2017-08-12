@@ -78,7 +78,8 @@ class Session(object):
         self.complete_percent = []
         if self.get_file_stat(remote_dir, filename):
             status = functools.partial(self.__transfer_status__, filename)
-            self.SFTP.get(filename, local_dir + filename, callback=status)
+            self.SFTP.get(
+                remote_dir + filename, local_dir + filename, callback=status)
             print('\n')
 
     def put_sftp(self, local_dir, remote_dir, filename):
