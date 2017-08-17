@@ -65,7 +65,7 @@ class Limeaide(object):
 
         return parser.parse_args()
 
-    def check_tools(self, config):
+    def check_tools(self):
         """Check for required tools and directories."""
         if not os.path.isdir(self.output_dir):
             os.mkdir(self.output_dir)
@@ -84,7 +84,18 @@ class Limeaide(object):
         if not os.path.isdir(self.scheduled_pickup_dir):
             os.mkdir(self.scheduled_pickup_dir)
 
+        # Create config file
+        if not os.path.isfile('.limeaide'):
+            config = configparser.RawConfigParser()
+            config.set('DEFAULT', 'volatility', '')
+            config.set('DEFAULT', 'output', '')
+            config.set('DEFAULT', 'compress', '')
+            with open('.limeaide', 'w') as config_file:
+                config.write(config_file)
+
         # Check to see if a volatility directory exists
+        config = configparser.ConfigParser()
+        config.read('.limeaide')
         config_vol_dir = config['DEFAULT']['volatility']
         if not config_vol_dir or not os.path.isdir(config_vol_dir):
             cprint(
@@ -187,10 +198,10 @@ class Limeaide(object):
             "LiME is licensed under GPL-2.0\n")
 
         args = self.get_args()
+        self.check_tools()
+
         config = configparser.ConfigParser()
         config.read('.limeaide')
-
-        self.check_tools(config)
         profiler = Profiler()
         profiler.load_profiles()
         client = self.get_client(args, config)
