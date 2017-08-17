@@ -67,41 +67,40 @@ class Profiler(object):
         versions.
         """
         distro, kver, arch = '', '', ''
-        if remote_session.get_file_stat('/etc/', 'os-release'):
-            os_release = remote_session.exec_cmd(
-                "cat /etc/{}".format('os-release'), False)
+        releases = remote_session.exec_cmd("cd /etc/; ls *-release", False)
+        releases = releases[0].split()
 
-            d_id = list(filter(lambda val: 'ID=' in val, os_release))
-            d_id = d_id[len(d_id) - 1].split('=')
-            d_version = list(filter(lambda val: 'VERSION=' in val, os_release))
-            d_version = d_version[0].split('=')
-            distro = "{0}-{1}".format(d_id[1].lower(), d_version[1].lower())
+        if len(releases) > 0:
+            if 'os-release' in releases:
+                os_release = remote_session.exec_cmd(
+                    "cat /etc/{}".format('os-release'), False)
 
-        if not distro:
-            releases = remote_session.exec_cmd("cd /etc/; ls *-release", False)
-            releases = releases[0].split()
-            if len(releases) >= 1:
-                if 'lsb-release' in releases:
-                    lsb_release = remote_session.exec_cmd(
-                        "cat /etc/{}".format('lsb-release'), False)
+                distro = list(filter(lambda val: val.startswith("PRETTY_NAME="), os_release))
+                distro = distro[0].split('=')
+                distro = distro[1]
 
-                    d_id = list(filter(
-                        lambda val: 'DISTRIB_ID' in val, lsb_release))
-                    d_id = d_id[0].split('=')
-                    distro = d_id[1].lower()
+            elif 'lsb-release' in releases:
+                lsb_release = remote_session.exec_cmd(
+                    "cat /etc/{}".format('lsb-release'), False)
 
-                else:
-                    gen_release = remote_session.exec_cmd(
-                        "cat /etc/{}".format(releases[0]), False)
-                    distro = gen_release[0][:10]
+                distro = list(filter(lambda val: val.startswith('DISTRIB_DESCRIPTION='), os_release))
+                distro = distro[0].split('=')
+                distro = distro[1]
+
+            else:
+                os_release = remote_session.exec_cmd(
+                    "cat /etc/{}".format(releases[0]), False)
+
+            distro = re.sub('[^a-zA-Z0-9-\s_*.]', '', distro)
+            distro = re.sub('\s', '-', distro)
+            distro = distro.lower()
 
         if not distro:
             distro = input(colored("Cannot determine distribution. Please " +
                                    "enter distribution name: ", 'red'))
-
+        
         uname = remote_session.exec_cmd('uname -rm', False)
         kver, arch = uname[0].split()
-        distro = re.sub('[^a-zA-Z0-9-_*.]', '', distro)
 
         profile = {
             "distro": distro,
