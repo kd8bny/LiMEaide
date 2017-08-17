@@ -13,7 +13,7 @@ class VolDeploy(object):
         self.remote_session = session
 
         self.output_dir = './profiles/'
-        self.lime_rdir = '/tmp/lime/'
+        self.lime_rdir = './.limeaide/'
         self.map = 'System.map-%s' % self.client.profile['kver']
 
     def get_maps(self):
