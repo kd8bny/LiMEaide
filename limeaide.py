@@ -191,7 +191,7 @@ class Limeaide(object):
             '---'                        `''-...... -'   / /   | |_   \_______|/       `''-...... -'
                                                          \ \._,\ '/
                                                           `--'  `"
-             by kd8bny v{0}\n""".format(
+             by kd8bny {0}\n""".format(
                  self.__version__), 'green', attrs=['bold'])
         print(
             "LiMEaide is licensed under GPL-3.0\n"
