@@ -90,7 +90,7 @@ class Limeaide(object):
             config.set('DEFAULT', 'volatility', '')
             config.set('DEFAULT', 'output', '')
             config.set('DEFAULT', 'compress', '')
-            with open('.limeaide', 'w') as config_file:
+            with open('.limeaide', 'w+') as config_file:
                 config.write(config_file)
 
         # Check to see if a volatility directory exists
@@ -104,9 +104,16 @@ class Limeaide(object):
             cprint("Please provide a path to your Volatility directory." +
                    "\ne.g. '~/volatility/'" +
                    "\n[q] to never ask again: ", 'green')
-            path = input(":")
-            if path == 'q':
-                path = 'None'
+            while True:
+                path = input(":")
+                if path == 'q':
+                    path = 'None'
+                    break
+                elif os.path.isdir(path):
+                    break
+                else:
+                    cprint(
+                        "Entered directory does not exist. Please enter again", 'red')
 
             config.set('DEFAULT', 'volatility', path +
                        '/volatility/plugins/overlays/linux/')
