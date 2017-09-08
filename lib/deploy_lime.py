@@ -65,8 +65,12 @@ class LimeDeploy(object):
     def transfer_dump(self):
         """Retrieve files from remote client."""
         cprint("Beam me up Scotty", 'blue')
+        remote_file = self.client.output
+        if self.client.compress:
+            remote_file += '.bz2'
+
         self.remote_session.pull_sftp(
-            self.lime_rdir, self.client.output_dir, self.client.output)
+            self.lime_rdir, self.client.output_dir, remote_file)
 
         if self.new_profile:
             self.remote_session.pull_sftp(
