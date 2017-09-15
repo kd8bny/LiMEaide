@@ -212,7 +212,7 @@ class Limeaide(object):
 
         date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
         logging.basicConfig(
-            level=logging.DEBUG, filename='{0}{1}.log'.format(
+            level=logging.INFO, filename='{0}{1}.log'.format(
                 self.log_dir, date))
         config = configparser.ConfigParser()
         config.read('.limeaide')
