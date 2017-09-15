@@ -1,3 +1,4 @@
+import logging
 from termcolor import colored, cprint
 
 
@@ -6,13 +7,13 @@ class LimeDeploy(object):
 
     def __init__(self, session, profiler):
         super(LimeDeploy, self).__init__()
+        self.logger = logging.getLogger()
         self.remote_session = session
         self.client = session.client_
         self.profiler = profiler
 
         self.lime_dir = './tools/LiME/src/'
         self.lime_rdir = './.limeaide/'
-        self.lime_src = ['disk.c', 'lime.h', 'main.c', 'Makefile']
         self.profiles_dir = './profiles/'
 
         self.new_profile = False
@@ -20,11 +21,12 @@ class LimeDeploy(object):
     def send_lime(self):
         """Send LiME to remote client. Uses percompiled module if supplied."""
         cprint("sending LiME to remote client", 'blue')
+        lime_src = ['disk.c', 'lime.h', 'main.c', 'Makefile']
         self.remote_session.exec_cmd('mkdir %s' % self.lime_rdir, False)
 
         # Generate information to create a new profile
         if self.new_profile:
-            for file in self.lime_src:
+            for file in lime_src:
                 self.remote_session.put_sftp(
                     self.lime_dir, self.lime_rdir, file)
 
@@ -36,11 +38,18 @@ class LimeDeploy(object):
                 'cd {}; make'.format(self.lime_rdir), False)
             self.remote_session.exec_cmd("mv {0}lime.ko {0}{1}".format(
                 self.lime_rdir, self.client.profile["module"]), False)
+
+            self.logger.info(
+                "new profile created {0}".format(
+                    self.client.profile["module"]))
         # Use an old profile
         else:
             self.remote_session.put_sftp(
                 self.profiles_dir, self.lime_rdir,
                 self.client.profile["module"])
+
+            self.logger.info(
+                "Old profile used {0}".format(self.client.profile["module"]))
 
     def get_lime_dump(self):
         """Will install LiME and dump RAM."""
@@ -54,6 +63,8 @@ class LimeDeploy(object):
         self.remote_session.exec_cmd(
             "chmod 755 {0}{1}".format(
                 self.lime_rdir, self.client.output), True)
+
+        self.logger.info("LiME installed")
 
         if self.client.compress:
             cprint("Creating Bzip2...compressing the RAM dump", 'blue')

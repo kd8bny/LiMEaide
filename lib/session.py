@@ -1,5 +1,6 @@
 import sys
 import functools
+import logging
 import paramiko
 from termcolor import colored, cprint
 
@@ -7,19 +8,21 @@ from termcolor import colored, cprint
 class Session(object):
     """Session will take care of all the backend communications."""
 
-    def __init__(self, client):
+    def __init__(self, client, is_verbose=False):
         super(Session, self).__init__()
+        self.logger = logging.getLogger()
         self.client_ = client
+        self.is_verbose = is_verbose
         self.session = None
         self.SFTP = None
 
         self.complete_percent = []
 
-    @staticmethod
-    def __error_check__(stdout):
+    def __error_check__(self, stdout):
         """Check for standard errors from stdout"""
         for line in stdout:
             if "error" in line.lower():
+                self.logger.error(line)
                 return 1
 
         return 0
@@ -57,11 +60,17 @@ class Session(object):
         stdout = [line.strip('\n\r') for line in stdout]
         for line in stdout:
             if line != self.client_.pass_:
-                print(line)
+                self.logger.info(line)
+                if self.is_verbose:
+                    print(line)
 
         if not stderr or self.__error_check__(stdout):
-            [print(line.strip('\n')) for line in stderr]
-            sys.exit("Error deploying LiMEaide :(")
+            for line in stderr:
+                self.logger.error(line)
+                print(line.strip('\n'))
+            self.disconnect()
+            cprint("Error deploying LiMEaide :(", 'red')
+            sys.exit()
 
         return stdout
 

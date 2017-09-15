@@ -2,10 +2,10 @@
 
 import sys
 import os
+import logging
 import configparser
 import argparse
 import getpass
-import logging
 import pickle
 from datetime import datetime
 from termcolor import colored, cprint
@@ -60,6 +60,8 @@ class Limeaide(object):
         parser.add_argument("--delay-pickup", action="store_true", help="Used \
             to store job for future pickup")
         parser.add_argument("-P", "--pickup", help="Enter stored job file")
+        parser.add_argument("-v", "--verbose", action="store_true", help="Prod\
+            uce verbose output from remote client")
         parser.add_argument("--force-clean", action="store_true", help="Force \
             clean client after failed deployment")
 
@@ -113,11 +115,12 @@ class Limeaide(object):
                     break
                 else:
                     cprint(
-                        "Entered directory does not exist. Please enter again", 'red')
+                        "Entered directory does not exist. Please enter" +
+                        "again", 'red')
 
             config.set('DEFAULT', 'volatility', path +
                        '/volatility/plugins/overlays/linux/')
-            with open('.limeaide', 'w') as configfile:
+            with open('.limeaide', 'w+') as configfile:
                 config.write(configfile)
 
         self.volatility_profile_dir = config_vol_dir
@@ -199,7 +202,7 @@ class Limeaide(object):
                                                          \ \._,\ '/
                                                           `--'  `"
              by kd8bny {0}\n""".format(
-                 self.__version__), 'green', attrs=['bold'])
+                self.__version__), 'green', attrs=['bold'])
         print(
             "LiMEaide is licensed under GPL-3.0\n"
             "LiME is licensed under GPL-2.0\n")
@@ -207,18 +210,15 @@ class Limeaide(object):
         args = self.get_args()
         self.check_tools()
 
+        date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
+        logging.basicConfig(
+            level=logging.DEBUG, filename='{0}{1}.log'.format(
+                self.log_dir, date))
         config = configparser.ConfigParser()
         config.read('.limeaide')
         profiler = Profiler()
         profiler.load_profiles()
         client = self.get_client(args, config)
-        date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
-
-        # Set up logging files
-        info_log_file = '{0}{1}-info-limeaide.log'.format(self.log_dir, date)
-        debug_log_file = '{0}{1}-debug-limeaide.log'.format(self.log_dir, date)
-        logging.basicConfig(filename=info_log_file, level=logging.INFO)
-        logging.basicConfig(filename=debug_log_file, level=logging.DEBUG)
 
         if args.pickup:
             self.finish_saved_job(args.pickup)
@@ -228,7 +228,7 @@ class Limeaide(object):
             self.args_case = 'case_%s' % (args.case)
 
         # Start session
-        session = Session(client)
+        session = Session(client, args.verbose)
         session.connect()
         client.output_dir = "{0}{1}{2}/".format(
             self.output_dir, self.args_case, date)
@@ -272,6 +272,7 @@ class Limeaide(object):
             # Now that's taken care of, lets do work
             VolDeploy(session).main(self.volatility_profile_dir)
             session.disconnect()
+        logging.shutdown()
 
 
 if __name__ == '__main__':

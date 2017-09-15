@@ -24,11 +24,8 @@ class VolDeploy(object):
             "cp /boot/{0} {1}".format(self.map, self.lime_rdir), True)
         self.remote_session.exec_cmd(
             "chmod 744 {0}{1}".format(self.lime_rdir, self.map), True)
-        error = self.remote_session.pull_sftp(
+        self.remote_session.pull_sftp(
             self.lime_rdir, self.client.output_dir, self.map)
-
-        if error:
-            sys.exit(colored("Map not found cannot build profile", 'red'))
 
     def get_profile(self):
         """Obtain symbols from module and zip the profile."""
