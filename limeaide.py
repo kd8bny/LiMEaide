@@ -152,7 +152,7 @@ class Limeaide(object):
             if args.dont_compress:
                 client.compress = not client.compress
 
-        cprint("Establishing secure connection {0}@{1}".format(
+        cprint("> Establishing secure connection {0}@{1}".format(
             client.user, client.ip), 'blue')
         client.pass_ = getpass.getpass()
 

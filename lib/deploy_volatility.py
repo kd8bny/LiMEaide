@@ -18,8 +18,8 @@ class VolDeploy(object):
 
     def get_maps(self):
         """Grab system maps from remote client."""
-        cprint("Attempting to grab files for volatility profile", 'blue')
-        cprint("Obtaining System.maps", 'blue')
+        cprint("> Attempting to grab files for volatility profile", 'blue')
+        cprint("> Obtaining system.map", 'blue')
         self.remote_session.exec_cmd(
             "cp /boot/{0} {1}".format(self.map, self.lime_rdir), True)
         self.remote_session.exec_cmd(
@@ -29,7 +29,7 @@ class VolDeploy(object):
 
     def get_profile(self):
         """Obtain symbols from module and zip the profile."""
-        cprint("Obtaining symbols", 'blue')
+        cprint("> Obtaining symbols", 'blue')
         dwarf_file = open(
             self.client.output_dir + self.client.profile['kver'] +
             '.dwarf', 'w+')

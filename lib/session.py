@@ -123,13 +123,14 @@ class Session(object):
 
     def disconnect(self):
         """Call to end session and remove files from remote client."""
-        cprint("cleaning up...", 'blue')
+        cprint("> Cleaning up...", 'blue')
         self.exec_cmd('rm -rf ./.limeaide/', True)
 
-        cprint("Removing LKM...standby", 'blue')
+        cprint("> Removing LKM...standby", 'blue')
         self.exec_cmd('rmmod lime.ko', True)
 
         self.SFTP.close()
+        cprint("> Done", 'green')
 
     def connect(self):
         """Call to set connection with remote client."""
