@@ -5,8 +5,11 @@ import os
 import logging
 import configparser
 import argparse
+import urllib.request
+import zipfile
 import getpass
 import pickle
+import shutil
 from datetime import datetime
 from termcolor import colored, cprint
 
@@ -25,6 +28,7 @@ class Limeaide(object):
 
     def __init__(self):
         super(Limeaide, self).__init__()
+        self.logger = None
         self.volatility_profile_dir = None
         self.lime_dir = './tools/LiME/src/'
         self.tools_dir = './tools/'
@@ -69,23 +73,6 @@ class Limeaide(object):
 
     def check_tools(self):
         """Check for required tools and directories."""
-        if not os.path.isdir(self.output_dir):
-            os.mkdir(self.output_dir)
-
-        if not os.path.isdir(self.profile_dir):
-            os.mkdir(self.profile_dir)
-
-        if not os.path.isdir(self.lime_dir):
-            if not os.path.isdir(self.tools_dir):
-                os.mkdir(self.tools_dir)
-            sys.exit("Please download LiME and place in the ./tools/ dir")
-
-        if not os.path.isdir(self.log_dir):
-            os.mkdir(self.log_dir)
-
-        if not os.path.isdir(self.scheduled_pickup_dir):
-            os.mkdir(self.scheduled_pickup_dir)
-
         # Create config file
         if not os.path.isfile('.limeaide'):
             config = configparser.RawConfigParser()
@@ -94,6 +81,34 @@ class Limeaide(object):
             config.set('DEFAULT', 'compress', '')
             with open('.limeaide', 'w+') as config_file:
                 config.write(config_file)
+
+        if not os.path.isdir(self.output_dir):
+            os.mkdir(self.output_dir)
+
+        if not os.path.isdir(self.profile_dir):
+            os.mkdir(self.profile_dir)
+
+        if not os.path.isdir(self.tools_dir):
+                os.mkdir(self.tools_dir)
+
+        if not os.path.isdir(self.lime_dir):
+            lime_version = '1.7.8.1'
+            self.logger.info("LiME not found. downloading")
+            cprint("Downloading LiME", 'green')
+            urllib.request.urlretrieve(
+                "https://github.com/kd8bny/LiME/archive/v{}.zip".format(
+                    lime_version), filename="./tools/lime_master.zip")
+            zip_lime = zipfile.ZipFile("./tools/lime_master.zip", 'r')
+            zip_lime.extractall('./tools/')
+            zip_lime.close()
+            shutil.move(
+                './tools/LiME-{}'.format(lime_version), './tools/LiME/')
+
+        if not os.path.isdir(self.log_dir):
+            os.mkdir(self.log_dir)
+
+        if not os.path.isdir(self.scheduled_pickup_dir):
+            os.mkdir(self.scheduled_pickup_dir)
 
         # Check to see if a volatility directory exists
         config = configparser.ConfigParser()
@@ -207,13 +222,14 @@ class Limeaide(object):
             "LiMEaide is licensed under GPL-3.0\n"
             "LiME is licensed under GPL-2.0\n")
 
-        args = self.get_args()
-        self.check_tools()
-
         date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
         logging.basicConfig(
             level=logging.INFO, filename='{0}{1}.log'.format(
                 self.log_dir, date))
+        self.logger = logging.getLogger()
+
+        args = self.get_args()
+        self.check_tools()
         config = configparser.ConfigParser()
         config.read('.limeaide')
         profiler = Profiler()
