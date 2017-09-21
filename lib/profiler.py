@@ -15,7 +15,7 @@ class Profiler(object):
         self.profiles_dir = './profiles/'
         self.manifest = 'manifest.json'
 
-    def _clean_manifest(self):
+    def __clean_manifest__(self):
         """Determine if profile need to be cleaned.
 
         Returns bool notifying the need to reload profiles.
@@ -24,7 +24,7 @@ class Profiler(object):
             os.listdir(self.profiles_dir), 'lime-*.ko'))
 
         if num_profiles != len(self.profiles):
-            print("Cleaning profile manifest")
+            cprint("> Cleaning profile manifest", 'blue')
             existing_profiles = []
             for profile in self.profiles:
                 if profile in existing_profiles:
@@ -56,7 +56,7 @@ class Profiler(object):
         except FileNotFoundError as e:
             print(e)
 
-        reload_profiles = self._clean_manifest()
+        reload_profiles = self.__clean_manifest__()
         if reload_profiles:
             self.load_profiles()
 
@@ -98,7 +98,7 @@ class Profiler(object):
         if not distro:
             distro = input(colored("Cannot determine distribution. Please " +
                                    "enter distribution name: ", 'red'))
-        
+
         uname = remote_session.exec_cmd('uname -rm', False)
         kver, arch = uname[0].split()
 

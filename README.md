@@ -1,5 +1,9 @@
 # LiMEaide
 ## v1.3.1
+<<<<<<< HEAD
+=======
+## by Daryl Bennett - kd8bny
+>>>>>>> trunk
 
 ## About
 LiMEaide is a python application designed to remotely dump RAM of a Linux client and create a volatility profile for later analysis on your local host. I hope that this will simplify Linux digital forensics in a remote environment. In order to use LiMEaide all you need to do is feed a remote Linux client IP address, sit back, and consume your favorite caffeinated beverage.
@@ -12,7 +16,7 @@ python3 limeaide.py <IP>
 and magic happens.
 
 For more detailed usage checkout the [wiki](https://github.com/kd8bny/LiMEaide/wiki)
-For editing the configuration file see [here]()
+For editing the configuration file see [here](https://github.com/kd8bny/LiMEaide/wiki/The-Config-File)
 
 ### Detailed usage
 ```
@@ -55,11 +59,9 @@ limeaide.py [OPTIONS] REMOTE_IP
 ### Dependencies
 #### python
 - DEB base
-
 ```
 sudo apt-get install python3-paramiko python3-termcolor
 ```
-
 - RPM base
 ```
 sudo yum install python3-paramiko python3-termcolor
@@ -68,19 +70,8 @@ sudo yum install python3-paramiko python3-termcolor
 ```
 sudo pip3 install paramiko termcolor
 ```
-#### LiME
-In order to use LiME you must download and move the source into the **LiMEaide/tools** directory. Make sure the the LiME folder is named **LiME**. The full path should be as follows:
-NOTE: If you would like to build Volatility profiles, you must use my forked version of LiME. This provides debugging symbols used by dwarfdump.
-```
-LiMEaide/tools/LiME/
-```
-How to...
 
- 1. Download [LiME v1.7.8.1](https://github.com/kd8bny/LiME/archive/v1.7.8.1.zip)
- 2. Extract into `LiMEaide/tools/`
- 3. Rename folder to `LiME`
-
-#### dwarfdump
+#### Installing dwarfdump
 In order to build a volatility profile we need to be able to read the debugging symbols in the LKM. For this we need to install dwarfdump.
 If you encounter any issues finding/installing dwarfdump see the volatility page [here](https://github.com/volatilityfoundation/volatility/wiki/Linux#creating-a-new-profile)
 - DEB package manager
@@ -93,10 +84,26 @@ sudo apt-get install dwarfdump
 sudo yum install libdwarf-tools
 ```
 
-## Special Thanks and Notes
-* The idea for this application was built upon the concept dreamed up by and the [Linux Memory Grabber](https://github.com/halpomeranz/lmg) project
-* And of course none of this could be possible without the amazing [LiME](https://github.com/504ensicsLabs/LiME) project
+#### LiME
+##### Auto-Install
+By default LiMEaide will automatically download and place LiME in the correct directory. However, if you are disconnected from a network proceed with manual installation method in the section below.
+##### Manually install LiME
+In order to use LiME you must download and move the source into the **LiMEaide/tools** directory. Make sure the the LiME folder is named **LiME**. The full path should be as follows:
+NOTE: If you would like to build Volatility profiles, you must use my forked version of LiME. This provides debugging symbols used by dwarfdump.
+```
+LiMEaide/tools/LiME/
+```
+How to...
+
+ 1. Download [LiME v1.7.8.1](https://github.com/kd8bny/LiME/archive/v1.7.8.1.zip)
+ 2. Extract into `LiMEaide/tools/`
+ 3. Rename folder to `LiME`
 
 ## Limits at this time
 - Support on for bash. Use other shells at your own risk
 - Modules must be built on remote client. Therefore remote client must have proper headers installed.
+
+## Special Thanks and Notes
+* The idea for this application was built upon the concept dreamed up by and the [Linux Memory Grabber](https://github.com/halpomeranz/lmg) project
+* And of course none of this could be possible without the amazing [LiME](https://github.com/504ensicsLabs/LiME) project
+
