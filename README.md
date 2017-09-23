@@ -1,5 +1,5 @@
 # LiMEaide
-## v1.3.1
+## v1.3.2
 ## by Daryl Bennett - kd8bny
 
 ## About
