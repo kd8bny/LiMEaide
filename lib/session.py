@@ -44,7 +44,7 @@ class Session(object):
         """Called to exec command on remote system.
 
         :param cmd The actual bash command to run on remote
-        :param requires_privlege Does this command require elivated privledge
+        :param requires_privlege Does this command require elevated privileges
         :return stdout
         """
         stdout, stderr = None, None
@@ -80,7 +80,7 @@ class Session(object):
         dir params do not include the file name
 
         :param remote_dir path to file on remote host
-        :param local_dir ppath to output dir on local machine
+        :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
 
@@ -97,7 +97,7 @@ class Session(object):
         dir params do not include the file name
 
         :param remote_dir path to file on remote host
-        :param local_dir ppath to output dir on local machine
+        :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
         self.SFTP.put(local_dir + filename, remote_dir + filename)
