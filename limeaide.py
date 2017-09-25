@@ -123,7 +123,7 @@ class Limeaide(object):
         config_vol_dir = config['DEFAULT']['volatility']
         if not config_vol_dir or not os.path.isdir(config_vol_dir):
             cprint(
-                "Volatility directory missing. Current direcotry is:", 'red')
+                "Volatility directory missing. Current directory is:", 'red')
             cprint("{}".format(config_vol_dir), 'blue')
             cprint("Please provide a path to your Volatility directory." +
                    "\ne.g. '~/volatility/'" +
