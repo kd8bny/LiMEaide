@@ -89,7 +89,13 @@ class Limeaide(object):
             os.mkdir(self.profile_dir)
 
         if not os.path.isdir(self.tools_dir):
-                os.mkdir(self.tools_dir)
+            os.mkdir(self.tools_dir)
+
+        if not os.path.isdir(self.log_dir):
+            os.mkdir(self.log_dir)
+
+        if not os.path.isdir(self.scheduled_pickup_dir):
+            os.mkdir(self.scheduled_pickup_dir)
 
         if not os.path.isdir(self.lime_dir):
             lime_version = '1.7.8.1'
@@ -111,19 +117,13 @@ class Limeaide(object):
                     "or place manually", 'red')
                 sys.exit()
 
-        if not os.path.isdir(self.log_dir):
-            os.mkdir(self.log_dir)
-
-        if not os.path.isdir(self.scheduled_pickup_dir):
-            os.mkdir(self.scheduled_pickup_dir)
-
         # Check to see if a volatility directory exists
         config = configparser.ConfigParser()
         config.read('.limeaide')
         config_vol_dir = config['DEFAULT']['volatility']
         if not config_vol_dir or not os.path.isdir(config_vol_dir):
             cprint(
-                "Volatility directory missing. Current direcotry is:", 'red')
+                "Volatility directory missing. Current directory is:", 'red')
             cprint("{}".format(config_vol_dir), 'blue')
             cprint("Please provide a path to your Volatility directory." +
                    "\ne.g. '~/volatility/'" +
@@ -230,13 +230,14 @@ class Limeaide(object):
             "LiME is licensed under GPL-2.0\n")
 
         date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
+        self.check_tools()
+
         logging.basicConfig(
             level=logging.INFO, filename='{0}{1}.log'.format(
                 self.log_dir, date))
         self.logger = logging.getLogger()
 
         args = self.get_args()
-        self.check_tools()
         config = configparser.ConfigParser()
         config.read('.limeaide')
         profiler = Profiler()
