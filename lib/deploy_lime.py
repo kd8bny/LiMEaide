@@ -19,7 +19,7 @@ class LimeDeploy(object):
         self.new_profile = False
 
     def send_lime(self):
-        """Send LiME to remote client. Uses percompiled module if supplied."""
+        """Send LiME to remote client. Uses pre-compiled module if supplied."""
         cprint("> Sending LiME src to remote client", 'blue')
         lime_src = ['disk.c', 'lime.h', 'main.c', 'Makefile']
         self.remote_session.exec_cmd('mkdir %s' % self.lime_rdir, False)
