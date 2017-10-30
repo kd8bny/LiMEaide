@@ -7,7 +7,7 @@ from termcolor import colored, cprint
 
 
 class Profiler(object):
-    """Maintain and impliment precomiled modules and profiles."""
+    """Maintain and implement pre-compiled modules and profiles."""
 
     def __init__(self):
         super(Profiler, self).__init__()
@@ -75,7 +75,8 @@ class Profiler(object):
                 os_release = remote_session.exec_cmd(
                     "cat /etc/{}".format('os-release'), False)
 
-                distro = list(filter(lambda val: val.startswith("PRETTY_NAME="), os_release))
+                distro = list(filter(lambda val: val.startswith(
+                    'PRETTY_NAME='), os_release))
                 distro = distro[0].split('=')
                 distro = distro[1]
 
@@ -83,7 +84,8 @@ class Profiler(object):
                 lsb_release = remote_session.exec_cmd(
                     "cat /etc/{}".format('lsb-release'), False)
 
-                distro = list(filter(lambda val: val.startswith('DISTRIB_DESCRIPTION='), os_release))
+                distro = list(filter(lambda val: val.startswith(
+                    'DISTRIB_DESCRIPTION='), lsb_release))
                 distro = distro[0].split('=')
                 distro = distro[1]
 
