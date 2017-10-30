@@ -99,7 +99,6 @@ class Limeaide(object):
 
         if not os.path.isdir(self.lime_dir):
             lime_version = '1.7.8.1'
-            self.logger.info("LiME not found. downloading")
             cprint("Downloading LiME", 'green')
             try:
                 urllib.request.urlretrieve(
@@ -110,8 +109,7 @@ class Limeaide(object):
                 zip_lime.close()
                 shutil.move(
                     './tools/LiME-{}'.format(lime_version), './tools/LiME/')
-            except urllib.error.URLError as e:
-                self.logger.error(e)
+            except urllib.error.URLError:
                 cprint(
                     "LiME failed to download. Check your internet connection" +
                     "or place manually", 'red')
