@@ -111,9 +111,6 @@ class Limeaide(object):
                     "or place manually", 'red')
                 sys.exit()
 
-        if not os.path.isdir(self.log_dir):
-            os.mkdir(self.log_dir)
-
         if not os.path.isdir(self.scheduled_pickup_dir):
             os.mkdir(self.scheduled_pickup_dir)
 
@@ -230,6 +227,10 @@ class Limeaide(object):
             "LiME is licensed under GPL-2.0\n")
 
         date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
+        
+        if not os.path.isdir(self.log_dir):
+            os.mkdir(self.log_dir)
+
         logging.basicConfig(
             level=logging.INFO, filename='{0}{1}.log'.format(
                 self.log_dir, date))
