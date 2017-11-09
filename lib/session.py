@@ -143,6 +143,8 @@ class Session(object):
 
             self.SFTP = self.session.open_sftp()
 
-        except paramiko.AuthenticationException as auth_except:
-            print(colored("{}".format(auth_except), 'red'))
+        except (paramiko.AuthenticationException,
+                paramiko.ssh_exception.NoValidConnectionsError) as e:
+            print(colored("> {}".format(e), 'red'))
+            self.logger.error(e)
             sys.exit()
