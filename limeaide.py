@@ -71,17 +71,7 @@ class Limeaide(object):
 
         return parser.parse_args()
 
-    def check_tools(self):
-        """Check for required tools and directories."""
-        # Create config file
-        if not os.path.isfile('.limeaide'):
-            config = configparser.RawConfigParser()
-            config.set('DEFAULT', 'volatility', '')
-            config.set('DEFAULT', 'output', '')
-            config.set('DEFAULT', 'compress', '')
-            with open('.limeaide', 'w+') as config_file:
-                config.write(config_file)
-
+    def check_directories(self):
         if not os.path.isdir(self.output_dir):
             os.mkdir(self.output_dir)
 
@@ -97,6 +87,18 @@ class Limeaide(object):
         if not os.path.isdir(self.scheduled_pickup_dir):
             os.mkdir(self.scheduled_pickup_dir)
 
+    def check_tools(self):
+        """Check for required tools and directories."""
+
+        if not os.path.isfile('.limeaide'):
+            config = configparser.RawConfigParser()
+            config.set('DEFAULT', 'volatility', '')
+            config.set('DEFAULT', 'output', '')
+            config.set('DEFAULT', 'compress', '')
+            with open('.limeaide', 'w+') as config_file:
+                config.write(config_file)
+
+        # Download LiME
         if not os.path.isdir(self.lime_dir):
             lime_version = '1.7.8.1'
             cprint("Downloading LiME", 'green')
@@ -115,7 +117,7 @@ class Limeaide(object):
                     "or place manually", 'red')
                 sys.exit()
 
-        # Check to see if a volatility directory exists
+        # Check to see if a volatility directory exists in config
         config = configparser.ConfigParser()
         config.read('.limeaide')
         config_vol_dir = config['DEFAULT']['volatility']
@@ -228,6 +230,7 @@ class Limeaide(object):
             "LiME is licensed under GPL-2.0\n")
 
         date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
+        self.check_directories()
         self.check_tools()
 
         logging.basicConfig(
