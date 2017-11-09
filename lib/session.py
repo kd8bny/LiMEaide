@@ -40,7 +40,7 @@ class Session(object):
                 colored("Transfer of %r is at %d/%d bytes (%.0f%%)\r"
                    % (filename, bytes_so_far, bytes_total, percent), 'cyan'), end='\r', flush=True)
 
-    def exec_cmd(self, cmd, requires_privlege):
+    def exec_cmd(self, cmd, requires_privlege, DisconnectOnFail=True):
         """Called to exec command on remote system.
 
         :param cmd The actual bash command to run on remote
@@ -68,10 +68,10 @@ class Session(object):
             for line in stderr:
                 self.logger.error(line)
                 print(line.strip('\n'))
-            self.disconnect()
             cprint("Error deploying LiMEaide :(", 'red')
-            sys.exit()
-
+            if DisconnectOnFail:
+              self.disconnect()
+              sys.exit()
         return stdout
 
     def pull_sftp(self, remote_dir, local_dir, filename):
@@ -124,10 +124,10 @@ class Session(object):
     def disconnect(self):
         """Call to end session and remove files from remote client."""
         cprint("> Cleaning up...", 'blue')
-        self.exec_cmd('rm -rf ./.limeaide/', True)
+        self.exec_cmd('rm -rf ./.limeaide/', True, False)
 
         cprint("> Removing LKM...standby", 'blue')
-        self.exec_cmd('rmmod lime.ko', True)
+        self.exec_cmd('rmmod lime.ko', True, False)
 
         self.SFTP.close()
         cprint("> Done", 'green')
