@@ -100,7 +100,7 @@ class Limeaide(object):
 
         # Download LiME
         if not os.path.isdir(self.lime_dir):
-            lime_version = '1.7.8.1'
+            lime_version = '1.7.8.2'
             cprint("Downloading LiME", 'green')
             try:
                 urllib.request.urlretrieve(
