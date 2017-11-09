@@ -1,5 +1,6 @@
 import logging
-from termcolor import colored, cprint
+from termcolor import cprint
+import hashlib
 
 
 class LimeDeploy(object):
@@ -19,9 +20,10 @@ class LimeDeploy(object):
         self.new_profile = False
 
     def send_lime(self):
-        """Send LiME to remote client. Uses percompiled module if supplied."""
+        """Send LiME to remote client. Uses pre-compiled module if supplied."""
         cprint("> Sending LiME src to remote client", 'blue')
-        lime_src = ['disk.c', 'lime.h', 'main.c', 'Makefile']
+        lime_src = ['main.c', 'disk.c', 'tcp.c', 'hash.c', 'lime.h',
+                    'Makefile']
         self.remote_session.exec_cmd('mkdir %s' % self.lime_rdir, False)
 
         # Generate information to create a new profile
@@ -58,7 +60,7 @@ class LimeDeploy(object):
         """Will install LiME and dump RAM."""
         cprint("> Installing LKM and retrieving RAM", 'blue')
         self.remote_session.exec_cmd(
-            "insmod {0}{1} 'path={2}{3} format=lime dio=0'".format(
+            "insmod {0}{1} 'path={2}{3} format=lime digest=sha1'".format(
                 self.lime_rdir, self.client.profile["module"], self.lime_rdir,
                 self.client.output), True)
 
@@ -81,11 +83,14 @@ class LimeDeploy(object):
         """Retrieve files from remote client."""
         cprint("> Beam me up Scotty", 'blue')
         remote_file = self.client.output
+        remote_file_hash = self.client.output + ".sha1"
         if self.client.compress:
             remote_file += '.bz2'
 
         self.remote_session.pull_sftp(
             self.lime_rdir, self.client.output_dir, remote_file)
+        self.remote_session.pull_sftp(
+            self.lime_rdir, self.client.output_dir, remote_file_hash)
 
         if self.new_profile:
             self.remote_session.pull_sftp(
@@ -94,6 +99,29 @@ class LimeDeploy(object):
 
         cprint("> Memory extraction is complete\n\n{0} is in {1}".format(
             self.client.output, self.client.output_dir), 'green')
+
+    def check_integrity(self):
+        BUFF_SIZE = 65536
+        digest = hashlib.sha1()
+
+        cprint("> Computing message digest of image", 'blue')
+        with open(self.client.output_dir + self.client.output, 'rb') as f:
+            while True:
+                data = f.read(BUFF_SIZE)
+                if not data:
+                    break
+                digest.update(data)
+        sha1 = digest.hexdigest()
+
+        with open(self.client.output_dir +
+                  self.client.output + '.sha1', 'r') as f:
+            remote_sha1 = f.read()
+
+        if sha1 == remote_sha1:
+            cprint("> Digest complete (sha1) {}".format(sha1), 'green')
+        else:
+            cprint("> DIGEST MISMATCH (sha1) \nlocal  {0} \nremote {1}".format(
+                sha1, remote_sha1), 'red')
 
     def main(self):
         """Begin the process of transporting LiME and dumping the RAM."""
@@ -105,3 +133,4 @@ class LimeDeploy(object):
 
         if not self.client.delay_pickup:
             self.transfer_dump()
+            self.check_integrity()
