@@ -40,7 +40,7 @@ class Session(object):
                 colored("Transfer of %r is at %d/%d bytes (%.0f%%)\r"
                    % (filename, bytes_so_far, bytes_total, percent), 'cyan'), end='\r', flush=True)
 
-    def exec_cmd(self, cmd, requires_privlege, DisconnectOnFail=True):
+    def exec_cmd(self, cmd, requires_privlege, disconnect_on_fail=True):
         """Called to exec command on remote system.
 
         :param cmd The actual bash command to run on remote
@@ -69,9 +69,11 @@ class Session(object):
                 self.logger.error(line)
                 print(line.strip('\n'))
             cprint("Error deploying LiMEaide :(", 'red')
-            if DisconnectOnFail:
-              self.disconnect()
-              sys.exit()
+
+            if disconnect_on_fail:
+                self.disconnect()
+                sys.exit()
+
         return stdout
 
     def pull_sftp(self, remote_dir, local_dir, filename):
