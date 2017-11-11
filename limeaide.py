@@ -121,17 +121,22 @@ class Limeaide(object):
         config = configparser.ConfigParser()
         config.read('.limeaide')
         config_vol_dir = config['DEFAULT']['volatility']
-        if not config_vol_dir or not os.path.isdir(config_vol_dir):
+
+        if config_vol_dir == 'None':
+            pass
+        elif not config_vol_dir or not os.path.isdir(config_vol_dir):
             cprint(
                 "Volatility directory missing. Current directory is:", 'red')
             cprint("{}".format(config_vol_dir), 'blue')
             cprint("Please provide a path to your Volatility directory." +
                    "\ne.g. '~/volatility/'" +
                    "\n[q] to never ask again: ", 'green')
+            path_ext = '/volatility/plugins/overlays/linux/'
             while True:
                 path = input(":")
                 if path == 'q':
                     path = 'None'
+                    path_ext = ''
                     break
                 elif os.path.isdir(path):
                     break
@@ -140,8 +145,7 @@ class Limeaide(object):
                         "Entered directory does not exist. Please enter" +
                         "again", 'red')
 
-            config.set('DEFAULT', 'volatility', path +
-                       '/volatility/plugins/overlays/linux/')
+            config.set('DEFAULT', 'volatility', path + path_ext)
             with open('.limeaide', 'w+') as configfile:
                 config.write(configfile)
 
