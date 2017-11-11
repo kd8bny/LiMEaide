@@ -1,4 +1,5 @@
 import os
+import logging
 import re
 import fnmatch
 import contextlib
@@ -11,6 +12,7 @@ class Profiler(object):
 
     def __init__(self):
         super(Profiler, self).__init__()
+        self.logger = logging.getLogger()
         self.profiles = []
         self.profiles_dir = './profiles/'
         self.manifest = 'manifest.json'
@@ -54,7 +56,7 @@ class Profiler(object):
             self.profiles = json.load(
                 open(self.profiles_dir + self.manifest, 'r'))
         except FileNotFoundError as e:
-            print(e)
+            self.logger.info(str(e) + "This could be a first run")
 
         reload_profiles = self.__clean_manifest__()
         if reload_profiles:
