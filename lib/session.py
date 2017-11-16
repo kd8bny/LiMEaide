@@ -118,8 +118,8 @@ class Session(object):
             if attributes.st_size > 0:
                 file_exists = True
 
-        except IOError:
-            pass
+        except IOError as e:
+            self.logger.warning(e)
 
         return file_exists
 

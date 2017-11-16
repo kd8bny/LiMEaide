@@ -196,12 +196,14 @@ class Limeaide(object):
         """Restore client with pickle. Transfer dump."""
         restored_client = pickle.load(open(jobname, 'rb'))
         cprint("Client restored!", 'green')
-        cprint("Retrieving RAM dump {}".format(restored_client.output), 'blue')
+        cprint(
+            'Retrieving RAM dump "{}"'.format(restored_client.output), 'blue')
 
         if not os.path.isdir(restored_client.output_dir):
             os.mkdir(restored_client.output_dir)
 
         saved_session = Session(restored_client)
+        saved_session.connect()
         delayed_profiler = Profiler()
         LimeDeploy(saved_session, delayed_profiler).transfer_dump()
         VolDeploy(saved_session).main(self.volatility_profile_dir)
@@ -298,9 +300,10 @@ class Limeaide(object):
             self.save_job(client, client.jobname)
             cprint("RAM dump retrieval is postponed 0_0\nLATERZ!", 'blue')
         else:
-            # Now that's taken care of, lets do work
+            # Now that's taken care of, lets do work on Volatility
             VolDeploy(session).main(self.volatility_profile_dir)
             session.disconnect()
+
         logging.shutdown()
 
 
