@@ -133,4 +133,6 @@ class LimeDeploy(object):
 
         if not self.client.delay_pickup:
             self.transfer_dump()
-            self.check_integrity()
+
+            if not self.client.compress:
+                self.check_integrity()
