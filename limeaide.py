@@ -23,7 +23,7 @@ from lib.profiler import Profiler
 class Limeaide(object):
     """Deploy LiME LKM to remote host in order to scrape RAM."""
 
-    __version__ = "1.3.2"
+    __version__ = "1.4.0"
     __author__ = "kd8bny@gmail.com"
 
     def __init__(self):
