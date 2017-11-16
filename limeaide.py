@@ -253,7 +253,7 @@ class Limeaide(object):
 
         if args.pickup:
             self.finish_saved_job(args.pickup)
-            sys.exit("goodbye")
+            sys.exit()
 
         if args.case is not None:
             self.args_case = 'case_%s' % (args.case)
@@ -298,7 +298,10 @@ class Limeaide(object):
 
         if args.delay_pickup:
             self.save_job(client, client.jobname)
-            cprint("RAM dump retrieval is postponed 0_0\nLATERZ!", 'blue')
+            cprint("> RAM dump retrieval is postponed", 'green')
+            cprint(
+                "> To retrieve, run LiMEaide with" +
+                '"-P scheduled_jobs/{}.dat"'.format(client.jobname), 'yellow')
         else:
             # Now that's taken care of, lets do work on Volatility
             VolDeploy(session).main(self.volatility_profile_dir)
