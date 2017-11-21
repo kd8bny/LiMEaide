@@ -211,17 +211,17 @@ class Limeaide(object):
         os.remove(jobname)
 
     def setup_logging(self):
-      """Setup logging to file and initial logger"""
+        """Setup logging to file and initial logger"""
 
-      date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
+        date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
         
-      if not os.path.isdir(self.log_dir):
-        os.mkdir(self.log_dir)
-
-      logging.basicConfig(
-          level=logging.INFO, filename='{0}{1}.log'.format(
-              self.log_dir, date))
-      self.logger = logging.getLogger(__name__)
+        if not os.path.isdir(self.log_dir):
+          os.mkdir(self.log_dir)
+  
+        logging.basicConfig(
+            level=logging.INFO, filename='{0}{1}.log'.format(
+                self.log_dir, date))
+        self.logger = logging.getLogger(__name__)
 
     def main(self):
         """Start the interactive session for LiMEaide."""

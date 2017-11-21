@@ -49,11 +49,14 @@ class Session(object):
         """
         stdout, stderr = None, None
         if self.client_.is_sudoer and requires_privlege:
+            cmd = "sudo -S -p ' ' {0}".format(cmd)
+            self.logger.info("Command executed: {0}".format(cmd))
             stdin, stdout, stderr = self.session.exec_command(
-                "sudo -S -p ' ' {0}".format(cmd), get_pty=True)
+                cmd, get_pty=True)
             stdin.write(self.client_.pass_ + '\n')
             stdin.flush()
         else:
+            self.logger.info("Command executed: {0}".format(cmd))
             stdin, stdout, stderr = self.session.exec_command(
                 cmd, get_pty=True)
 
