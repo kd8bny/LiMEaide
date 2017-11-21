@@ -10,7 +10,7 @@ class Session(object):
 
     def __init__(self, client, is_verbose=False):
         super(Session, self).__init__()
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger(__name__)
         self.client_ = client
         self.is_verbose = is_verbose
         self.session = None

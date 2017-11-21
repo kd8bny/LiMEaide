@@ -12,7 +12,7 @@ class Profiler(object):
 
     def __init__(self):
         super(Profiler, self).__init__()
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger(__name__)
         self.profiles = []
         self.profiles_dir = './profiles/'
         self.manifest = 'manifest.json'

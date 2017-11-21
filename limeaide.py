@@ -81,9 +81,6 @@ class Limeaide(object):
         if not os.path.isdir(self.tools_dir):
             os.mkdir(self.tools_dir)
 
-        if not os.path.isdir(self.log_dir):
-            os.mkdir(self.log_dir)
-
         if not os.path.isdir(self.scheduled_pickup_dir):
             os.mkdir(self.scheduled_pickup_dir)
 
@@ -213,6 +210,19 @@ class Limeaide(object):
         saved_session.disconnect()
         os.remove(jobname)
 
+    def setup_logging(self):
+      """Setup logging to file and initial logger"""
+
+      date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
+        
+      if not os.path.isdir(self.log_dir):
+        os.mkdir(self.log_dir)
+
+      logging.basicConfig(
+          level=logging.INFO, filename='{0}{1}.log'.format(
+              self.log_dir, date))
+      self.logger = logging.getLogger(__name__)
+
     def main(self):
         """Start the interactive session for LiMEaide."""
         cprint(
@@ -236,13 +246,9 @@ class Limeaide(object):
             "LiME is licensed under GPL-2.0\n")
 
         date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
+        self.setup_logging()
         self.check_directories()
         self.check_tools()
-
-        logging.basicConfig(
-            level=logging.INFO, filename='{0}{1}.log'.format(
-                self.log_dir, date))
-        self.logger = logging.getLogger()
 
         args = self.get_args()
         config = configparser.ConfigParser()

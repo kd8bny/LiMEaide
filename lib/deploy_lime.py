@@ -8,7 +8,7 @@ class LimeDeploy(object):
 
     def __init__(self, session, profiler):
         super(LimeDeploy, self).__init__()
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger(__name__)
         self.remote_session = session
         self.client = session.client_
         self.profiler = profiler
