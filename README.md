@@ -105,7 +105,7 @@ How to...
 ## Limits at this time
 - Only supports bash. Use other shells at your own risk
 - Modules must be built on remote client. Therefore remote client must have proper headers installed.
- - Unless you follow [this](https://github.com/kd8bny/LiMEaide/wiki/Building-Out-of-Tree-Modules) guide for compiling external kernel modules
+  - Unless you follow [this](https://github.com/kd8bny/LiMEaide/wiki/Building-Out-of-Tree-Modules) guide for compiling external kernel modules
 
 ## Special Thanks and Notes
 * The idea for this application was built upon the concept dreamed up by and the [Linux Memory Grabber](https://github.com/halpomeranz/lmg) project
