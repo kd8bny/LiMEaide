@@ -275,7 +275,7 @@ class Limeaide(object):
             if profile is None:
                 new_profile = input(colored(
                     "No profiles found... Would you like to build a new" +
-                    "profile for the remote client [Y/n]", 'red'))
+                    "profile for the remote client [Y/n] ", 'red'))
                 if new_profile.lower() == 'n':
                     sys.exit()
             else:
@@ -285,7 +285,7 @@ class Limeaide(object):
         elif not args.no_profiler:
             use_profile = input(colored(
                 "Would you like to select a pre-generated profile " +
-                "[Y/n]", 'green'))
+                "[y/N] ", 'green'))
             if use_profile.lower() == 'y':
                 profile = profiler.interactive_chooser()
                 if profile is None:
