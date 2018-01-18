@@ -97,8 +97,9 @@ class LimeDeploy(object):
                 self.lime_rdir, self.profiles_dir,
                 self.client.profile['module'])
 
-        cprint("> Memory extraction is complete\n\n{0} is in {1}".format(
-            self.client.output, self.client.output_dir), 'green')
+        cprint("> Memory extraction is complete", 'blue')
+        cprint("{0} is in {1}".format(
+            self.client.output, self.client.output_dir), 'cyan')
 
     def check_integrity(self):
         BUFF_SIZE = 65536
