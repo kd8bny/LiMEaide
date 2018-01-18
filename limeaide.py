@@ -289,7 +289,7 @@ class Limeaide(object):
             if use_profile.lower() == 'y':
                 profile = profiler.interactive_chooser()
                 if profile is None:
-                    cprint("No profiles found... Will build new profile" +
+                    cprint("No profiles found... Will build new profile " +
                            "for remote client", 'red')
                 else:
                     client.profile = profile
