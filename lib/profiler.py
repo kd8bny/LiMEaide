@@ -2,7 +2,6 @@ import os
 import logging
 import re
 import fnmatch
-import contextlib
 import json
 from termcolor import colored, cprint
 
