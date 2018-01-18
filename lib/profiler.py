@@ -3,6 +3,7 @@ import logging
 import re
 import fnmatch
 import json
+import shutil
 from termcolor import colored, cprint
 
 
@@ -54,9 +55,13 @@ class Profiler(object):
                     self.logger.info(
                         "Profile {} found. Importing".format(module))
                     cprint("> Module {}".format(module), 'yellow')
-                    distro = input(colored("Distribution: ", 'green'))
-                    kver = input(colored("Kernel Version: ", 'green'))
-                    arch = input(colored("Architecture: ", 'green'))
+                    distro = input(colored(
+                        "Distribution: ", 'green')).lower().replace(' ', '')
+                    kver = input(colored(
+                        "Kernel Version: ", 'green')).lower().replace(' ', '')
+                    arch = input(colored(
+                        "Architecture: ", 'green')).lower().replace(' ', '')
+ 
 
                     profile = {
                         "distro": distro,
@@ -66,6 +71,10 @@ class Profiler(object):
                             distro, kver, arch),
                         "profile": "vol-{0}-{1}-{2}.zip".format(
                             distro, kver, arch)}
+
+                    shutil.move(
+                        self.profiles_dir + module,
+                        self.profiles_dir + profile['module'])
 
                     existing_profiles.append(profile)
 
