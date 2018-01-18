@@ -52,6 +52,12 @@ limeaide.py [OPTIONS] REMOTE_IP
     If previous attempt failed then clean up client
 ```
 
+### Import Old Modules
+LiMEaide allows you to import old modules or external modules, just copy the module `*.ko` into the profiles directory.
+```
+./profiles/
+```
+
 ## Set-up
 ### Dependencies
 #### python
@@ -97,8 +103,9 @@ How to...
  3. Rename folder to `LiME`
 
 ## Limits at this time
-- Support on for bash. Use other shells at your own risk
+- Only supports bash. Use other shells at your own risk
 - Modules must be built on remote client. Therefore remote client must have proper headers installed.
+ - Unless you follow [this](https://github.com/kd8bny/LiMEaide/wiki/Building-Out-of-Tree-Modules) guide for compiling external kernel modules
 
 ## Special Thanks and Notes
 * The idea for this application was built upon the concept dreamed up by and the [Linux Memory Grabber](https://github.com/halpomeranz/lmg) project
