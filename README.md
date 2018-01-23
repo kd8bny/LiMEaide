@@ -14,6 +14,10 @@ and magic happens.
 
 - For more detailed usage checkout the [wiki](https://github.com/kd8bny/LiMEaide/wiki)
 - For editing the configuration file see [here](https://github.com/kd8bny/LiMEaide/wiki/The-Config-File)
+- Import old modules or external modules, just copy the module `*.ko` into the profiles directory.
+```
+./profiles/
+```
 
 ### Detailed usage
 ```
@@ -50,12 +54,6 @@ limeaide.py [OPTIONS] REMOTE_IP
 
 --force-clean
     If previous attempt failed then clean up client
-```
-
-### Import Old Modules
-LiMEaide allows you to import old modules or external modules, just copy the module `*.ko` into the profiles directory.
-```
-./profiles/
 ```
 
 ## Set-up
