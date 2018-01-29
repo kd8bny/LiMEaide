@@ -60,9 +60,9 @@ class Session(object):
             stdin, stdout, stderr = self.session.exec_command(
                 cmd, get_pty=True)
 
-        stdout = [line.strip('\n\r') for line in stdout]
+        stdout = [line.strip() for line in stdout]
         for line in stdout:
-            if line != self.client_.pass_:
+            if line and line != self.client_.pass_:
                 self.logger.info(line)
                 if self.is_verbose:
                     print(line)
