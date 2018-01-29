@@ -23,7 +23,7 @@ from lib.profiler import Profiler
 class Limeaide(object):
     """Deploy LiME LKM to remote host in order to scrape RAM."""
 
-    __version__ = "1.4.1"
+    __version__ = "1.5.0"
     __author__ = "kd8bny@gmail.com"
 
     def __init__(self):
@@ -238,7 +238,7 @@ class Limeaide(object):
   |   ||__||__|  |__|  |__|  `.             .'  .'.''| ||__|/_______.'/    `.             .'
   '---'                        `''-...... -'   / /   | |_   \_______|/       `''-...... -'
                                                \ \._,\ '/
-                                                 `--'  `"
+                                                `--'  `"
              by kd8bny {0}\n""".format(
                 self.__version__), 'green', attrs=['bold'])
         print(
@@ -281,7 +281,7 @@ class Limeaide(object):
             if profile is None:
                 new_profile = input(colored(
                     "No profiles found... Would you like to build a new" +
-                    "profile for the remote client [Y/n]", 'red'))
+                    "profile for the remote client [Y/n] ", 'red'))
                 if new_profile.lower() == 'n':
                     sys.exit()
             else:
@@ -291,11 +291,11 @@ class Limeaide(object):
         elif not args.no_profiler:
             use_profile = input(colored(
                 "Would you like to select a pre-generated profile " +
-                "[Y/n]", 'green'))
+                "[y/N] ", 'green'))
             if use_profile.lower() == 'y':
                 profile = profiler.interactive_chooser()
                 if profile is None:
-                    cprint("No profiles found... Will build new profile" +
+                    cprint("No profiles found... Will build new profile " +
                            "for remote client", 'red')
                 else:
                     client.profile = profile

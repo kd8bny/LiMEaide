@@ -2,8 +2,8 @@ import os
 import logging
 import re
 import fnmatch
-import contextlib
 import json
+import shutil
 from termcolor import colored, cprint
 
 
@@ -22,25 +22,61 @@ class Profiler(object):
 
         Returns bool notifying the need to reload profiles.
         """
-        num_profiles = len(fnmatch.filter(
-            os.listdir(self.profiles_dir), 'lime-*.ko'))
 
-        if num_profiles != len(self.profiles):
+        disk_modules = fnmatch.filter(
+            os.listdir(self.profiles_dir), '*.ko')
+
+        if len(disk_modules) != len(self.profiles):
             cprint("> Cleaning profile manifest", 'blue')
+            self.logger.info("Cleaning profile manifest")
+
             existing_profiles = []
             for profile in self.profiles:
-                if profile in existing_profiles:
+                if profile['module'] not in disk_modules:
+                    self.logger.info(
+                        "Profile {0} {1} {2} not found. Removing".format(
+                            profile["distro"], profile["kver"],
+                            profile["arch"]))
+
                     continue
 
-                elif ((os.path.isfile(
-                        self.profiles_dir + profile['module'])) and
-                      (os.path.isfile(
-                          self.profiles_dir + profile['profile']))):
+                self.logger.info(
+                    "Profile {0} {1} {2} exists".format(
+                        profile["distro"], profile["kver"],
+                        profile["arch"]))
+
+                disk_modules.pop(disk_modules.index(profile['module']))
+                existing_profiles.append(profile)
+
+            if len(disk_modules) > 0:
+                cprint("> Importing new modules", 'green')
+
+                for module in disk_modules:
+                    self.logger.info(
+                        "Profile {} found. Importing".format(module))
+                    cprint("> Module {}".format(module), 'yellow')
+                    distro = input(colored(
+                        "Distribution: ", 'green')).lower().replace(' ', '')
+                    kver = input(colored(
+                        "Kernel Version: ", 'green')).lower().replace(' ', '')
+                    arch = input(colored(
+                        "Architecture: ", 'green')).lower().replace(' ', '')
+ 
+
+                    profile = {
+                        "distro": distro,
+                        "kver": kver,
+                        "arch": arch,
+                        "module": "lime-{0}-{1}-{2}.ko".format(
+                            distro, kver, arch),
+                        "profile": "vol-{0}-{1}-{2}.zip".format(
+                            distro, kver, arch)}
+
+                    shutil.move(
+                        self.profiles_dir + module,
+                        self.profiles_dir + profile['module'])
+
                     existing_profiles.append(profile)
-                else:
-                    with contextlib.suppress(FileNotFoundError):
-                        os.remove(self.profiles_dir + profile['module'])
-                        os.remove(self.profiles_dir + profile['profile'])
 
             self.profiles = existing_profiles
             json.dump(
