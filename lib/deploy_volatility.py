@@ -1,4 +1,5 @@
 import sys
+import logging
 import shutil
 from subprocess import Popen
 from termcolor import colored, cprint
@@ -11,6 +12,7 @@ class VolDeploy(object):
         super(VolDeploy, self).__init__()
         self.client = session.client_
         self.remote_session = session
+        self.logger = logging.getLogger(__name__)
 
         self.output_dir = './profiles/'
         self.lime_rdir = './.limeaide/'

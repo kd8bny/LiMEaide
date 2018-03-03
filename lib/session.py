@@ -10,7 +10,7 @@ class Session(object):
 
     def __init__(self, client, is_verbose=False):
         super(Session, self).__init__()
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger(__name__)
         self.client_ = client
         self.is_verbose = is_verbose
         self.session = None
@@ -49,17 +49,20 @@ class Session(object):
         """
         stdout, stderr = None, None
         if self.client_.is_sudoer and requires_privlege:
+            cmd = "sudo -S -p ' ' {0}".format(cmd)
+            self.logger.info("Command executed: {0}".format(cmd))
             stdin, stdout, stderr = self.session.exec_command(
-                "sudo -S -p ' ' {0}".format(cmd), get_pty=True)
+                cmd, get_pty=True)
             stdin.write(self.client_.pass_ + '\n')
             stdin.flush()
         else:
+            self.logger.info("Command executed: {0}".format(cmd))
             stdin, stdout, stderr = self.session.exec_command(
                 cmd, get_pty=True)
 
-        stdout = [line.strip('\n\r') for line in stdout]
+        stdout = [line.strip() for line in stdout]
         for line in stdout:
-            if line != self.client_.pass_:
+            if line and line != self.client_.pass_:
                 self.logger.info(line)
                 if self.is_verbose:
                     print(line)
