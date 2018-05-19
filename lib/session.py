@@ -5,6 +5,7 @@ import paramiko
 import hashlib
 from termcolor import colored, cprint
 
+
 class Session(object):
     """Session will take care of all the backend communications."""
 
