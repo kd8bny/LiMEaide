@@ -2,8 +2,8 @@ import sys
 import functools
 import logging
 import paramiko
+import hashlib
 from termcolor import colored, cprint
-
 
 class Session(object):
     """Session will take care of all the backend communications."""
@@ -26,6 +26,33 @@ class Session(object):
                 return 1
 
         return 0
+
+    def __calc_hash(self, filename):
+        """Calculate sha256 hash of file. 
+
+        :param filename Path to file
+        """
+        file_hash = hashlib.sha256()
+        with open(filename, "rb") as binary_file:
+            for file_chunk in iter(lambda: binary_file.read(4096), b""):
+              file_hash.update(file_chunk)
+            
+        return file_hash.hexdigest()
+
+    def __log_file_details(self, filename):
+        """Log details of file prior to transfer to target host 
+
+        :param filename Path to file
+        """
+        try:
+            file_hash = self.__calc_hash(filename)
+            self.logger.info("File Transmit Details: {0} (sha256={1})".format(
+                filename, file_hash))
+        except Exception as e:
+            cprint("Warning: Error calculating file checksum", 'red')
+            self.logger.warning("Error calculating file checksum: {0}".format(
+                filename))
+            self.logger.warning(e)
 
     def __transfer_status__(self, filename, bytes_so_far, bytes_total):
         """Callback to provide status of the files being transfered.
@@ -97,7 +124,7 @@ class Session(object):
             print('\n')
 
     def put_sftp(self, local_dir, remote_dir, filename):
-        """Called when data needs to be pulled from remote system.
+        """Called when data needs to be transfered to remote system.
 
         dir params do not include the file name
 
@@ -105,6 +132,9 @@ class Session(object):
         :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
+        # Calcuate and log file details prior to transfer
+        self.__log_file_details(local_dir + filename)
+
         self.SFTP.put(local_dir + filename, remote_dir + filename)
 
     def get_file_stat(self, remote_dir, filename):
