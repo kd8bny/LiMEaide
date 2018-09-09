@@ -48,6 +48,9 @@ class Limeaide(object):
         parser.add_argument("-u", "--user", help="use a sudo user instead \
             default: root")
         parser.add_argument(
+            "-r", "--raw", help="Use a raw socket instead of a SFTP session \
+            to transfer data. Does not write anything to remote disk.")
+        parser.add_argument(
             "-N", "--no-profiler", action="store_true",
             help="Do NOT run profiler and force compile new module/profile for \
             client")
@@ -214,10 +217,10 @@ class Limeaide(object):
         """Setup logging to file and initial logger"""
 
         date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
-        
+
         if not os.path.isdir(self.log_dir):
-          os.mkdir(self.log_dir)
-  
+            os.mkdir(self.log_dir)
+
         logging.basicConfig(
             level=logging.INFO, filename='{0}{1}.log'.format(
                 self.log_dir, date))
