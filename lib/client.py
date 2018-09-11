@@ -1,4 +1,4 @@
-class Client(object):
+class Client:
     """All client attributes including the profile.
 
     The profile format is stored as json as such
@@ -21,6 +21,7 @@ class Client(object):
         self.job_name = None
 
         # Profile and options
+        self.transfer = None
         self.profile = None
         self.output = 'dump.lime'
         self.output_dir = None
