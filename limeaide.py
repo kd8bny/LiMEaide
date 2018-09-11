@@ -169,8 +169,15 @@ class Limeaide:
             client.user = args.user
             client.is_sudoer = True
 
-        if args.delay_pickup:
+        if args.delay_pickup: #Skip local
             client.delay_pickup = True
+
+        if args.raw:
+            client.transfer = 'raw'
+
+        if args.local:
+            client.transfer = 'local'
+            # TODO kill delay
 
         if not config['DEFAULT']['output']:
             if args.output is not None:
