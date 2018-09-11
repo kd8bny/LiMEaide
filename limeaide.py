@@ -20,7 +20,7 @@ from lib.deploy_volatility import VolDeploy
 from lib.profiler import Profiler
 
 
-class Limeaide(object):
+class Limeaide:
     """Deploy LiME LKM to remote host in order to scrape RAM."""
 
     __version__ = "1.5.0"
@@ -50,6 +50,8 @@ class Limeaide(object):
         parser.add_argument(
             "-r", "--raw", help="Use a raw socket instead of a SFTP session \
             to transfer data. Does not write anything to remote disk.")
+        parser.add_argument(
+            "-l", "--local", help="Run on local machine.")
         parser.add_argument(
             "-N", "--no-profiler", action="store_true",
             help="Do NOT run profiler and force compile new module/profile for \
