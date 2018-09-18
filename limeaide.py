@@ -185,10 +185,6 @@ class Limeaide:
         if args.raw:
             client.transfer = 'raw'
 
-        if args.local:
-            client.transfer = 'local'
-            # TODO kill delay
-
         if not config['DEFAULT']['output']:
             if args.output is not None:
                 client.output = args.output
