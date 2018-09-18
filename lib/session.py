@@ -2,7 +2,7 @@ import sys
 import logging
 import paramiko
 from termcolor import colored, cprint
-import transfer
+import lib.transfer as transfer
 
 
 class Session:
@@ -85,14 +85,15 @@ class Session:
                 self.client_.ip, username=self.client_.user,
                 password=self.client_.pass_)
 
-
-            # TODO determine client
-            if client_.transfer is 'raw':
-                self.transfer = Raw()
-            elif client_.transfer is 'local':
-                self.transfer = Local()
+            if self.client_.transfer == 'raw':
+                #self.transfer = transfer.Raw()
+                ##TODO we still need SFTP for profiles
+                pass
+            elif self.client_.transfer == 'local':
+                #self.transfer = transfer.Local()
+                pass
             else:
-                self.transfer = SFTP()
+                self.transfer = transfer.SFTP()
 
             self.transfer.connect()
 

@@ -15,13 +15,13 @@ class Client:
         super(Client, self).__init__()
         # Client specifics
         self.ip = None
+        self.transfer = 'SFTP'
         self.user = 'root'
         self.is_sudoer = False
         self.pass_ = None
         self.job_name = None
 
         # Profile and options
-        self.transfer = None
         self.profile = None
         self.output = 'dump.lime'
         self.output_dir = None
