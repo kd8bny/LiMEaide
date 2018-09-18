@@ -1,11 +1,11 @@
 import sys
-import functools
 import logging
 import paramiko
 from termcolor import colored, cprint
+import transfer
 
 
-class Session(object):
+class Session:
     """Session will take care of all the backend communications."""
 
     def __init__(self, client, is_verbose=False):
@@ -13,10 +13,8 @@ class Session(object):
         self.logger = logging.getLogger(__name__)
         self.client_ = client
         self.is_verbose = is_verbose
-        self.session = None
-        self.SFTP = None
-
-        self.complete_percent = []
+        self.remote_session = None
+        self.transfer = None
 
     def __error_check__(self, stdout):
         """Check for standard errors from stdout"""
@@ -26,19 +24,6 @@ class Session(object):
                 return 1
 
         return 0
-
-    def __transfer_status__(self, filename, bytes_so_far, bytes_total):
-        """Callback to provide status of the files being transfered.
-
-        Calling function must print new line on return or else line will be
-        overwritten.
-        """
-        percent = int(100 * bytes_so_far / bytes_total)
-        if percent % 10 == 0 and percent not in self.complete_percent:
-            self.complete_percent.append(percent)
-            print(
-                colored("Transfer of %r is at %d/%d bytes (%.0f%%)\r"
-                   % (filename, bytes_so_far, bytes_total, percent), 'cyan'), end='\r', flush=True)
 
     def exec_cmd(self, cmd, requires_privlege, disconnect_on_fail=True):
         """Called to exec command on remote system.
@@ -79,53 +64,6 @@ class Session(object):
 
         return stdout
 
-    def pull_sftp(self, remote_dir, local_dir, filename):
-        """Called when data needs to be pulled from remote system.
-
-        dir params do not include the file name
-
-        :param remote_dir path to file on remote host
-        :param local_dir path to output dir on local machine
-        :param filename file to transfer
-        """
-
-        self.complete_percent = []
-        if self.get_file_stat(remote_dir, filename):
-            status = functools.partial(self.__transfer_status__, filename)
-            self.SFTP.get(
-                remote_dir + filename, local_dir + filename, callback=status)
-            print('\n')
-
-    def put_sftp(self, local_dir, remote_dir, filename):
-        """Called when data needs to be pulled from remote system.
-
-        dir params do not include the file name
-
-        :param remote_dir path to file on remote host
-        :param local_dir path to output dir on local machine
-        :param filename file to transfer
-        """
-        self.SFTP.put(local_dir + filename, remote_dir + filename)
-
-    def get_file_stat(self, remote_dir, filename):
-        """Check to see if remote file exists and size is greater than 0.
-
-        :param remote_dir Directory without filename
-        :param filename File to Check
-        :return If the file exists
-        """
-        file_exists = False
-
-        try:
-            attributes = self.SFTP.stat(remote_dir + filename)
-            if attributes.st_size > 0:
-                file_exists = True
-
-        except IOError as e:
-            self.logger.warning(e)
-
-        return file_exists
-
     def disconnect(self):
         """Call to end session and remove files from remote client."""
         cprint("> Cleaning up...", 'blue')
@@ -140,16 +78,27 @@ class Session(object):
     def connect(self):
         """Call to set connection with remote client."""
         try:
-            self.session = paramiko.SSHClient()
-            self.session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            self.session.connect(
+            self.remote_session = paramiko.SSHClient()
+            self.remote_session.set_missing_host_key_policy(
+                paramiko.AutoAddPolicy())
+            self.remote_session.connect(
                 self.client_.ip, username=self.client_.user,
                 password=self.client_.pass_)
 
-            self.SFTP = self.session.open_sftp()
+
+            # TODO determine client
+            if client_.transfer is 'raw':
+                self.transfer = Raw()
+            elif client_.transfer is 'local':
+                self.transfer = Local()
+            else:
+                self.transfer = SFTP()
+
+            self.transfer.connect()
 
         except (paramiko.AuthenticationException,
                 paramiko.ssh_exception.NoValidConnectionsError) as e:
             print(colored("> {}".format(e), 'red'))
+            self.transfer.close()
             self.logger.error(e)
             sys.exit()
