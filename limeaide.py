@@ -51,8 +51,6 @@ class Limeaide:
             "-r", "--raw", help="Use a raw socket instead of a SFTP session \
             to transfer data. Does not write anything to remote disk.")
         parser.add_argument(
-            "-l", "--local", help="Run on local machine.")
-        parser.add_argument(
             "-N", "--no-profiler", action="store_true",
             help="Do NOT run profiler and force compile new module/profile for \
             client")
@@ -162,15 +160,27 @@ class Limeaide:
         client = Client()
         date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
 
-        client.ip = args.remote
+        if args.remote == 'local':
+            client.session = 'local'
+        else:
+            client.ip = args.remote
+
+        if args.raw:
+            client.session = 'raw'
+
         client.jobname = "{0}-{1}-worker".format(client.ip, date)
 
         if args.user is not None:
             client.user = args.user
             client.is_sudoer = True
 
-        if args.delay_pickup: #Skip local
-            client.delay_pickup = True
+        if args.delay_pickup:
+            if client.session != 'SFTP':
+                sys.exit(
+                    "Can not delay non SFTP sessions. Please remove raw" +
+                    " or local arguments")
+            else:
+                client.delay_pickup = True
 
         if args.raw:
             client.transfer = 'raw'
