@@ -29,7 +29,7 @@ class LimeDeploy(object):
         # Generate information to create a new profile
         if self.new_profile:
             for file in lime_src:
-                self.remote_session.put_sftp(
+                self.remote_session.transfer.put(
                     self.lime_dir, self.lime_rdir, file)
 
             self.client.profile = self.profiler.create_profile(

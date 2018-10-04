@@ -1,12 +1,15 @@
 import functools
+from lib.transfer.transfer import Transfer
 
 
 class SFTP(Transfer):
     """Session will take care of all the backend communications."""
 
-    def __init__(self):
-        super(transfer, self).__init__()
+    def __init__(self, remote_session):
+        Transfer.__init__(self, remote_session)
+        # super(transfer.Transfer, self)
         self.complete_percent = []
+        self.SFTP = None
 
     def pull(self, remote_dir, local_dir, filename):
         """Called when data needs to be pulled from remote system.
@@ -59,8 +62,8 @@ class SFTP(Transfer):
 
     def connect(self):
         # TODO Catch error
-        self.SFTP = self.session.open_sftp()
+        self.SFTP = self.remote_session.open_sftp()
 
     def close(self):
         # TODO Catch error
-        self.SFTP = self.session.open_sftp()
+        self.remote_session.close()

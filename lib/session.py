@@ -2,7 +2,7 @@ import sys
 import logging
 import paramiko
 from termcolor import colored, cprint
-import lib.transfer as transfer
+from lib.transfer import sftp
 
 
 class Session:
@@ -36,13 +36,13 @@ class Session:
         if self.client_.is_sudoer and requires_privlege:
             cmd = "sudo -S -p ' ' {0}".format(cmd)
             self.logger.info("Command executed: {0}".format(cmd))
-            stdin, stdout, stderr = self.session.exec_command(
+            stdin, stdout, stderr = self.remote_session.exec_command(
                 cmd, get_pty=True)
             stdin.write(self.client_.pass_ + '\n')
             stdin.flush()
         else:
             self.logger.info("Command executed: {0}".format(cmd))
-            stdin, stdout, stderr = self.session.exec_command(
+            stdin, stdout, stderr = self.remote_session.exec_command(
                 cmd, get_pty=True)
 
         stdout = [line.strip() for line in stdout]
@@ -72,7 +72,7 @@ class Session:
         cprint("> Removing LKM...standby", 'blue')
         self.exec_cmd('rmmod lime.ko', True, False)
 
-        self.SFTP.close()
+        self.transfer.close()
         cprint("> Done", 'green')
 
     def connect(self):
@@ -86,20 +86,19 @@ class Session:
                 password=self.client_.pass_)
 
             if self.client_.transfer == 'raw':
-                #self.transfer = transfer.Raw()
-                ##TODO we still need SFTP for profiles
+                # self.transfer = transfer.Raw()
+                # TODO we still need SFTP for profiles
                 pass
             elif self.client_.transfer == 'local':
-                #self.transfer = transfer.Local()
+                # self.transfer = transfer.Local()
                 pass
             else:
-                self.transfer = transfer.SFTP()
+                self.transfer = sftp.SFTP(self.remote_session)
 
             self.transfer.connect()
 
         except (paramiko.AuthenticationException,
                 paramiko.ssh_exception.NoValidConnectionsError) as e:
             print(colored("> {}".format(e), 'red'))
-            self.transfer.close()
             self.logger.error(e)
             sys.exit()
