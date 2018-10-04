@@ -1,8 +1,7 @@
-import sys
 import logging
 import shutil
 from subprocess import Popen
-from termcolor import colored, cprint
+from termcolor import cprint
 
 
 class VolDeploy(object):
@@ -26,7 +25,7 @@ class VolDeploy(object):
             "cp /boot/{0} {1}".format(self.map, self.lime_rdir), True)
         self.remote_session.exec_cmd(
             "chmod 744 {0}{1}".format(self.lime_rdir, self.map), True)
-        self.remote_session.pull_sftp(
+        self.remote_session.transfer.pull(
             self.lime_rdir, self.client.output_dir, self.map)
 
     def get_profile(self):
