@@ -3,7 +3,7 @@ from lib.transfer.transfer import Transfer
 
 
 class SFTP(Transfer):
-    """Session will take care of all the backend communications."""
+    """Transfer method using SFTP through paramiko"""
 
     def __init__(self, remote_session):
         Transfer.__init__(self, remote_session)
