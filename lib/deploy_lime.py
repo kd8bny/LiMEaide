@@ -29,7 +29,7 @@ class LimeDeploy(object):
         # Generate information to create a new profile
         if self.new_profile:
             for file in lime_src:
-                self.remote_session.put_sftp(
+                self.remote_session.transfer.put(
                     self.lime_dir, self.lime_rdir, file)
 
             self.client.profile = self.profiler.create_profile(
@@ -44,9 +44,10 @@ class LimeDeploy(object):
             self.logger.info(
                 "new profile created {0}".format(
                     self.client.profile["module"]))
+
         # Use an old profile
         else:
-            self.remote_session.put_sftp(
+            self.remote_session.transfer.put(
                 self.profiles_dir, self.lime_rdir,
                 self.client.profile["module"])
 
@@ -87,13 +88,13 @@ class LimeDeploy(object):
         if self.client.compress:
             remote_file += '.bz2'
 
-        self.remote_session.pull_sftp(
+        self.remote_session.transfer.pull(
             self.lime_rdir, self.client.output_dir, remote_file)
-        self.remote_session.pull_sftp(
+        self.remote_session.transfer.pull(
             self.lime_rdir, self.client.output_dir, remote_file_hash)
 
         if self.new_profile:
-            self.remote_session.pull_sftp(
+            self.remote_session.transfer.pull(
                 self.lime_rdir, self.profiles_dir,
                 self.client.profile['module'])
 

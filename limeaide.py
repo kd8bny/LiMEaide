@@ -20,7 +20,7 @@ from lib.deploy_volatility import VolDeploy
 from lib.profiler import Profiler
 
 
-class Limeaide(object):
+class Limeaide:
     """Deploy LiME LKM to remote host in order to scrape RAM."""
 
     __version__ = "1.5.0"
@@ -47,6 +47,9 @@ class Limeaide(object):
         parser.add_argument("remote", help="remote host IP")
         parser.add_argument("-u", "--user", help="use a sudo user instead \
             default: root")
+        parser.add_argument(
+            "-r", "--raw", help="Use a raw socket instead of a SFTP session \
+            to transfer data. Does not write anything to remote disk.")
         parser.add_argument(
             "-N", "--no-profiler", action="store_true",
             help="Do NOT run profiler and force compile new module/profile for \
@@ -157,7 +160,14 @@ class Limeaide(object):
         client = Client()
         date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
 
-        client.ip = args.remote
+        if args.remote == 'local':
+            client.session = 'local'
+        else:
+            client.ip = args.remote
+
+        if args.raw:
+            client.session = 'raw'
+
         client.jobname = "{0}-{1}-worker".format(client.ip, date)
 
         if args.user is not None:
@@ -165,7 +175,15 @@ class Limeaide(object):
             client.is_sudoer = True
 
         if args.delay_pickup:
-            client.delay_pickup = True
+            if client.session != 'SFTP':
+                sys.exit(
+                    "Can not delay non SFTP sessions. Please remove raw" +
+                    " or local arguments")
+            else:
+                client.delay_pickup = True
+
+        if args.raw:
+            client.transfer = 'raw'
 
         if not config['DEFAULT']['output']:
             if args.output is not None:
@@ -214,10 +232,10 @@ class Limeaide(object):
         """Setup logging to file and initial logger"""
 
         date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
-        
+
         if not os.path.isdir(self.log_dir):
-          os.mkdir(self.log_dir)
-  
+            os.mkdir(self.log_dir)
+
         logging.basicConfig(
             level=logging.INFO, filename='{0}{1}.log'.format(
                 self.log_dir, date))

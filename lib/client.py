@@ -1,4 +1,4 @@
-class Client(object):
+class Client:
     """All client attributes including the profile.
 
     The profile format is stored as json as such
@@ -15,6 +15,7 @@ class Client(object):
         super(Client, self).__init__()
         # Client specifics
         self.ip = None
+        self.transfer = 'SFTP'
         self.user = 'root'
         self.is_sudoer = False
         self.pass_ = None

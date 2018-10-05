@@ -61,7 +61,6 @@ class Profiler(object):
                         "Kernel Version: ", 'green')).lower().replace(' ', '')
                     arch = input(colored(
                         "Architecture: ", 'green')).lower().replace(' ', '')
- 
 
                     profile = {
                         "distro": distro,
