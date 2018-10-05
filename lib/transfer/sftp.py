@@ -7,7 +7,7 @@ class SFTP(Transfer):
 
     def __init__(self, remote_session):
         Transfer.__init__(self, remote_session)
-        # super(transfer.Transfer, self)
+        # TODO fix transfer status
         self.complete_percent = []
         self.SFTP = None
 
@@ -22,7 +22,7 @@ class SFTP(Transfer):
         """
 
         self.complete_percent = []
-        if self.get_file_stat(remote_dir, filename):
+        if self.file_stat(remote_dir, filename):
             status = functools.partial(self.__transfer_status__, filename)
             self.SFTP.get(
                 remote_dir + filename, local_dir + filename, callback=status)

@@ -1,14 +1,14 @@
 import os
 import shutil
+from lib.transfer.transfer import Transfer
 
 
 class Local(Transfer):
-    """Session will take care of all the backend communications."""
+    """Transfer method to deploy locally"""
 
     def __init__(self):
         super(Local, self).__init__()
         pass
-
 
     def pull(self, remote_dir, local_dir, filename):
         """Called when data needs to be pulled from remote system.
@@ -20,9 +20,7 @@ class Local(Transfer):
         :param filename file to transfer
         """
         if self.file_stat(remote_dir, filename):
-        shutil.move(remote_dir + filename, local_dir + filename)
-
-        return
+            shutil.move(remote_dir + filename, local_dir + filename)
 
     def put(self, local_dir, remote_dir, filename):
         """Called when data needs to be pulled from remote system.
@@ -34,9 +32,6 @@ class Local(Transfer):
         :param filename file to transfer
         """
         shutil.move(local_dir + filename, remote_dir + filename)
-
-        return
-
 
     def file_stat(self, remote_dir, filename):
         """Check to see if remote file exists and size is greater than 0.

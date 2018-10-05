@@ -2,7 +2,7 @@ import sys
 import logging
 import paramiko
 from termcolor import colored, cprint
-from lib.transfer import sftp
+from lib.transfer import sftp, local
 
 
 class Session:
@@ -77,28 +77,31 @@ class Session:
 
     def connect(self):
         """Call to set connection with remote client."""
-        try:
-            self.remote_session = paramiko.SSHClient()
-            self.remote_session.set_missing_host_key_policy(
-                paramiko.AutoAddPolicy())
-            self.remote_session.connect(
-                self.client_.ip, username=self.client_.user,
-                password=self.client_.pass_)
+
+        if self.client_.transfer == 'local':
+            self.transfer = local.Local(None)
+
+        else:
+            try:
+                self.remote_session = paramiko.SSHClient()
+                self.remote_session.set_missing_host_key_policy(
+                    paramiko.AutoAddPolicy())
+                self.remote_session.connect(
+                    self.client_.ip, username=self.client_.user,
+                    password=self.client_.pass_)
+
+            except (paramiko.AuthenticationException,
+                    paramiko.ssh_exception.NoValidConnectionsError) as e:
+                print(colored("> {}".format(e), 'red'))
+                self.logger.error(e)
+                sys.exit()
 
             if self.client_.transfer == 'raw':
-                # self.transfer = transfer.Raw()
+                # self.transfer = raw.Raw()
                 # TODO we still need SFTP for profiles
                 pass
-            elif self.client_.transfer == 'local':
-                # self.transfer = transfer.Local()
-                pass
-            else:
+
+            elif self.client_.transfer == 'SFTP':
                 self.transfer = sftp.SFTP(self.remote_session)
 
             self.transfer.connect()
-
-        except (paramiko.AuthenticationException,
-                paramiko.ssh_exception.NoValidConnectionsError) as e:
-            print(colored("> {}".format(e), 'red'))
-            self.logger.error(e)
-            sys.exit()
