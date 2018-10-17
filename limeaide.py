@@ -100,11 +100,11 @@ class Limeaide:
 
         # Download LiME
         if not os.path.isdir(self.lime_dir):
-            lime_version = '1.8'
+            lime_version = '1.8.0.1'
             cprint("Downloading LiME", 'green')
             try:
                 urllib.request.urlretrieve(
-                    "https://github.com/504ensicsLabs/LiME/archive/" +
+                    "https://github.com/kd8bny/LiME/archive/" +
                     "v{}.zip".format(
                         lime_version), filename="./tools/lime_master.zip")
                 zip_lime = zipfile.ZipFile("./tools/lime_master.zip", 'r')
