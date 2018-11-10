@@ -60,6 +60,8 @@ class LimeDeploy(object):
     def get_lime_dump(self):
         """Will install LiME and dump RAM."""
         cprint("> Installing LKM and retrieving RAM", 'blue')
+
+        # transfer
         self.remote_session.exec_cmd(
             "insmod {0}{1} 'path={2}{3} format=lime digest=sha1'".format(
                 self.lime_rdir, self.client.profile["module"], self.lime_rdir,

@@ -15,7 +15,8 @@ class Client:
         super(Client, self).__init__()
         # Client specifics
         self.ip = None
-        self.transfer = 'SFTP'
+        self.port = None
+        self.transfer = 'network'
         self.user = 'root'
         self.is_sudoer = False
         self.pass_ = None

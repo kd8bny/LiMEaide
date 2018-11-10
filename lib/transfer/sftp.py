@@ -11,7 +11,21 @@ class SFTP(Transfer):
         self.complete_percent = []
         self.SFTP = None
 
-    def pull(self, remote_dir, local_dir, filename):
+    def pull(self, *args):
+        """This is a raw pull, create a TCP server.
+
+        dir params do not include the file name
+
+        :param remote_dir path to file on remote host
+        :param local_dir path to output dir on local machine
+        :param filename file to transfer
+        """
+        pass
+
+    def pull_tcp(self, local_dir, filename):
+        pass
+
+    def pull_sftp(self, remote_dir, local_dir, filename):
         """Called when data needs to be pulled from remote system.
 
         dir params do not include the file name
