@@ -49,7 +49,8 @@ class Limeaide:
             default: root")
         parser.add_argument(
             "-r", "--raw", help="Use a raw socket instead of a SFTP session \
-            to transfer data. Does not write anything to remote disk.")
+            to transfer data. Does not write the memory image to disk, but \
+            will transfer other needed files")
         parser.add_argument(
             "-N", "--no-profiler", action="store_true",
             help="Do NOT run profiler and force compile new module/profile for \
@@ -176,10 +177,9 @@ class Limeaide:
             client.is_sudoer = True
 
         if args.delay_pickup:
-            if client.session != 'SFTP':
-                sys.exit(
-                    "Can not delay non SFTP sessions. Please remove raw" +
-                    " or local arguments")
+            if client.session != 'network':
+                sys.exit(colored("Can not delay raw or local sessions.\
+                     Please remove raw or local arguments", 'red'))
             else:
                 client.delay_pickup = True
 

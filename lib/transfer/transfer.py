@@ -1,8 +1,8 @@
-from termcolor import colored, cprint
 
 
 class Transfer:
-    """Session will take care of all the backend communications."""
+    """Top level parent. Override all functions when developing new
+    mechanisms"""
 
     def __init__(self, remote_session):
         self.remote_session = remote_session
@@ -16,7 +16,6 @@ class Transfer:
         """
         pass
 
-    """OVERRIDE"""
     def pull(self, remote_dir, local_dir, filename):
         """Called when data needs to be pulled from remote system.
 
@@ -26,7 +25,6 @@ class Transfer:
         :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
-
         pass
 
     def put(self, local_dir, remote_dir, filename):

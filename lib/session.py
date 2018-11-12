@@ -3,7 +3,7 @@ import logging
 import paramiko
 import hashlib
 from termcolor import colored, cprint
-from lib.transfer import sftp, local
+from lib.transfer import network, local
 
 
 class Session:
@@ -124,25 +124,20 @@ class Session:
 
         else:
             try:
-                self.remote_session = paramiko.SSHClient()
-                self.remote_session.set_missing_host_key_policy(
+                self.paramiko_session = paramiko.SSHClient()
+                self.paramiko_session.set_missing_host_key_policy(
                     paramiko.AutoAddPolicy())
-                self.remote_session.connect(
+                self.paramiko_session.connect(
                     self.client_.ip, username=self.client_.user,
                     password=self.client_.pass_)
 
             except (paramiko.AuthenticationException,
                     paramiko.ssh_exception.NoValidConnectionsError) as e:
-                print(colored("> {}".format(e), 'red'))
                 self.logger.error(e)
-                sys.exit()
+                sys.exit(colored("> {}".format(e), 'red'))
 
-            if self.client_.transfer == 'raw':
-                # self.transfer = raw.Raw()
-                # TODO we still need SFTP for profiles
-                pass
+            self.transfer = network.Network(
+                self.paramiko_session, self.client_.transfer,
+                self.client_.ip, self.client_port)
 
-            elif self.client_.transfer == 'SFTP':
-                self.transfer = sftp.SFTP(self.remote_session)
-
-            self.transfer.connect()
+        self.transfer.connect()

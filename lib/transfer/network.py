@@ -1,15 +1,16 @@
 import functools
-from lib.transfer.transfer import Transfer
+from lib.transfer.transfer import Transfer, TCP_CLIENT
 
 
-class SFTP(Transfer):
-    """Transfer method using SFTP through paramiko"""
+class Network(Transfer):
+    """Network transfer method using SFTP or raw TCP"""
 
-    def __init__(self, remote_session):
-        Transfer.__init__(self, remote_session)
-        # TODO fix transfer status
+    def __init__(self, paramiko_session, method, ip=None, port=None):
+        Transfer.__init__(self, paramiko_session)
         self.complete_percent = []
-        self.SFTP = None
+        #self.SFTP = None
+        self.ip = ip
+        self.port = port
 
     def pull(self, *args):
         """This is a raw pull, create a TCP server.
@@ -20,10 +21,20 @@ class SFTP(Transfer):
         :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
-        pass
+        if self.paramiko_session.client
+        self.pull_tcp()
 
     def pull_tcp(self, local_dir, filename):
-        pass
+        """Called when data needs to be pulled from remote system.
+            Connects as a TCP client
+
+        dir params do not include the file name
+
+        :param remote_dir path to file on remote host
+        :param local_dir path to output dir on local machine
+        :param filename file to transfer
+        """
+        TCP_CLIENT(self.ip, self.port, local_dir, filename)
 
     def pull_sftp(self, remote_dir, local_dir, filename):
         """Called when data needs to be pulled from remote system.
