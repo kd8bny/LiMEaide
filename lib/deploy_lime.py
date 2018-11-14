@@ -38,8 +38,9 @@ class LimeDeploy(object):
             cprint("> Building loadable kernel module", 'blue')
             self.remote_session.exec_cmd(
                 'cd {}; make'.format(self.lime_rdir), False)
-            self.remote_session.exec_cmd("mv {0}lime.ko {0}{1}".format(
-                self.lime_rdir, self.client.profile["module"]), False)
+            self.remote_session.exec_cmd("mv {0}lime-{1}.ko {0}{2}".format(
+                self.lime_rdir, self.client.profile["kver"],
+                self.client.profile["module"]), False)
 
             self.logger.info(
                 "new profile created {0}".format(
