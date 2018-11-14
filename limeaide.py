@@ -169,6 +169,7 @@ class Limeaide:
 
         if args.raw:
             client.session = 'raw'
+            client.port = args.port = args.raw
 
         client.jobname = "{0}-{1}-worker".format(client.ip, date)
 
@@ -182,10 +183,6 @@ class Limeaide:
                      Please remove raw or local arguments", 'red'))
             else:
                 client.delay_pickup = True
-
-        if args.raw:
-            client.transfer = 'raw'
-            client.port = args.port = args.raw
 
         if not config['DEFAULT']['output']:
             if args.output is not None:
