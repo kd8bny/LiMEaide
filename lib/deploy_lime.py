@@ -66,7 +66,7 @@ class LimeDeploy(object):
 
         # Build the correct instructions
         insmod_path = ""
-        if self.client.transfer == 'raw':
+        if self.client.transfer is 'raw':
             insmod_path = "path=tcp:{}".format(self.client.port)
         else:
             insmod_path = "path={0}{1}".format(
@@ -84,10 +84,11 @@ class LimeDeploy(object):
 
         self.remote_session.exec_cmd(insmod_cmd, True)
 
-        cprint("> Changing permissions", 'blue')
-        self.remote_session.exec_cmd(
-            "chmod 755 {0}{1}".format(
-                self.lime_rdir, self.client.output), True)
+        if self.client.transfer is not 'raw':
+            cprint("> Changing permissions", 'blue')
+            self.remote_session.exec_cmd(
+                "chmod 755 {0}{1}".format(
+                    self.lime_rdir, self.client.output), True)
 
         self.logger.info("LiME installed")
 

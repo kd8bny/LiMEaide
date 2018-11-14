@@ -185,6 +185,7 @@ class Limeaide:
 
         if args.raw:
             client.transfer = 'raw'
+            client.port = args.port = args.raw
 
         if not config['DEFAULT']['output']:
             if args.output is not None:
