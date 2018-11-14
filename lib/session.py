@@ -124,14 +124,12 @@ class Session:
 
         else:
             try:
-                print("hi")
                 self.paramiko_session = paramiko.SSHClient()
                 self.paramiko_session.set_missing_host_key_policy(
                     paramiko.AutoAddPolicy())
                 self.paramiko_session.connect(
                     self.client_.ip, username=self.client_.user,
                     password=self.client_.pass_)
-                print("bye")
 
             except (paramiko.AuthenticationException,
                     paramiko.ssh_exception.NoValidConnectionsError) as e:

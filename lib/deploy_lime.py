@@ -71,14 +71,13 @@ class LimeDeploy(object):
         else:
             insmod_path = "path={0}{1}".format(
                 self.lime_rdir, self.client.output)
-        insmod_format = "format={}".format(self.client.digest)
+        insmod_format = "format={}".format(self.client.format)
         insmod_digest = "digest={}".format(self.client.digest)
 
         cprint(">> {}".format(insmod_path), 'blue')
         cprint(">> {}".format(insmod_format), 'blue')
         cprint(">> {}".format(insmod_digest), 'blue')
 
-        print(self.client.profile["module"])
         insmod_cmd = "insmod {0}{1} '{2} {3} {4}'".format(
             self.lime_rdir, self.client.profile["module"],
             insmod_path, insmod_format, insmod_digest)
