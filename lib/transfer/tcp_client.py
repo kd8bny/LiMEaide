@@ -34,8 +34,10 @@ class TCP_CLIENT:
 
     def main(self):
         try:
+            self.logger.info("Connecting to Socket")
             srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             srv.connect((self.ip, self.port))
+            print("connect")
 
             self.__handle_client__(srv)
 
