@@ -25,6 +25,8 @@ class Client:
         # Profile and options
         self.profile = None
         self.output = 'dump.lime'
+        self.format = 'lime'
+        self.digest = 'sha1'
         self.output_dir = None
         self.compress = True
         self.delay_pickup = False

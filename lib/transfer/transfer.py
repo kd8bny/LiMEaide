@@ -4,8 +4,8 @@ class Transfer:
     """Top level parent. Override all functions when developing new
     mechanisms"""
 
-    def __init__(self, remote_session):
-        self.remote_session = remote_session
+    def __init__(self):
+        pass
 
     def __transfer_status__(self, filename, bytes_so_far, bytes_total):
         # TDOD can we do this abstracted?

@@ -28,10 +28,9 @@ class TCP_CLIENT:
         try:
             with open(self.file_name, 'ab') as f:
                 f.write(data)
-
-        except as e:
-            self.logger.error("Unable to save output: {}".format(e))
-            sys.exit()
+        except:
+            self.logger.error("Unable to save output")
+            sys.exit("Unable to save output")
 
     def main(self):
         try:

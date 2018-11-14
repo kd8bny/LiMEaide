@@ -1,18 +1,21 @@
 import functools
-from lib.transfer.transfer import Transfer, TCP_CLIENT
+from lib.transfer.transfer import Transfer
+from lib.transfer.tcp_client import TCP_CLIENT
 
 
 class Network(Transfer):
     """Network transfer method using SFTP or raw TCP"""
 
     def __init__(self, paramiko_session, method, ip=None, port=None):
-        Transfer.__init__(self, paramiko_session)
-        self.complete_percent = []
-        #self.SFTP = None
+        Transfer.__init__(self)
+        self.paramiko_session = paramiko_session
+        self.method = method
         self.ip = ip
         self.port = port
+        # self.complete_percent = []
+        # self.SFTP = None
 
-    def pull(self, *args):
+    def pull(self, remote_dir, local_dir, filename):
         """This is a raw pull, create a TCP server.
 
         dir params do not include the file name
@@ -21,10 +24,13 @@ class Network(Transfer):
         :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
-        if self.paramiko_session.client
-        self.pull_tcp()
+        if remote_dir is None:
+            self.__pull_tcp__(self.ip, self.port, local_dir, filename)
+        else:
+            self.__pull_sftp__(remote_dir, local_dir, filename)
 
-    def pull_tcp(self, local_dir, filename):
+    @staticmethod
+    def __pull_tcp__(ip, port, local_dir, filename):
         """Called when data needs to be pulled from remote system.
             Connects as a TCP client
 
@@ -34,9 +40,10 @@ class Network(Transfer):
         :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
-        TCP_CLIENT(self.ip, self.port, local_dir, filename)
+        TCP_CLIENT(ip, port, local_dir, filename)
 
-    def pull_sftp(self, remote_dir, local_dir, filename):
+    @staticmethod
+    def __pull_sftp__(self, remote_dir, local_dir, filename):
         """Called when data needs to be pulled from remote system.
 
         dir params do not include the file name
@@ -87,8 +94,8 @@ class Network(Transfer):
 
     def connect(self):
         # TODO Catch error
-        self.SFTP = self.remote_session.open_sftp()
+        self.SFTP = self.paramiko_session.open_sftp()
 
     def close(self):
         # TODO Catch error
-        self.remote_session.close()
+        self.paramiko_session.close()

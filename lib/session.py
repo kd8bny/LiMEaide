@@ -14,7 +14,7 @@ class Session:
         self.logger = logging.getLogger(__name__)
         self.client_ = client
         self.is_verbose = is_verbose
-        self.remote_session = None
+        self.paramiko_session = None
         self.transfer = None
 
     def __error_check__(self, stdout):
@@ -77,13 +77,13 @@ class Session:
         if self.client_.is_sudoer and requires_privlege:
             cmd = "sudo -S -p ' ' {0}".format(cmd)
             self.logger.info("Command executed: {0}".format(cmd))
-            stdin, stdout, stderr = self.remote_session.exec_command(
+            stdin, stdout, stderr = self.paramiko_session.exec_command(
                 cmd, get_pty=True)
             stdin.write(self.client_.pass_ + '\n')
             stdin.flush()
         else:
             self.logger.info("Command executed: {0}".format(cmd))
-            stdin, stdout, stderr = self.remote_session.exec_command(
+            stdin, stdout, stderr = self.paramiko_session.exec_command(
                 cmd, get_pty=True)
 
         stdout = [line.strip() for line in stdout]
@@ -108,7 +108,7 @@ class Session:
     def disconnect(self):
         """Call to end session and remove files from remote client."""
         cprint("> Cleaning up...", 'blue')
-        self.exec_cmd('rm -rf ./.limeaide/', True, False)
+        #self.exec_cmd('rm -rf ./.limeaide/', True, False)
 
         cprint("> Removing LKM...standby", 'blue')
         self.exec_cmd('rmmod lime.ko', True, False)
@@ -124,12 +124,14 @@ class Session:
 
         else:
             try:
+                print("hi")
                 self.paramiko_session = paramiko.SSHClient()
                 self.paramiko_session.set_missing_host_key_policy(
                     paramiko.AutoAddPolicy())
                 self.paramiko_session.connect(
                     self.client_.ip, username=self.client_.user,
                     password=self.client_.pass_)
+                print("bye")
 
             except (paramiko.AuthenticationException,
                     paramiko.ssh_exception.NoValidConnectionsError) as e:
@@ -138,6 +140,6 @@ class Session:
 
             self.transfer = network.Network(
                 self.paramiko_session, self.client_.transfer,
-                self.client_.ip, self.client_port)
+                self.client_.ip, self.client_.port)
 
         self.transfer.connect()
