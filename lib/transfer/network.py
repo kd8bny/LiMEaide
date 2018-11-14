@@ -29,8 +29,7 @@ class Network(Transfer):
         else:
             self.__pull_sftp__(remote_dir, local_dir, filename)
 
-    @staticmethod
-    def __pull_tcp__(ip, port, local_dir, filename):
+    def __pull_tcp__(self, ip, port, local_dir, filename):
         """Called when data needs to be pulled from remote system.
             Connects as a TCP client
 
@@ -42,7 +41,6 @@ class Network(Transfer):
         """
         TCP_CLIENT(ip, port, local_dir, filename)
 
-    @staticmethod
     def __pull_sftp__(self, remote_dir, local_dir, filename):
         """Called when data needs to be pulled from remote system.
 
