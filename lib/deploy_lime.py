@@ -39,7 +39,7 @@ class LimeDeploy(object):
 
             cprint("> Building loadable kernel module", 'blue')
             self.remote_session.exec_cmd(
-                'cd {}; make'.format(self.lime_rdir), False)
+                'cd {}; make debug'.format(self.lime_rdir), False)
             self.remote_session.exec_cmd("mv {0}lime-{1}.ko {0}{2}".format(
                 self.lime_rdir, self.client.profile["kver"],
                 self.client.profile["module"]), False)
@@ -82,7 +82,11 @@ class LimeDeploy(object):
             self.lime_rdir, self.client.profile["module"],
             insmod_path, insmod_format, insmod_digest)
 
+        print("b4")
         self.remote_session.exec_cmd(insmod_cmd, True)
+        print("hold")
+
+        self.logger.info("LiME installed")
 
         if self.client.transfer != 'raw':
             cprint("> Changing permissions", 'blue')
@@ -90,15 +94,13 @@ class LimeDeploy(object):
                 "chmod 755 {0}{1}".format(
                     self.lime_rdir, self.client.output), True)
 
-        self.logger.info("LiME installed")
-
-        if self.client.compress:
-            cprint(
-                "> Compressing image to Bzip2...This will take awhile", 'blue')
-            self.remote_session.exec_cmd(
-                'tar -jv --remove-files -f {0}{1}.bz2 -c {2}{3}'.format(
-                    self.lime_rdir, self.client.output, self.lime_rdir,
-                    self.client.output), True)
+            if self.client.compress:
+                cprint(
+                    "> Compressing image to Bzip2...This will take awhile", 'blue')
+                self.remote_session.exec_cmd(
+                    'tar -jv --remove-files -f {0}{1}.bz2 -c {2}{3}'.format(
+                        self.lime_rdir, self.client.output, self.lime_rdir,
+                        self.client.output), True)
 
     def transfer_dump(self):
         """Retrieve files from remote client."""

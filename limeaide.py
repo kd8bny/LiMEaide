@@ -3,16 +3,12 @@
 import sys
 import os
 import logging
-import configparser
 import argparse
-import urllib.request
-import zipfile
 import getpass
 import pickle
-import shutil
-from datetime import datetime
 from termcolor import colored, cprint
 
+from lib.config import Config
 from lib.session import Session
 from lib.client import Client
 from lib.deploy_lime import LimeDeploy
@@ -29,18 +25,9 @@ class Limeaide:
     def __init__(self):
         super(Limeaide, self).__init__()
         self.logger = None
-        self.volatility_profile_dir = None
-        self.lime_dir = './tools/LiME/src/'
-        self.tools_dir = './tools/'
-        self.output_dir = './output/'
-        self.profile_dir = './profiles/'
-        self.log_dir = './logs/'
-        self.scheduled_pickup_dir = './scheduled_jobs/'
-
-        self.args_case = ''
 
     @staticmethod
-    def get_args():
+    def __get_args__():
         """Take a look at those args."""
         parser = argparse.ArgumentParser(description='Utility designed to \
             automate GNU/Linux memory forensics')
@@ -75,122 +62,47 @@ class Limeaide:
 
         return parser.parse_args()
 
-    def check_directories(self):
-        if not os.path.isdir(self.output_dir):
-            os.mkdir(self.output_dir)
-
-        if not os.path.isdir(self.profile_dir):
-            os.mkdir(self.profile_dir)
-
-        if not os.path.isdir(self.tools_dir):
-            os.mkdir(self.tools_dir)
-
-        if not os.path.isdir(self.scheduled_pickup_dir):
-            os.mkdir(self.scheduled_pickup_dir)
-
-    def check_tools(self):
-        """Check for required tools and directories."""
-
-        if not os.path.isfile('.limeaide'):
-            config = configparser.RawConfigParser()
-            config.set('DEFAULT', 'volatility', '')
-            config.set('DEFAULT', 'output', '')
-            config.set('DEFAULT', 'compress', '')
-            with open('.limeaide', 'w+') as config_file:
-                config.write(config_file)
-
-        # Download LiME
-        if not os.path.isdir(self.lime_dir):
-            lime_version = '1.8.0.1'
-            cprint("Downloading LiME", 'green')
-            try:
-                urllib.request.urlretrieve(
-                    "https://github.com/kd8bny/LiME/archive/" +
-                    "v{}.zip".format(
-                        lime_version), filename="./tools/lime_master.zip")
-                zip_lime = zipfile.ZipFile("./tools/lime_master.zip", 'r')
-                zip_lime.extractall('./tools/')
-                zip_lime.close()
-                shutil.move(
-                    './tools/LiME-{}'.format(lime_version), './tools/LiME/')
-            except urllib.error.URLError:
-                cprint(
-                    "LiME failed to download. Check your internet connection" +
-                    "or place manually", 'red')
-                sys.exit()
-
-        # Check to see if a volatility directory exists in config
-        config = configparser.ConfigParser()
-        config.read('.limeaide')
-        config_vol_dir = config['DEFAULT']['volatility']
-
-        if config_vol_dir == 'None':
-            pass
-        elif not config_vol_dir or not os.path.isdir(config_vol_dir):
-            cprint(
-                "Volatility directory missing. Current directory is:", 'red')
-            cprint("{}".format(config_vol_dir), 'blue')
-            cprint("Please provide a path to your Volatility directory." +
-                   "\ne.g. '~/volatility/'" +
-                   "\n[q] to never ask again: ", 'green')
-            path_ext = '/volatility/plugins/overlays/linux/'
-            while True:
-                path = input(":")
-                if path == 'q':
-                    path = 'None'
-                    path_ext = ''
-                    break
-                elif os.path.isdir(path):
-                    break
-                else:
-                    cprint(
-                        "Entered directory does not exist. Please enter" +
-                        "again", 'red')
-
-            config.set('DEFAULT', 'volatility', path + path_ext)
-            with open('.limeaide', 'w+') as configfile:
-                config.write(configfile)
-
-        self.volatility_profile_dir = config_vol_dir
-
-    @staticmethod
-    def get_client(args, config):
+    def __get_client__(self, args, config):
         """Return instantiated client.
 
         Config will provide global overrides.
         """
         client = Client()
-        date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
-
-        if args.remote == 'local':
-            client.session = 'local'
-        else:
-            client.ip = args.remote
-
+        client.ip = args.remote
         if args.raw:
-            client.transfer = 'raw'
-            client.port = args.port = args.raw
+            if client.ip != 'local':
+                sys.exit(colored("Can not conduct raw transfer on local\
+                    machine", 'red'))
+            else:
+                client.transfer = 'raw'
+                client.port = args.port
 
-        client.jobname = "{0}-{1}-worker".format(client.ip, date)
+        if args.case:
+            client.jobname = args.case
+        else:
+            client.jobname = "{0}-{1}-worker".format(
+                client.ip, self.config.date)
 
-        if args.user is not None:
+        if args.user:
             client.user = args.user
-            client.is_sudoer = True
 
         if args.delay_pickup:
             if client.session != 'network':
                 sys.exit(colored("Can not delay raw or local sessions.\
                      Please remove raw or local arguments", 'red'))
             else:
-                client.delay_pickup = True
+                client.delay_pickup = args.delay_pickup
 
         if not config['DEFAULT']['output']:
-            if args.output is not None:
+            if args.output:
                 client.output = args.output
 
         if not config['DEFAULT']['compress']:
             if args.dont_compress:
                 client.compress = not client.compress
+
+        client.output_dir = "{0}{1}/".format(
+            self.config.output_dir, self.client.job_name)
 
         cprint("> Establishing secure connection {0}@{1}".format(
             client.user, client.ip), 'blue')
@@ -227,21 +139,7 @@ class Limeaide:
         saved_session.disconnect()
         os.remove(jobname)
 
-    def setup_logging(self):
-        """Setup logging to file and initial logger"""
-
-        date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
-
-        if not os.path.isdir(self.log_dir):
-            os.mkdir(self.log_dir)
-
-        logging.basicConfig(
-            level=logging.INFO, filename='{0}{1}.log'.format(
-                self.log_dir, date))
-        self.logger = logging.getLogger(__name__)
-
-    def main(self):
-        """Start the interactive session for LiMEaide."""
+    def display_header(self):
         cprint(
             """\
   .---.                                                     _______
@@ -262,37 +160,30 @@ class Limeaide:
             "LiMEaide is licensed under GPL-3.0\n"
             "LiME is licensed under GPL-2.0\n")
 
-        date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
-        self.setup_logging()
-        self.check_directories()
-        self.check_tools()
+    def main(self):
+        """Start the interactive session for LiMEaide."""
 
-        args = self.get_args()
-        config = configparser.ConfigParser()
-        config.read('.limeaide')
+        self.display_header()
+        config = Config.configure()
         profiler = Profiler()
         profiler.load_profiles()
-        client = self.get_client(args, config)
+
+        args = self.get_args()
+        client = self.__get_client__(args, config)
 
         if args.pickup:
             self.finish_saved_job(args.pickup)
             sys.exit()
 
-        if args.case is not None:
-            self.args_case = 'case_%s' % (args.case)
-
         # Start session
         session = Session(client, args.verbose)
         session.connect()
-        client.output_dir = "{0}{1}{2}/".format(
-            self.output_dir, self.args_case, date)
-        os.mkdir(client.output_dir)
 
         if args.force_clean:
             session.disconnect()
             sys.exit("Clean attempt complete")
 
-        if args.profile is not None:
+        if args.profile:
             profile = profiler.select_profile(
                 args.profile[0], args.profile[1], args.profile[2])
             if profile is None:
@@ -302,8 +193,8 @@ class Limeaide:
                 if new_profile.lower() == 'n':
                     sys.exit()
             else:
-                client.profile = profile
                 cprint("Profile found!", 'green')
+                client.profile = profile
 
         elif not args.no_profiler:
             use_profile = input(colored(
@@ -317,6 +208,7 @@ class Limeaide:
                 else:
                     client.profile = profile
 
+        os.mkdir(client.output_dir)
         LimeDeploy(session, profiler).main()
 
         if args.delay_pickup:
