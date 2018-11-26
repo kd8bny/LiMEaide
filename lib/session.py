@@ -108,7 +108,7 @@ class Session:
     def disconnect(self):
         """Call to end session and remove files from remote client."""
         cprint("> Cleaning up...", 'blue')
-        #self.exec_cmd('rm -rf ./.limeaide/', True, False)
+        self.exec_cmd('rm -rf ./.limeaide/', True, False)
 
         cprint("> Removing LKM...standby", 'blue')
         self.exec_cmd('rmmod lime.ko', True, False)
@@ -119,7 +119,7 @@ class Session:
     def connect(self):
         """Call to set connection with remote client."""
 
-        if self.client_.transfer == 'local':
+        if self.client_.ip == 'local':
             self.transfer = local.Local(None)
 
         else:

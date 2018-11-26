@@ -47,8 +47,8 @@ class Limeaide:
             help="Skip the profiler by providing the distribution, kernel\
             version, and architecture of the remote client.")
         parser.add_argument(
-            "-C", "--dont-compress", action="store_true", help="Do NOT compress\
-            dump into Bzip2 format")
+            "-C", "--compress", action="store_true", help="Compress\
+            dump into Bzip2 format on host")
         parser.add_argument("-o", "--output", help="name the output file")
         parser.add_argument("-c", "--case", help="Append case number to output\
             dir")
@@ -74,14 +74,13 @@ class Limeaide:
                 sys.exit(colored("Can not conduct raw transfer on local\
                     machine", 'red'))
             else:
-                client.transfer = 'raw'
                 client.port = args.port
 
         if args.case:
             client.jobname = args.case
         else:
             client.jobname = "{0}-{1}-worker".format(
-                client.ip, self.config.date)
+                client.ip, config.date)
 
         if args.user:
             client.user = args.user
@@ -93,16 +92,18 @@ class Limeaide:
             else:
                 client.delay_pickup = args.delay_pickup
 
-        if not config['DEFAULT']['output']:
-            if args.output:
-                client.output = args.output
+        if args.output:
+            client.output = args.output
+        else:
+            client.output = config.output
 
-        if not config['DEFAULT']['compress']:
-            if args.dont_compress:
-                client.compress = not client.compress
+        if args.compress:
+            client.compress = True
+        else:
+            client.compress = config.compress
 
         client.output_dir = "{0}{1}/".format(
-            self.config.output_dir, self.client.job_name)
+            config.output_dir, client.job_name)
 
         cprint("> Establishing secure connection {0}@{1}".format(
             client.user, client.ip), 'blue')
@@ -164,11 +165,12 @@ class Limeaide:
         """Start the interactive session for LiMEaide."""
 
         self.display_header()
-        config = Config.configure()
+        config = Config()
+        config.configure()
         profiler = Profiler()
         profiler.load_profiles()
 
-        args = self.get_args()
+        args = self.__get_args__()
         client = self.__get_client__(args, config)
 
         if args.pickup:

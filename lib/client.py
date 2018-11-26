@@ -16,17 +16,17 @@ class Client:
         # Client specifics
         self.ip = None
         self.port = None
-        self.transfer = 'network'
-        self.user = 'root'
-        self.is_sudoer = False
+        self.user = None
         self.pass_ = None
-        self.job_name = None
+
+        # LiME options
+        self.output = None
+        self.format = None
+        self.digest = None
 
         # Profile and options
         self.profile = None
-        self.output = 'dump.lime'
-        self.format = 'lime'
-        self.digest = 'sha1'
         self.output_dir = None
-        self.compress = True
-        self.delay_pickup = False
+        self.compress = None
+        self.delay_pickup = None
+        self.job_name = None

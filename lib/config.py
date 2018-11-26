@@ -13,11 +13,9 @@ class Config:
     def __init__(self):
         super(Config, self).__init__()
 
-        #self.ascii = 
         self.lime_version = '1.8.0.1'
-        self.date = datetime.strftime(
-            datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
-        self.volatility_profile_dir = None
+        self.config_version = '1'
+        self.config_file = '.limeaide'
         self.lime_dir = './tools/LiME/src/'
         self.tools_dir = './tools/'
         self.output_dir = './output/'
@@ -25,7 +23,33 @@ class Config:
         self.log_dir = './logs/'
         self.scheduled_pickup_dir = './scheduled_jobs/'
 
-        self.defaults = None
+        self.date = None
+        self.volatility_profile_dir = None
+        self.output = None
+        self.compress = None
+        self.format = None
+        self.digest = None
+
+    def set_date(self):
+        datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
+
+    def __update_config__(self):
+        cprint("Updating Configuration", 'green')
+        # self.logger.info("Updating config file")
+        # self.format = 'lime'
+        # self.digest = 'sha1'
+
+        # default_config = configparser.ConfigParser()
+        # default_config['MANIFEST'] = {}
+        # default_config['MANIFEST']['version'] = str(self.config_version)
+        # default_config.set('DEFAULT', 'volatility', self.volatility_profile_dir)
+        # default_config.set('DEFAULT', 'output', self.output)
+        # default_config.set('DEFAULT', 'compress', self.compress)
+        # default_config.set('DEFAULT', 'format', self.format)
+        # default_config.set('DEFAULT', 'digest', self.digest)
+        # with open('.limeaide', 'w+') as config_file:
+        #     config.write(config_file)
+        pass
 
     def __download_lime__(self):
         cprint("Downloading LiME", 'green')
@@ -45,22 +69,25 @@ class Config:
                 "or place manually", 'red'))
 
     def __write_new_config__(self):
-        config = configparser.RawConfigParser()
-        config.set('DEFAULT', 'volatility', '')
-        config.set('DEFAULT', 'output', '')
-        config.set('DEFAULT', 'compress', '')
-        with open('.limeaide', 'w+') as config_file:
-            config.write(config_file)
+        default_config = configparser.ConfigParser()
+        default_config['MANIFEST'] = {}
+        default_config['MANIFEST']['version'] = self.config_version
+        default_config.set('DEFAULT', 'volatility', '')
+        default_config.set('DEFAULT', 'output', 'dump.lime')
+        default_config.set('DEFAULT', 'compress', 'False')
+        default_config.set('DEFAULT', 'format', 'lime')
+        default_config.set('DEFAULT', 'digest', 'sha1')
+        with open(self.config_file, 'w') as configfile:
+            default_config.write(configfile)
 
-    def __update_vol_dir__(self, vol_dir):
-        cprint(
-            "Volatility directory missing. Current directory is:", 'red')
-        cprint("{}".format(vol_dir), 'blue')
+    def __update_vol_dir__(self):
+        cprint("Volatility directory missing.", 'red')
         cprint("Please provide a path to your Volatility directory." +
                "\ne.g. '~/volatility/'" +
                "\n[q] to never ask again: ", 'green')
 
         path_ext = '/volatility/plugins/overlays/linux/'
+
         while True:
             path = input(":")
             if path == 'q':
@@ -72,11 +99,16 @@ class Config:
             else:
                 cprint(
                     "Entered directory does not exist. Please enter" +
-                    "again", 'red')
+                    " again", 'red')
 
-        self.defaults.set('DEFAULT', 'volatility', path + path_ext)
-        with open('.limeaide', 'w+') as configfile:
-            self.defaults.write(configfile)
+        self.volatility_profile_dir = path + path_ext
+
+        default_config = configparser.ConfigParser()
+        default_config.read(self.config_file)
+        default_config.set(
+            'DEFAULT', 'volatility', self.volatility_profile_dir)
+        with open(self.config_file, 'w+') as configfile:
+            default_config.write(configfile)
 
     def check_directories(self):
         if not os.path.isdir(self.output_dir):
@@ -97,19 +129,31 @@ class Config:
         if not os.path.isdir(self.lime_dir):
             self.__download_lime__()
 
-        vol_dir = self.defaults['DEFAULT']['volatility']
-        if vol_dir == 'None':
-            continue
-        elif not vol_dir or not os.path.isdir(vol_dir):
+        if self.volatility_profile_dir == 'None':
+            pass
+        elif not self.volatility_profile_dir or not os.path.isdir(self.volatility_profile_dir):
             self.__update_vol_dir__()
 
     def read_config(self):
         """Read default configuration."""
-        if not os.path.isfile('.limeaide'):
+        if not os.path.isfile(self.config_file):
             self.__write_new_config__()
 
-        self.defaults = configparser.ConfigParser()
-        self.defaults.read('.limeaide')
+        default_config = configparser.ConfigParser()
+        default_config.read(self.config_file)
+        try:
+            if self.config_version > int(default_config['MANIFEST']['version']):
+                self.__update_config__()
+
+            else:
+                self.volatility_profile_dir = default_config['DEFAULT']['volatility']
+                self.output = default_config['DEFAULT']['output']
+                self.compress = default_config['DEFAULT']['compress']
+                self.format = default_config['DEFAULT']['format']
+                self.digest = default_config['DEFAULT']['digest']
+
+        except KeyError:
+            self.__update_config__()
 
     def setup_logging(self):
         """Setup logging to file and initial logger"""
@@ -119,6 +163,7 @@ class Config:
         self.logger = logging.getLogger(__name__)
 
     def configure(self):
+        self.setup_logging()
+        self.set_date()
         self.read_config()
         self.check_directories()
-        self.setup_logging()
