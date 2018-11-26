@@ -9,7 +9,7 @@ import pickle
 from termcolor import colored, cprint
 
 from lib.config import Config
-from lib.session import Session
+from lib.session import local, network
 from lib.client import Client
 from lib.deploy_lime import LimeDeploy
 from lib.deploy_volatility import VolDeploy
@@ -93,10 +93,8 @@ class Limeaide:
                 client.delay_pickup = args.delay_pickup
 
         if args.output:
-            print("arg")
             client.output = args.output
         else:
-            print(config.output)
             client.output = config.output
 
         if args.compress:
@@ -106,7 +104,6 @@ class Limeaide:
 
         client.output_dir = "{0}{1}/".format(
             config.output_dir, client.job_name)
-        print(client.output_dir)
 
         cprint("> Establishing secure connection {0}@{1}".format(
             client.user, client.ip), 'blue')
@@ -181,7 +178,11 @@ class Limeaide:
             sys.exit()
 
         # Start session
-        session = Session(client, args.verbose)
+        if client.ip == 'local':
+            session = session.local(client, args.verbose)
+        else:
+            session = session.network(client, args.verbose)
+
         session.connect()
 
         if args.force_clean:
