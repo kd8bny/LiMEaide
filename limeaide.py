@@ -77,9 +77,9 @@ class Limeaide:
                 client.port = args.port
 
         if args.case:
-            client.jobname = args.case
+            client.job_name = args.case
         else:
-            client.jobname = "{0}-{1}-worker".format(
+            client.job_name = "{0}-{1}-worker".format(
                 client.ip, config.date)
 
         if args.user:
@@ -93,8 +93,10 @@ class Limeaide:
                 client.delay_pickup = args.delay_pickup
 
         if args.output:
+            print("arg")
             client.output = args.output
         else:
+            print(config.output)
             client.output = config.output
 
         if args.compress:
@@ -104,6 +106,7 @@ class Limeaide:
 
         client.output_dir = "{0}{1}/".format(
             config.output_dir, client.job_name)
+        print(client.output_dir)
 
         cprint("> Establishing secure connection {0}@{1}".format(
             client.user, client.ip), 'blue')

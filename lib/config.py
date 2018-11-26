@@ -31,7 +31,7 @@ class Config:
         self.digest = None
 
     def set_date(self):
-        datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
+        self.date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
 
     def __update_config__(self):
         cprint("Updating Configuration", 'green')
