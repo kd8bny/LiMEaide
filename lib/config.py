@@ -142,7 +142,7 @@ class Config:
         default_config = configparser.ConfigParser()
         default_config.read(self.config_file)
         try:
-            if self.config_version > int(default_config['MANIFEST']['version']):
+            if int(self.config_version) > int(default_config['MANIFEST']['version']):
                 self.__update_config__()
 
             else:
