@@ -74,7 +74,7 @@ class Session:
         :return stdout
         """
         stdout, stderr = None, None
-        if self.client_.is_sudoer and requires_privlege:
+        if self.client_.user is not 'root' and requires_privlege:
             cmd = "sudo -S -p ' ' {0}".format(cmd)
             self.logger.info("Command executed: {0}".format(cmd))
             stdin, stdout, stderr = self.paramiko_session.exec_command(
@@ -120,7 +120,7 @@ class Session:
         """Call to set connection with remote client."""
 
         if self.client_.ip == 'local':
-            self.transfer = local.Local(None)
+            self.transfer = local.Local()
 
         else:
             try:
