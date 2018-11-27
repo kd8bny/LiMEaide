@@ -84,6 +84,8 @@ class Limeaide:
 
         if args.user:
             client.user = args.user
+        else:
+            client.user = 'root'
 
         if args.delay_pickup:
             if client.session != 'network':
@@ -116,29 +118,31 @@ class Limeaide:
 
         Format will be <date>-worker.dat
         """
-        pickle.dump(client, open(("{0}{1}.dat".format(
-            self.scheduled_pickup_dir, jobname)), 'wb'))
+        # pickle.dump(client, open(("{0}{1}.dat".format(
+        #     self.scheduled_pickup_dir, jobname)), 'wb'))
+        pass
 
     def finish_saved_job(self, jobname):
+        pass
         """Restore client with pickle. Transfer dump."""
-        restored_client = pickle.load(open(jobname, 'rb'))
-        cprint("Client restored!", 'green')
-        cprint(
-            'Retrieving RAM dump "{}"'.format(restored_client.output), 'blue')
+        # restored_client = pickle.load(open(jobname, 'rb'))
+        # cprint("Client restored!", 'green')
+        # cprint(
+        #     'Retrieving RAM dump "{}"'.format(restored_client.output), 'blue')
 
-        if not os.path.isdir(restored_client.output_dir):
-            os.mkdir(restored_client.output_dir)
+        # if not os.path.isdir(restored_client.output_dir):
+        #     os.mkdir(restored_client.output_dir)
 
-        saved_session = Session(restored_client)
-        saved_session.connect()
-        delayed_profiler = Profiler()
-        LimeDeploy(saved_session, delayed_profiler).transfer_dump()
-        VolDeploy(saved_session).main(self.volatility_profile_dir)
-        cprint(
-            "Job {} pickup has been completed!".format(
-                restored_client.output), 'green')
-        saved_session.disconnect()
-        os.remove(jobname)
+        # saved_session = Session(restored_client)
+        # saved_session.connect()
+        # delayed_profiler = Profiler()
+        # LimeDeploy(saved_session, delayed_profiler).transfer_dump()
+        # VolDeploy(saved_session).main(self.volatility_profile_dir)
+        # cprint(
+        #     "Job {} pickup has been completed!".format(
+        #         restored_client.output), 'green')
+        # saved_session.disconnect()
+        # os.remove(jobname)
 
     def display_header(self):
         cprint(
@@ -178,10 +182,11 @@ class Limeaide:
             sys.exit()
 
         # Start session
+        session = None
         if client.ip == 'local':
-            session = session.local(client, args.verbose)
+            session = local.Local(client, args.verbose)
         else:
-            session = session.network(client, args.verbose)
+            session = network.Network(client, args.verbose)
 
         session.connect()
 
