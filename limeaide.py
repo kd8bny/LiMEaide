@@ -87,6 +87,9 @@ class Limeaide:
         else:
             client.user = 'root'
 
+        client.format = config.format
+        client.digest = config.digest
+
         if args.delay_pickup:
             if client.session != 'network':
                 sys.exit(colored("Can not delay raw or local sessions.\

@@ -10,7 +10,7 @@ class LimeDeploy(object):
         super(LimeDeploy, self).__init__()
         self.logger = logging.getLogger(__name__)
         self.remote_session = remote_session
-        self.client = remote_session.client_
+        self.client = remote_session.client
         self.profiler = profiler
 
         self.lime_dir = './tools/LiME/src/'
@@ -66,13 +66,13 @@ class LimeDeploy(object):
 
         # Build the correct instructions
         insmod_path = ""
-        if self.client.transfer == 'raw':
-            insmod_path = "path=tcp:{}".format(self.client.port)
-        else:
-            insmod_path = "path={0}{1}".format(
+        #if self.client.transfer == 'raw':
+        #    insmod_path = "path=tcp:{}".format(self.client.port)
+        #else:
+        insmod_path = "path={0}{1}".format(
                 self.lime_rdir, self.client.output)
         insmod_format = "format={}".format(self.client.format)
-        insmod_digest = "digest={}".format(self.client.digest)
+        insmod_digest = '' #"digest={}".format(self.client.digest)
 
         cprint(">> {}".format(insmod_path), 'blue')
         cprint(">> {}".format(insmod_format), 'blue')
@@ -82,25 +82,23 @@ class LimeDeploy(object):
             self.lime_rdir, self.client.profile["module"],
             insmod_path, insmod_format, insmod_digest)
 
-        print("b4")
         self.remote_session.exec_cmd(insmod_cmd, True)
-        print("hold")
 
         self.logger.info("LiME installed")
 
-        if self.client.transfer != 'raw':
-            cprint("> Changing permissions", 'blue')
-            self.remote_session.exec_cmd(
-                "chmod 755 {0}{1}".format(
-                    self.lime_rdir, self.client.output), True)
+        #if self.client.transfer != 'raw':
+        cprint("> Changing permissions", 'blue')
+        self.remote_session.exec_cmd(
+            "chmod 755 {0}{1}".format(
+                self.lime_rdir, self.client.output), True)
 
-            if self.client.compress:
-                cprint(
-                    "> Compressing image to Bzip2...This will take awhile", 'blue')
-                self.remote_session.exec_cmd(
-                    'tar -jv --remove-files -f {0}{1}.bz2 -c {2}{3}'.format(
-                        self.lime_rdir, self.client.output, self.lime_rdir,
-                        self.client.output), True)
+        # if self.client.compress:
+        #     cprint(
+        #         "> Compressing image to Bzip2...This will take awhile", 'blue')
+        #     self.remote_session.exec_cmd(
+        #         'tar -jv --remove-files -f {0}{1}.bz2 -c {2}{3}'.format(
+        #             self.lime_rdir, self.client.output, self.lime_rdir,
+        #             self.client.output), True)
 
     def transfer_dump(self):
         """Retrieve files from remote client."""
@@ -108,18 +106,18 @@ class LimeDeploy(object):
         remote_file = self.client.output
         remote_file_hash = "{}.{}".format(
             self.client.output, self.client.digest)
-        if self.client.transfer == 'raw':
-            self.remote_session.transfer.pull(
-                None, self.client.output_dir, remote_file)
-            self.remote_session.transfer.pull(
-                None, self.client.output_dir, remote_file_hash)
-        else:
-            if self.client.compress:
-                remote_file += '.bz2'
-            self.remote_session.transfer.pull(
-                self.lime_rdir, self.client.output_dir, remote_file)
-            self.remote_session.transfer.pull(
-                self.lime_rdir, self.client.output_dir, remote_file_hash)
+        #if self.client.transfer == 'raw':
+        #     self.remote_session.transfer.pull(
+        #         None, self.client.output_dir, remote_file)
+        #     self.remote_session.transfer.pull(
+        #         None, self.client.output_dir, remote_file_hash)
+        # else:
+        #if self.client.compress:
+        #    remote_file += '.bz2'
+        self.remote_session.transfer.pull(
+            self.lime_rdir, self.client.output_dir, remote_file)
+        self.remote_session.transfer.pull(
+            self.lime_rdir, self.client.output_dir, remote_file_hash)
 
         if self.new_profile:
             self.remote_session.transfer.pull(

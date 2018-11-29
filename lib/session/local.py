@@ -2,6 +2,7 @@ import sys
 from subprocess import Popen
 from termcolor import colored, cprint
 from lib.transfer import local
+from lib.session.session import Session
 
 
 class Local(Session):

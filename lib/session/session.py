@@ -5,10 +5,10 @@ from termcolor import colored, cprint
 class Session:
     """Session will take care of all the backend communications."""
 
-    def __init__(self, client, is_verbose):
+    def __init__(self, client, is_verbose=False):
         super(Session, self).__init__()
         self.logger = logging.getLogger(__name__)
-        self.client_ = client
+        self.client = client
         self.is_verbose = is_verbose
 
     def __error_check__(self, stdout):
