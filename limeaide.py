@@ -49,7 +49,10 @@ class Limeaide:
         parser.add_argument(
             "-C", "--compress", action="store_true", help="Compress\
             dump into Bzip2 format on host")
-        parser.add_argument("-o", "--output", help="name the output file")
+        parser.add_argument("-o", "--output", help="Name the output file")
+        parser.add_argument("-f", "--format", help="Change the format")
+        parser.add_argument("-d", "--digest", help="Use a different digest\
+             algorithm. Use 'None' to disable")
         parser.add_argument("-c", "--case", help="Append case number to output\
             dir")
         parser.add_argument("--delay-pickup", action="store_true", help="Used \
@@ -87,8 +90,18 @@ class Limeaide:
         else:
             client.user = 'root'
 
-        client.format = config.format
-        client.digest = config.digest
+        if args.format:
+            client.format = args.format
+        else:
+            client.format = config.format
+
+        if args.digest:
+            if args.digest == 'None':
+                client.digest = ''
+            else:
+                client.digest = args.digest
+        else:
+            client.digest = config.digest
 
         if args.delay_pickup:
             if client.session != 'network':
