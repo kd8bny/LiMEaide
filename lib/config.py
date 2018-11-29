@@ -164,7 +164,7 @@ class Config:
         self.logger = logging.getLogger(__name__)
 
     def configure(self):
-        self.setup_logging()
         self.set_date()
+        self.setup_logging()
         self.read_config()
         self.check_directories()
