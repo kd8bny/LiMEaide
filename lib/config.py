@@ -67,7 +67,7 @@ class Config:
         except urllib.error.URLError:
             sys.exit(colored(
                 "LiME failed to download. Check your internet connection" +
-                "or place manually", 'red'))
+                " or place manually", 'red'))
 
     def __write_new_config__(self):
         default_config = configparser.ConfigParser()
