@@ -223,7 +223,8 @@ class Limeaide:
                     client.profile = profile
 
         os.mkdir(client.output_dir)
-        LimeDeploy(session, profiler).main()
+        lime_deploy = LimeDeploy(config, session, profiler)
+        lime_deploy.main()
 
         if args.delay_pickup:
             self.save_job(client, client.jobname)

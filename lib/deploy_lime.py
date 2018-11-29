@@ -6,16 +6,13 @@ import hashlib
 class LimeDeploy(object):
     """Send LiME and retrieve the RAM dump from a remote client."""
 
-    def __init__(self, remote_session, profiler):
+    def __init__(self, config, session, profiler):
         super(LimeDeploy, self).__init__()
         self.logger = logging.getLogger(__name__)
-        self.remote_session = remote_session
-        self.client = remote_session.client
+        self.config = config
+        self.session = session
+        self.client = session.client
         self.profiler = profiler
-
-        self.lime_dir = './tools/LiME/src/'
-        self.lime_rdir = './.limeaide/'
-        self.profiles_dir = './profiles/'
 
         self.new_profile = False
 
@@ -24,24 +21,25 @@ class LimeDeploy(object):
         cprint("> Sending LiME src to remote client", 'blue')
         lime_src = ['main.c', 'disk.c', 'tcp.c', 'hash.c', 'lime.h',
                     'Makefile']
-        self.remote_session.exec_cmd(
-            'mkdir -p {}'.format(self.lime_rdir), False)
+
+        self.session.exec_cmd(
+            'mkdir -p {}'.format(self.config.lime_rdir), False)
 
         # Generate information to create a new profile
         if self.new_profile:
             for file in lime_src:
-                self.remote_session.transfer.put(
-                    self.lime_dir, self.lime_rdir, file)
+                self.session.transfer.put(
+                    self.config.lime_dir, self.config.lime_rdir, file)
 
             self.client.profile = self.profiler.create_profile(
-                self.remote_session)
+                self.session)
             print(self.client.profile["module"])
 
             cprint("> Building loadable kernel module", 'blue')
-            self.remote_session.exec_cmd(
-                'cd {}; make debug'.format(self.lime_rdir), False)
-            self.remote_session.exec_cmd("mv {0}lime-{1}.ko {0}{2}".format(
-                self.lime_rdir, self.client.profile["kver"],
+            self.session.exec_cmd(
+                'cd {}; make debug'.format(self.config.lime_rdir), False)
+            self.session.exec_cmd("mv {0}lime-{1}.ko {0}{2}".format(
+                self.config.lime_rdir, self.client.profile["kver"],
                 self.client.profile["module"]), False)
 
             self.logger.info(
@@ -50,8 +48,8 @@ class LimeDeploy(object):
 
         # Use an old profile
         else:
-            self.remote_session.transfer.put(
-                self.profiles_dir, self.lime_rdir,
+            self.session.transfer.put(
+                self.profiles_dir, self.config.lime_rdir,
                 self.client.profile["module"])
 
             self.logger.info(
@@ -70,7 +68,7 @@ class LimeDeploy(object):
         #    insmod_path = "path=tcp:{}".format(self.client.port)
         #else:
         insmod_path = "path={0}{1}".format(
-                self.lime_rdir, self.client.output)
+                self.config.lime_rdir, self.client.output)
         insmod_format = "format={}".format(self.client.format)
         insmod_digest = '' #"digest={}".format(self.client.digest)
 
@@ -79,23 +77,23 @@ class LimeDeploy(object):
         cprint(">> {}".format(insmod_digest), 'blue')
 
         insmod_cmd = "insmod {0}{1} '{2} {3} {4}'".format(
-            self.lime_rdir, self.client.profile["module"],
+            self.config.lime_rdir, self.client.profile["module"],
             insmod_path, insmod_format, insmod_digest)
 
-        self.remote_session.exec_cmd(insmod_cmd, True)
+        self.session.exec_cmd(insmod_cmd, True)
 
         self.logger.info("LiME installed")
 
         #if self.client.transfer != 'raw':
         cprint("> Changing permissions", 'blue')
-        self.remote_session.exec_cmd(
+        self.session.exec_cmd(
             "chmod 755 {0}{1}".format(
-                self.lime_rdir, self.client.output), True)
+                self.config.lime_rdir, self.client.output), True)
 
         # if self.client.compress:
         #     cprint(
         #         "> Compressing image to Bzip2...This will take awhile", 'blue')
-        #     self.remote_session.exec_cmd(
+        #     self.session.exec_cmd(
         #         'tar -jv --remove-files -f {0}{1}.bz2 -c {2}{3}'.format(
         #             self.lime_rdir, self.client.output, self.lime_rdir,
         #             self.client.output), True)
@@ -107,20 +105,20 @@ class LimeDeploy(object):
         remote_file_hash = "{}.{}".format(
             self.client.output, self.client.digest)
         #if self.client.transfer == 'raw':
-        #     self.remote_session.transfer.pull(
+        #     self.session.transfer.pull(
         #         None, self.client.output_dir, remote_file)
-        #     self.remote_session.transfer.pull(
+        #     self.session.transfer.pull(
         #         None, self.client.output_dir, remote_file_hash)
         # else:
         #if self.client.compress:
         #    remote_file += '.bz2'
-        self.remote_session.transfer.pull(
-            self.lime_rdir, self.client.output_dir, remote_file)
-        self.remote_session.transfer.pull(
-            self.lime_rdir, self.client.output_dir, remote_file_hash)
+        self.session.transfer.pull(
+            self.config.lime_rdir, self.client.output_dir, remote_file)
+        self.session.transfer.pull(
+            self.config.lime_rdir, self.client.output_dir, remote_file_hash)
 
         if self.new_profile:
-            self.remote_session.transfer.pull(
+            self.session.transfer.pull(
                 self.lime_rdir, self.profiles_dir,
                 self.client.profile['module'])
 

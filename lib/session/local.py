@@ -9,8 +9,7 @@ class Local(Session):
     """Session will take care of all the backend communications."""
 
     def __init__(self, client, is_verbose=False):
-        super(Local, self).__init__()
-        self.is_verbose = is_verbose
+        super(Local, self).__init__(client, is_verbose)
 
     def exec_cmd(self, cmd, requires_privlege, disconnect_on_fail=True):
         """Called to exec command on remote system.
@@ -19,34 +18,39 @@ class Local(Session):
         :param requires_privlege Does this command require elevated privileges
         :return stdout
         """
-        if self.client_.user is not 'root' and requires_privlege:
-            pf = Popen(['sudo', '-S', '-p', cmd])
+        cmd_args = cmd.split(' ')
+        if self.client.user is not 'root' and requires_privlege:
+            pf = Popen(['sudo', '-S', '-p', cmd_args])
+        else:
+            print(cmd)
+            print(cmd_args)
+            pf = Popen(cmd_args)
 
             # self.logger.info("Command executed: {0}".format(cmd))
-            stdin.write(self.client_.pass_ + '\n')
-            stdin.flush()
-        else:
-            #self.logger.info("Command executed: {0}".format(cmd))
-            pf = Popen(cmd)
+        #     stdin.write(self.client_.pass_ + '\n')
+        #     stdin.flush()
+        # else:
+        #     #self.logger.info("Command executed: {0}".format(cmd))
+        #     pf = Popen(cmd)
 
-        stdout = [line.strip() for line in stdout]
-        for line in stdout:
-            if line and line != self.client_.pass_:
-                self.logger.info(line)
-                if self.is_verbose:
-                    print(line)
+        # stdout = [line.strip() for line in stdout]
+        # for line in stdout:
+        #     if line and line != self.client_.pass_:
+        #         self.logger.info(line)
+        #         if self.is_verbose:
+        #             print(line)
 
-        if not stderr or self.__error_check__(stdout):
-            for line in stderr:
-                self.logger.error(line)
-                print(line.strip('\n'))
-            cprint("Error deploying LiMEaide :(", 'red')
+        # if not stderr or self.__error_check__(stdout):
+        #     for line in stderr:
+        #         self.logger.error(line)
+        #         print(line.strip('\n'))
+        #     cprint("Error deploying LiMEaide :(", 'red')
 
-            if disconnect_on_fail:
-                self.disconnect()
-                sys.exit()
+        #     if disconnect_on_fail:
+        #         self.disconnect()
+        #         sys.exit()
 
-        return stdout
+        #return stdout
 
     def disconnect(self):
         """Call to end session and remove files from remote client."""
@@ -62,25 +66,5 @@ class Local(Session):
     def connect(self):
         """Call to set connection with remote client."""
 
-        if self.client_.ip == 'local':
-            self.transfer = local.Local()
-
-        else:
-            try:
-                self.paramiko_session = paramiko.SSHClient()
-                self.paramiko_session.set_missing_host_key_policy(
-                    paramiko.AutoAddPolicy())
-                self.paramiko_session.connect(
-                    self.client_.ip, username=self.client_.user,
-                    password=self.client_.pass_)
-
-            except (paramiko.AuthenticationException,
-                    paramiko.ssh_exception.NoValidConnectionsError) as e:
-                self.logger.error(e)
-                sys.exit(colored("> {}".format(e), 'red'))
-
-            self.transfer = network.Network(
-                self.paramiko_session, self.client_.transfer,
-                self.client_.ip, self.client_.port)
-
+        self.transfer = local.Local()
         self.transfer.connect()

@@ -31,7 +31,7 @@ class Local(Transfer):
         :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
-        shutil.move(local_dir + filename, remote_dir + filename)
+        shutil.copy(local_dir + filename, remote_dir)
 
     def file_stat(self, remote_dir, filename):
         """Check to see if remote file exists and size is greater than 0.
