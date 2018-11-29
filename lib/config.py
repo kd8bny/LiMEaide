@@ -10,11 +10,11 @@ import logging
 
 
 class Config:
+
+    __version__ = "1"
+
     def __init__(self):
         super(Config, self).__init__()
-
-        self.config_version = '1'
-
         # Internal Resources
         self.lime_version = '1.8.0.1'
         self.config_file = '.limeaide'
@@ -46,7 +46,7 @@ class Config:
 
         # default_config = configparser.ConfigParser()
         # default_config['MANIFEST'] = {}
-        # default_config['MANIFEST']['version'] = str(self.config_version)
+        # default_config['MANIFEST']['version'] = str(self.__version__)
         # default_config.set('DEFAULT', 'volatility', self.volatility_profile_dir)
         # default_config.set('DEFAULT', 'output', self.output)
         # default_config.set('DEFAULT', 'compress', self.compress)
@@ -76,7 +76,7 @@ class Config:
     def __write_new_config__(self):
         default_config = configparser.ConfigParser()
         default_config['MANIFEST'] = {}
-        default_config['MANIFEST']['version'] = self.config_version
+        default_config['MANIFEST']['version'] = self.__version__
         default_config.set('DEFAULT', 'volatility', '')
         default_config.set('DEFAULT', 'output', 'dump.lime')
         default_config.set('DEFAULT', 'compress', 'False')
@@ -147,7 +147,7 @@ class Config:
         default_config = configparser.ConfigParser()
         default_config.read(self.config_file)
         try:
-            if int(self.config_version) > int(default_config['MANIFEST']['version']):
+            if int(self.__version__) > int(default_config['MANIFEST']['version']):
                 self.__update_config__()
 
             else:
