@@ -13,8 +13,10 @@ class Config:
     def __init__(self):
         super(Config, self).__init__()
 
-        self.lime_version = '1.8.0.1'
         self.config_version = '1'
+
+        # Internal Resources
+        self.lime_version = '1.8.0.1'
         self.config_file = '.limeaide'
         self.lime_dir = './tools/LiME/src/'
         self.tools_dir = './tools/'
@@ -22,6 +24,8 @@ class Config:
         self.profile_dir = './profiles/'
         self.log_dir = './logs/'
         self.scheduled_pickup_dir = './scheduled_jobs/'
+
+        # External Resources
         self.lime_rdir = './.limeaide_working/'
 
         self.date = None
