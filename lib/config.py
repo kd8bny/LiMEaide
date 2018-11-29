@@ -22,6 +22,7 @@ class Config:
         self.profile_dir = './profiles/'
         self.log_dir = './logs/'
         self.scheduled_pickup_dir = './scheduled_jobs/'
+        self.lime_rdir = './.limeaide_working/'
 
         self.date = None
         self.volatility_profile_dir = None
