@@ -31,7 +31,8 @@ class Limeaide:
         """Take a look at those args."""
         parser = argparse.ArgumentParser(description='Utility designed to \
             automate GNU/Linux memory forensics')
-        parser.add_argument("remote", help="remote host IP")
+        parser.add_argument("remote", help="IP address of remote host. Use \
+            'local' in place of IP to run locally")
         parser.add_argument("-u", "--user", help="use a sudo user instead \
             default: root")
         parser.add_argument(
