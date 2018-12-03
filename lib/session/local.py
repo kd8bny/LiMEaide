@@ -20,48 +20,30 @@ class Local(Session):
         """
         cmd_args = cmd.split(' ')
         if self.client.user is not 'root' and requires_privlege:
-            pf = Popen(['sudo', '-S', '-p', cmd_args])
-        else:
-            print(cmd)
-            print(cmd_args)
-            pf = Popen(cmd_args)
+            priv_esc = ['sudo', '-S', '-p']
+            stdin.write(self.client_.pass_ + '\n')
+            stdin.flush()
 
-            # self.logger.info("Command executed: {0}".format(cmd))
-        #     stdin.write(self.client_.pass_ + '\n')
-        #     stdin.flush()
-        # else:
-        #     #self.logger.info("Command executed: {0}".format(cmd))
-        #     pf = Popen(cmd)
+            #popen = Popen(['sudo', '-S', '-p', cmd_args])
+        popen = Popen(cmd_args, stdout=PIPE, stdin=PIPE, stderr=PIPE)
+        stdout = p.communicate(input=b'one\ntwo\nthree\nfour\nfive\nsix\n')[0]
+        # print(grep_stdout.decode())
 
-        # stdout = [line.strip() for line in stdout]
-        # for line in stdout:
-        #     if line and line != self.client_.pass_:
-        #         self.logger.info(line)
-        #         if self.is_verbose:
-        #             print(line)
+        self.logger.info("Command executed: {0}".format(cmd))
 
-        # if not stderr or self.__error_check__(stdout):
-        #     for line in stderr:
-        #         self.logger.error(line)
-        #         print(line.strip('\n'))
-        #     cprint("Error deploying LiMEaide :(", 'red')
+        self.__print__(stdout)
 
-        #     if disconnect_on_fail:
-        #         self.disconnect()
-        #         sys.exit()
+        if not stderr or self.__error_check__(stdout):
+            for line in stderr:
+                self.logger.error(line)
+                print(line.strip('\n'))
+            cprint("Error deploying LiMEaide :(", 'red')
 
-        #return stdout
+            if disconnect_on_fail:
+                self.disconnect()
+                sys.exit()
 
-    def disconnect(self):
-        """Call to end session and remove files from remote client."""
-        cprint("> Cleaning up...", 'blue')
-        self.exec_cmd('rm -rf ./.limeaide/', True, False)
-
-        cprint("> Removing LKM...standby", 'blue')
-        self.exec_cmd('rmmod lime.ko', True, False)
-
-        self.transfer.close()
-        cprint("> Done", 'green')
+        return stdout
 
     def connect(self):
         """Call to set connection with remote client."""

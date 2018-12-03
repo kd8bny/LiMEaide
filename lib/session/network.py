@@ -8,8 +8,8 @@ from lib.session.session import Session
 class Network(Session):
     """Session will take care of all the backend communications."""
 
-    def __init__(self, client, is_verbose=False):
-        Session.__init__(self, client, is_verbose)
+    def __init__(self, config, client, is_verbose=False):
+        Session.__init__(self, config, client, is_verbose)
         self.paramiko_session = None
         self.transfer = None
 
@@ -41,13 +41,9 @@ class Network(Session):
             self.logger.info("Command executed: {0}".format(cmd))
             stdin, stdout, stderr = self.paramiko_session.exec_command(
                 cmd, get_pty=True)
+        output = stdout.readlines()
 
-        stdout = [line.strip() for line in stdout]
-        for line in stdout:
-            if line and line != self.client.pass_:
-                self.logger.info(line)
-                if self.is_verbose:
-                    print(line)
+        self.__print__(output)
 
         if not stderr or self.__error_check__(stdout):
             for line in stderr:
@@ -59,18 +55,7 @@ class Network(Session):
                 self.disconnect()
                 sys.exit()
 
-        return stdout
-
-    def disconnect(self):
-        """Call to end session and remove files from remote client."""
-        cprint("> Cleaning up...", 'blue')
-        self.exec_cmd('rm -rf ./.limeaide/', True, False)
-
-        cprint("> Removing LKM...standby", 'blue')
-        self.exec_cmd('rmmod lime.ko', True, False)
-
-        self.transfer.close()
-        cprint("> Done", 'green')
+        return output
 
     def connect(self):
         """Call to set connection with remote client."""

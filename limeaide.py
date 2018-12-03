@@ -201,9 +201,9 @@ class Limeaide:
         # Start session
         session = None
         if client.ip == 'local':
-            session = local.Local(client, args.verbose)
+            session = local.Local(config, client, args.verbose)
         else:
-            session = network.Network(client, args.verbose)
+            session = network.Network(config, client, args.verbose)
 
         session.connect()
 
