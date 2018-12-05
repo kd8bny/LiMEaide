@@ -8,8 +8,8 @@ from lib.session.session import Session
 class Local(Session):
     """Session will take care of all the backend communications."""
 
-    def __init__(self, client, is_verbose=False):
-        super(Local, self).__init__(client, is_verbose)
+    def __init__(self, config, client, is_verbose=False):
+        super(Local, self).__init__(config, client, is_verbose)
 
     def exec_cmd(self, cmd, requires_privlege, disconnect_on_fail=True):
         """Called to exec command on remote system.
