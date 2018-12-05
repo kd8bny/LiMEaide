@@ -119,7 +119,7 @@ class LimeDeploy(object):
 
         if self.new_profile:
             self.session.transfer.pull(
-                self.lime_rdir, self.profiles_dir,
+                self.config.lime_rdir, self.config.profile_dir,
                 self.client.profile['module'])
 
         cprint("> Memory extraction is complete", 'blue')
