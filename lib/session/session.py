@@ -31,18 +31,16 @@ class Session:
 
     def disconnect(self):
         """Call to end session and remove files from remote client."""
-        """Call to end session and remove files from remote client."""
         cprint("> Cleaning up...", 'blue')
-        if self.transfer.file_stat(self.config.lime_rdir):
+        if self.transfer.file_stat(self.config.lime_rdir, ''):
             self.exec_cmd('rm -rf {0}'.format(
-                self.config.lime_rdir, True, False))
+                self.config.lime_rdir), True, False)
 
         #TODO Check lsmod for lime before removing
         cprint("> Removing LKM...standby", 'blue')
         self.exec_cmd('rmmod lime.ko', True, False)
 
         self.transfer.close()
-        cprint("> Done", 'green')
 
     def exec_cmd(self, cmd, requires_privlege, disconnect_on_fail=True):
         """Called to exec command on remote system.

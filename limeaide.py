@@ -209,7 +209,7 @@ class Limeaide:
 
         if args.force_clean:
             session.disconnect()
-            sys.exit("Clean attempt complete")
+            sys.exit(colored("> Clean attempt complete", 'green'))
 
         if args.profile:
             profile = profiler.select_profile(
