@@ -1,3 +1,4 @@
+import logging
 
 
 class Transfer:
@@ -5,7 +6,7 @@ class Transfer:
     mechanisms"""
 
     def __init__(self):
-        pass
+        self.logger = logging.getLogger(__name__)
 
     def __transfer_status__(self, filename, bytes_so_far, bytes_total):
         # TDOD can we do this abstracted?
