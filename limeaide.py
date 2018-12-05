@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import sys
-import os
 import logging
 import argparse
 import getpass
@@ -104,12 +103,12 @@ class Limeaide:
         else:
             client.digest = config.digest
 
-        if args.delay_pickup:
-            if client.session != 'network':
-                sys.exit(colored("Can not delay raw or local sessions.\
-                     Please remove raw or local arguments", 'red'))
-            else:
-                client.delay_pickup = args.delay_pickup
+        # if args.delay_pickup:
+        #     if client.ip == 'local':
+        #         sys.exit(colored("Can not delay raw or local sessions.\
+        #              Please remove raw or local arguments", 'red'))
+        #     else:
+        #         client.delay_pickup = args.delay_pickup
 
         if args.output:
             client.output = args.output
@@ -236,7 +235,6 @@ class Limeaide:
                 else:
                     client.profile = profile
 
-        os.mkdir(client.output_dir)
         lime_deploy = LimeDeploy(config, session, profiler)
         lime_deploy.main()
 

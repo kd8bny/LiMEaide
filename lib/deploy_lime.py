@@ -1,4 +1,5 @@
 import logging
+import os
 from termcolor import cprint
 import hashlib
 
@@ -101,6 +102,7 @@ class LimeDeploy(object):
     def transfer_dump(self):
         """Retrieve files from remote client."""
         cprint("> Beam me up Scotty", 'blue')
+        os.mkdir(client.output_dir)
         remote_file = self.client.output
         remote_file_hash = "{}.{}".format(
             self.client.output, self.client.digest)
