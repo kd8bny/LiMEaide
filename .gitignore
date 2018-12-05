@@ -91,6 +91,7 @@ tools/
 output/
 profiles/
 scheduled_jobs/
+vlimeaide/
 
 # project configs
 .limeaide
