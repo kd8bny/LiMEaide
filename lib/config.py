@@ -170,6 +170,6 @@ class Config:
 
     def configure(self):
         self.set_date()
+        self.check_directories()
         self.setup_logging()
         self.read_config()
-        self.check_directories()
