@@ -25,13 +25,13 @@ class Local(Session):
             cmd = "sudo -S -p ' ' {0}".format(cmd)
             popen = Popen(
                 cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=True)
-            popen.stdin.write(self.client.pass_ + '\n')
-            popen.stdin.flush()
+            stdout, stderr = popen.communicate(
+                bytes(self.client.pass_, 'utf-8'))
         else:
             popen = Popen(
                 cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=True)
+            stdout, stderr = popen.communicate()
 
-        stdout, stderr = popen.communicate()
         output = stdout.decode('utf-8')
         output = output.split("\n")
 
