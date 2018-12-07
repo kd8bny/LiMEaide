@@ -187,7 +187,7 @@ class Limeaide:
         self.display_header()
         config = Config()
         config.configure()
-        profiler = Profiler()
+        profiler = Profiler(config)
         profiler.load_profiles()
 
         args = self.__get_args__()

@@ -10,12 +10,13 @@ from termcolor import colored, cprint
 class Profiler(object):
     """Maintain and implement pre-compiled modules and profiles."""
 
-    def __init__(self):
+    def __init__(self, config):
         super(Profiler, self).__init__()
         self.logger = logging.getLogger(__name__)
+        self.profiles_dir = config.profile_dir
+        self.manifest = config.manifest
+
         self.profiles = []
-        self.profiles_dir = './profiles/'
-        self.manifest = 'manifest.json'
 
     def __clean_manifest__(self):
         """Determine if profile need to be cleaned.
