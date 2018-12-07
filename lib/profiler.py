@@ -105,13 +105,13 @@ class Profiler(object):
         versions.
         """
         distro, kver, arch = '', '', ''
-        releases = remote_session.exec_cmd("cd /etc/; ls *-release", False)
+        releases = remote_session.exec_cmd("cd /etc/; ls *-release")
         releases = releases[0].split()
 
         if len(releases) > 0:
             if 'os-release' in releases:
                 os_release = remote_session.exec_cmd(
-                    "cat /etc/{}".format('os-release'), False)
+                    "cat /etc/{}".format('os-release'))
 
                 distro = list(filter(lambda val: val.startswith(
                     'PRETTY_NAME='), os_release))
@@ -120,7 +120,7 @@ class Profiler(object):
 
             elif 'lsb-release' in releases:
                 lsb_release = remote_session.exec_cmd(
-                    "cat /etc/{}".format('lsb-release'), False)
+                    "cat /etc/{}".format('lsb-release'))
 
                 distro = list(filter(lambda val: val.startswith(
                     'DISTRIB_DESCRIPTION='), lsb_release))
@@ -129,7 +129,7 @@ class Profiler(object):
 
             else:
                 os_release = remote_session.exec_cmd(
-                    "cat /etc/{}".format(releases[0]), False)
+                    "cat /etc/{}".format(releases[0]))
 
             distro = re.sub('[^a-zA-Z0-9-\s_*.]', '', distro)
             distro = re.sub('\s', '-', distro)
@@ -139,7 +139,7 @@ class Profiler(object):
             distro = input(colored("Cannot determine distribution. Please " +
                                    "enter distribution name: ", 'red'))
 
-        uname = remote_session.exec_cmd('uname -rm', False)
+        uname = remote_session.exec_cmd('uname -rm')
         kver, arch = uname[0].split()
 
         profile = {

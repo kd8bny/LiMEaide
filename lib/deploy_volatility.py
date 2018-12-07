@@ -20,10 +20,10 @@ class VolDeploy(object):
         """Grab system maps from remote client."""
         cprint("> Attempting to grab files for volatility profile", 'blue')
         cprint("> Obtaining system.map", 'blue')
-        self.session.exec_cmd(
-            "cp /boot/{0} {1}".format(self.map, self.config.lime_rdir), True)
-        self.session.exec_cmd(
-            "chmod 744 {0}{1}".format(self.config.lime_rdir, self.map), True)
+        self.session.exec_cmd("cp /boot/{0} {1}".format(
+            self.map, self.config.lime_rdir), priv=True)
+        self.session.exec_cmd("chmod 744 {0}{1}".format(
+            self.config.lime_rdir, self.map), priv=True)
         self.session.transfer.pull(
             self.config.lime_rdir, self.client.output_dir, self.map)
 

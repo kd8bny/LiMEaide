@@ -22,28 +22,28 @@ class Network(Session):
 
         return 0
 
-    def exec_cmd(self, cmd, requires_privlege, disconnect_on_fail=True):
+    def exec_cmd(self, cmd, priv=False, disconnect_on_fail=True):
         """Called to exec command on remote system.
 
         :param cmd The actual bash command to run on remote
         :param requires_privlege Does this command require elevated privileges
+        :If command fails disconnect session
         :return stdout
         """
         stdout, stderr = None, None
-        if self.client.user is not 'root' and requires_privlege:
+        if self.client.user is not 'root' and priv:
             cmd = "sudo -S -p ' ' {0}".format(cmd)
-            self.logger.info("Command executed: {0}".format(cmd))
             stdin, stdout, stderr = self.paramiko_session.exec_command(
                 cmd, get_pty=True)
             stdin.write(self.client.pass_ + '\n')
             stdin.flush()
         else:
-            self.logger.info("Command executed: {0}".format(cmd))
             stdin, stdout, stderr = self.paramiko_session.exec_command(
                 cmd, get_pty=True)
-        output = stdout.readlines()
 
+        output = stdout.readlines()
         self.__print__(output)
+        self.logger.info("Command executed: {0}".format(cmd))
 
         if not stderr or self.__error_check__(stdout):
             for line in stderr:

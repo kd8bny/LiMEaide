@@ -1,5 +1,5 @@
 import sys
-from subprocess import Popen
+from subprocess import Popen, PIPE
 from termcolor import colored, cprint
 from lib.transfer import local
 from lib.session.session import Session
@@ -11,30 +11,38 @@ class Local(Session):
     def __init__(self, config, client, is_verbose=False):
         super(Local, self).__init__(config, client, is_verbose)
 
-    def exec_cmd(self, cmd, requires_privlege, disconnect_on_fail=True):
+    def exec_cmd(self, cmd, priv=False, disconnect_on_fail=True):
         """Called to exec command on remote system.
 
         :param cmd The actual bash command to run on remote
-        :param requires_privlege Does this command require elevated privileges
+        :param priv Does this command require elevated privileges
+        :If command fails disconnect session
         :return stdout
         """
-        cmd_args = cmd.split(' ')
-        if self.client.user is not 'root' and requires_privlege:
-            priv_esc = ['sudo', '-S', '-p']
-            stdin.write(self.client_.pass_ + '\n')
-            stdin.flush()
+        popen = None
+        stdout, stderr = None, None
+        if self.client.user is not 'root' and priv:
+            cmd = "sudo -S -p ' ' {0}".format(cmd)
+            popen = Popen(
+                cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=True)
+            popen.stdin.write(self.client.pass_ + '\n')
+            popen.stdin.flush()
+        else:
+            popen = Popen(
+                cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=True)
 
-            #popen = Popen(['sudo', '-S', '-p', cmd_args])
-        popen = Popen(cmd_args, stdout=PIPE, stdin=PIPE, stderr=PIPE)
-        stdout = p.communicate(input=b'one\ntwo\nthree\nfour\nfive\nsix\n')[0]
-        # print(grep_stdout.decode())
+        stdout, stderr = popen.communicate()
+        output = stdout.decode('utf-8')
+        output = output.split("\n")
 
+        self.__print__(output)
         self.logger.info("Command executed: {0}".format(cmd))
 
-        self.__print__(stdout)
+        error = stderr.decode('utf-8')
+        error = error.split("\n")
 
-        if not stderr or self.__error_check__(stdout):
-            for line in stderr:
+        if not error or self.__error_check__(output):
+            for line in error:
                 self.logger.error(line)
                 print(line.strip('\n'))
             cprint("Error deploying LiMEaide :(", 'red')
@@ -43,7 +51,7 @@ class Local(Session):
                 self.disconnect()
                 sys.exit()
 
-        return stdout
+        return output
 
     def connect(self):
         """Call to set connection with remote client."""

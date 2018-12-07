@@ -18,6 +18,7 @@ class Config:
         # Internal Resources
         self.lime_version = '1.8.0.1'
         self.config_file = '.limeaide'
+        self.manifest = 'manifest.json'
         self.lime_dir = './tools/LiME/src/'
         self.tools_dir = './tools/'
         self.output_dir = './output/'

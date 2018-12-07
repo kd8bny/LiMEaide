@@ -24,7 +24,7 @@ class LimeDeploy(object):
                     'Makefile']
 
         self.session.exec_cmd(
-            'mkdir -p {}'.format(self.config.lime_rdir), False)
+            'mkdir -p {}'.format(self.config.lime_rdir))
 
         # Generate information to create a new profile
         if self.new_profile:
@@ -38,10 +38,10 @@ class LimeDeploy(object):
 
             cprint("> Building loadable kernel module", 'blue')
             self.session.exec_cmd(
-                'cd {}; make debug'.format(self.config.lime_rdir), False)
+                'cd {}; make debug'.format(self.config.lime_rdir))
             self.session.exec_cmd("mv {0}lime-{1}.ko {0}{2}".format(
                 self.config.lime_rdir, self.client.profile["kver"],
-                self.client.profile["module"]), False)
+                self.client.profile["module"]))
 
             self.logger.info(
                 "new profile created {0}".format(
@@ -81,7 +81,7 @@ class LimeDeploy(object):
             self.config.lime_rdir, self.client.profile["module"],
             insmod_path, insmod_format, insmod_digest)
 
-        self.session.exec_cmd(insmod_cmd, True)
+        self.session.exec_cmd(insmod_cmd, priv=True)
 
         self.logger.info("LiME installed")
 
@@ -89,7 +89,7 @@ class LimeDeploy(object):
         cprint("> Changing permissions", 'blue')
         self.session.exec_cmd(
             "chmod 755 {0}{1}".format(
-                self.config.lime_rdir, self.client.output), True)
+                self.config.lime_rdir, self.client.output), priv=True)
 
         # if self.client.compress:
         #     cprint(
@@ -102,7 +102,7 @@ class LimeDeploy(object):
     def transfer_dump(self):
         """Retrieve files from remote client."""
         cprint("> Beam me up Scotty", 'blue')
-        os.mkdir(client.output_dir)
+        os.mkdir(self.client.output_dir)
         remote_file = self.client.output
         remote_file_hash = "{}.{}".format(
             self.client.output, self.client.digest)

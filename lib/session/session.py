@@ -42,11 +42,12 @@ class Session:
 
         self.transfer.close()
 
-    def exec_cmd(self, cmd, requires_privlege, disconnect_on_fail=True):
+    def exec_cmd(self, cmd, priv=False, disconnect_on_fail=True):
         """Called to exec command on remote system.
 
         :param cmd The actual bash command to run on remote
         :param requires_privlege Does this command require elevated privileges
+        :If command fails disconnect session
         :return stdout
         """
         pass
