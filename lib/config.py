@@ -30,7 +30,7 @@ class Config:
         self.lime_rdir = './.limeaide_working/'
 
         self.date = None
-        self.volatility_profile_dir = None
+        self.volatility_dir = None
         self.output = None
         self.compress = None
         self.format = None
@@ -38,6 +38,13 @@ class Config:
 
     def set_date(self):
         self.date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
+
+    def setup_logging(self):
+        """Setup logging to file and initial logger"""
+        logging.basicConfig(
+            level=logging.INFO, filename='{0}{1}.log'.format(
+                self.log_dir, self.date))
+        self.logger = logging.getLogger(__name__)
 
     def __update_config__(self):
         cprint("Updating Configuration", 'green')
@@ -48,7 +55,7 @@ class Config:
         # default_config = configparser.ConfigParser()
         # default_config['MANIFEST'] = {}
         # default_config['MANIFEST']['version'] = str(self.__version__)
-        # default_config.set('DEFAULT', 'volatility', self.volatility_profile_dir)
+        # default_config.set('DEFAULT', 'volatility', self.volatility_dir)
         # default_config.set('DEFAULT', 'output', self.output)
         # default_config.set('DEFAULT', 'compress', self.compress)
         # default_config.set('DEFAULT', 'format', self.format)
@@ -107,12 +114,12 @@ class Config:
                     "Entered directory does not exist. Please enter" +
                     " again", 'red')
 
-        self.volatility_profile_dir = path + path_ext
+        self.volatility_dir = path + path_ext
 
         default_config = configparser.ConfigParser()
         default_config.read(self.config_file)
         default_config.set(
-            'DEFAULT', 'volatility', self.volatility_profile_dir)
+            'DEFAULT', 'volatility', self.volatility_dir)
         with open(self.config_file, 'w+') as configfile:
             default_config.write(configfile)
 
@@ -135,11 +142,6 @@ class Config:
         if not os.path.isdir(self.lime_dir):
             self.__download_lime__()
 
-        if self.volatility_profile_dir == 'None':
-            pass
-        elif not self.volatility_profile_dir or not os.path.isdir(self.volatility_profile_dir):
-            self.__update_vol_dir__()
-
     def read_config(self):
         """Read default configuration."""
         if not os.path.isfile(self.config_file):
@@ -152,7 +154,7 @@ class Config:
                 self.__update_config__()
 
             else:
-                self.volatility_profile_dir = default_config['DEFAULT']['volatility']
+                self.volatility_dir = default_config['DEFAULT']['volatility']
                 self.output = default_config['DEFAULT']['output']
                 self.compress = default_config['DEFAULT']['compress']
                 self.format = default_config['DEFAULT']['format']
@@ -161,12 +163,10 @@ class Config:
         except KeyError:
             self.__update_config__()
 
-    def setup_logging(self):
-        """Setup logging to file and initial logger"""
-        logging.basicConfig(
-            level=logging.INFO, filename='{0}{1}.log'.format(
-                self.log_dir, self.date))
-        self.logger = logging.getLogger(__name__)
+        if self.volatility_dir != 'None':
+            if not self.volatility_dir or not os.path.isdir(
+                    self.volatility_dir):
+                self.__update_vol_dir__()
 
     def configure(self):
         self.set_date()
