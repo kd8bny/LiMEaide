@@ -35,7 +35,7 @@ class Limeaide:
         parser.add_argument("-u", "--user", help="use a sudo user instead \
             default: root")
         parser.add_argument(
-            "-r", "--raw", help="Use a raw socket instead of a SFTP session \
+            "-s", "--socket", help="Use a TCP socket instead of a SFTP session \
             to transfer data. Does not write the memory image to disk, but \
             will transfer other needed files")
         parser.add_argument(
@@ -73,9 +73,9 @@ class Limeaide:
         """
         client = Client()
         client.ip = args.remote
-        if args.raw:
+        if args.socket:
             if client.ip != 'local':
-                sys.exit(colored("Can not conduct raw transfer on local\
+                sys.exit(colored("Can not conduct direct transfer on local\
                     machine", 'red'))
             else:
                 client.port = args.port
