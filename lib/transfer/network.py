@@ -39,7 +39,6 @@ class Network(Transfer):
         :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
-        print("tcp")
         TCP_CLIENT(ip, port, local_dir, filename)
 
     def __pull_sftp__(self, remote_dir, local_dir, filename):

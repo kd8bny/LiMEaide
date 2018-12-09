@@ -29,6 +29,29 @@ class Session:
                 if self.is_verbose:
                     print(line)
 
+    def check_integrity(self):
+        BUFF_SIZE = 65536
+        digest = hashlib.sha1()
+
+        cprint("> Computing message digest of image", 'blue')
+        with open(self.client.output_dir + self.client.output, 'rb') as f:
+            while True:
+                data = f.read(BUFF_SIZE)
+                if not data:
+                    break
+                digest.update(data)
+        sha1 = digest.hexdigest()
+
+        with open(self.client.output_dir +
+                  self.client.output + '.sha1', 'r') as f:
+            remote_sha1 = f.read()
+
+        if sha1 == remote_sha1:
+            cprint("> Digest complete (sha1) {}".format(sha1), 'green')
+        else:
+            cprint("> DIGEST MISMATCH (sha1) \nlocal  {0} \nremote {1}".format(
+                sha1, remote_sha1), 'red')
+
     def disconnect(self):
         """Call to end session and remove files from remote client."""
         cprint("> Cleaning up...", 'blue')

@@ -66,7 +66,7 @@ class Limeaide:
         return parser.parse_args()
 
     @staticmethod
-    def get_client(args, config):
+    def __get_client__(args, config):
         """Return instantiated client.
 
         Config will provide global overrides.
