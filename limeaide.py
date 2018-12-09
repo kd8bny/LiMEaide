@@ -74,9 +74,9 @@ class Limeaide:
         client = Client()
         client.ip = args.remote
         if args.socket:
-            if client.ip != 'local':
-                sys.exit(colored("Can not conduct direct transfer on local\
-                    machine", 'red'))
+            if client.ip == 'local':
+                sys.exit(colored("Can not conduct direct transfer " +
+                    "on local machine", 'red'))
             else:
                 client.port = args.port
 
