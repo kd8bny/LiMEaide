@@ -52,7 +52,7 @@ class VolDeploy(object):
         self.get_profile()
 
         if vol_dir != 'None':
-            shutil.copy(self.copy.output_dir +
+            shutil.copy(self.config.output_dir +
                         self.client.profile['profile'], vol_dir +
                         self.client.profile['profile'])
         cprint("Profile generation complete run 'vol.py --info | " +

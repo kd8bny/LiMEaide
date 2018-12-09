@@ -247,7 +247,7 @@ class Limeaide:
                 '"-P scheduled_jobs/{}.dat"'.format(client.jobname), 'yellow')
         else:
             # Now that's taken care of, lets do work on Volatility
-            VolDeploy(config, session).main(config.volatility_profile_dir)
+            VolDeploy(config, session).main(config.volatility_dir)
             session.disconnect()
 
         logging.shutdown()
