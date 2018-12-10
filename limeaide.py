@@ -78,7 +78,7 @@ class Limeaide:
                 sys.exit(colored("Can not conduct direct transfer " +
                     "on local machine", 'red'))
             else:
-                client.port = args.port
+                client.port = int(args.socket)
 
         if args.case:
             client.job_name = args.case

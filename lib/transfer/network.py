@@ -1,4 +1,6 @@
 import functools
+from threading import Event, Thread
+
 from lib.transfer.transfer import Transfer
 from lib.transfer.tcp_client import TCP_CLIENT
 
@@ -6,10 +8,9 @@ from lib.transfer.tcp_client import TCP_CLIENT
 class Network(Transfer):
     """Network transfer method using SFTP or raw TCP"""
 
-    def __init__(self, paramiko_session, method, ip=None, port=None):
+    def __init__(self, paramiko_session, ip=None, port=None):
         Transfer.__init__(self)
         self.paramiko_session = paramiko_session
-        self.method = method
         self.ip = ip
         self.port = port
         # self.complete_percent = []
@@ -39,7 +40,10 @@ class Network(Transfer):
         :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
-        TCP_CLIENT(ip, port, local_dir, filename)
+        output = local_dir + filename
+        client = TCP_CLIENT(ip, port, output)
+        thread = Thread(target=client.connect)
+        thread.start()
 
     def __pull_sftp__(self, remote_dir, local_dir, filename):
         """Called when data needs to be pulled from remote system.

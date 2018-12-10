@@ -122,6 +122,11 @@ class LimeDeploy(object):
         os.mkdir(self.client.output_dir)
         # Sym link logs
 
+        if self.client.port:
+            self.__transfer_image_sock__()
+        else:
+            self.__transfer_image__()
+
         if self.new_profile:
             self.session.transfer.pull(
                 self.config.lime_rdir, self.config.output_dir,

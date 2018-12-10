@@ -74,6 +74,5 @@ class Network(Session):
             sys.exit(colored("> {}".format(e), 'red'))
 
         self.transfer = network.Network(
-            self.paramiko_session, None,
-            self.client.ip, self.client.port)
+            self.paramiko_session, self.client.ip, self.client.port)
         self.transfer.connect()

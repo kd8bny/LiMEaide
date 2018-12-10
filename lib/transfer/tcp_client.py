@@ -6,12 +6,12 @@ import logging
 class TCP_CLIENT:
     """docstring for TCP_CLIENT"""
 
-    def __init__(self, ip, port, local_dir, file_name):
+    def __init__(self, ip, port, output):
         super(TCP_CLIENT, self).__init__()
         self.logger = logging.getLogger(__name__)
         self.ip = ip
         self.port = port
-        self.file_name = local_dir + file_name
+        self.output = output
 
     def __handle_client__(self, sock):
         while True:
@@ -24,26 +24,31 @@ class TCP_CLIENT:
 
             self.__write_out__(file_buffer)
 
+        return True
+
     def __write_out__(self, data):
         try:
-            with open(self.file_name, 'ab') as f:
+            with open(self.output, 'ab') as f:
                 f.write(data)
-        except:
-            self.logger.error("Unable to save output")
+
+        except Exception as e:
+            self.logger.error("Unable to save output: {}".format(e))
             sys.exit("Unable to save output")
 
-    def main(self):
-        try:
-            print("befoore")
-            self.logger.info("Connecting to Socket")
-            srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            srv.connect((self.ip, self.port))
-            print("connect")
+    def connect(self):
+        self.logger.info("Connecting to Socket")
+        while True:
+            try:
+                srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                srv.connect((self.ip, self.port))
 
-            self.__handle_client__(srv)
+                complete = self.__handle_client__(srv)
 
-        except socket.error as e:
-            sys.exit(e)
+                if complete:
+                    break
 
-        finally:
-            srv.close()
+            except socket.error as e:
+                pass
+
+            finally:
+                srv.close()
