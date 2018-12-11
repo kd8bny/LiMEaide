@@ -139,8 +139,10 @@ class LimeDeploy(object):
 
         self.session.transfer.pull(
             None, self.client.output_dir, remote_file)
-        self.session.transfer.pull(
-            None, self.client.output_dir, remote_file_hash)
+
+        if self.client.digest:
+            self.session.transfer.pull(
+                None, self.client.output_dir, remote_file_hash)
 
     def __transfer_image__(self):
         remote_file = self.client.output
@@ -149,8 +151,9 @@ class LimeDeploy(object):
 
         self.session.transfer.pull(
             self.config.lime_rdir, self.client.output_dir, remote_file)
-        self.session.transfer.pull(
-            self.config.lime_rdir, self.client.output_dir, remote_file_hash)
+        if self.client.digest:
+            self.session.transfer.pull(self.config.lime_rdir,
+                self.client.output_dir, remote_file_hash)
 
     def main(self):
         """Begin the process of transporting LiME and dumping the RAM."""
