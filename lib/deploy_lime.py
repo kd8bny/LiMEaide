@@ -108,19 +108,11 @@ class LimeDeploy(object):
 
         self.transfer_image()
 
-        # if self.client.compress:
-        #     cprint(
-        #         "> Compressing image to Bzip2...This will take awhile", 'blue')
-        #     self.session.exec_cmd(
-        #         'tar -jv --remove-files -f {0}{1}.bz2 -c {2}{3}'.format(
-        #             self.lime_rdir, self.client.output, self.lime_rdir,
-        #             self.client.output), True)
-
     def transfer_image(self):
         """Retrieve files from remote client."""
         cprint("> Beam me up Scotty", 'blue')
         os.mkdir(self.client.output_dir)
-        # Sym link logs
+        # TODO Sym link logs
 
         if self.client.port:
             self.__transfer_image_sock__()
@@ -129,7 +121,7 @@ class LimeDeploy(object):
 
         if self.new_profile:
             self.session.transfer.pull(
-                self.config.lime_rdir, self.config.output_dir,
+                self.config.lime_rdir, self.config.profile_dir,
                 self.client.profile['module'])
 
     def __transfer_image_sock__(self):
@@ -151,9 +143,10 @@ class LimeDeploy(object):
 
         self.session.transfer.pull(
             self.config.lime_rdir, self.client.output_dir, remote_file)
+
         if self.client.digest:
-            self.session.transfer.pull(self.config.lime_rdir,
-                self.client.output_dir, remote_file_hash)
+            self.session.transfer.pull(
+                self.config.lime_rdir, self.client.output_dir, remote_file_hash)
 
     def main(self):
         """Begin the process of transporting LiME and dumping the RAM."""

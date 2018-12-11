@@ -20,28 +20,31 @@ class VolDeploy(object):
         """Grab system maps from remote client."""
         cprint("> Attempting to grab files for volatility profile", 'blue')
         cprint("> Obtaining system.map", 'blue')
+
         self.session.exec_cmd("cp /boot/{0} {1}".format(
             self.map, self.config.lime_rdir), priv=True)
         self.session.exec_cmd("chmod 744 {0}{1}".format(
             self.config.lime_rdir, self.map), priv=True)
+
         self.session.transfer.pull(
             self.config.lime_rdir, self.client.output_dir, self.map)
 
     def get_profile(self):
         """Obtain symbols from module and zip the profile."""
         cprint("> Obtaining symbols", 'blue')
+
         dwarf_file = open(
             self.client.output_dir + self.client.profile['kver'] +
             '.dwarf', 'w+')
         sp = Popen(
             ['dwarfdump', '-d', '-i',
-                self.config.output_dir + self.client.profile['module']],
+                self.config.profile_dir + self.client.profile['module']],
             stdout=dwarf_file)
         sp.wait()
         dwarf_file.flush()
 
         pf = Popen(['zip', '-j',
-            self.config.output_dir + self.client.profile['profile'],
+            self.client.output_dir + self.client.profile['profile'],
             self.client.output_dir + self.client.profile['kver'] + '.dwarf',
             self.client.output_dir + self.map])
         pf.wait()
@@ -52,8 +55,9 @@ class VolDeploy(object):
         self.get_profile()
 
         if vol_dir != 'None':
-            shutil.copy(self.config.output_dir +
-                        self.client.profile['profile'], vol_dir +
-                        self.client.profile['profile'])
+            shutil.copy(
+                self.client.output_dir + self.client.profile['profile'],
+                vol_dir + self.client.profile['profile'])
+
         cprint("Profile generation complete run 'vol.py --info | " +
                "grep Linux' to see your profile", 'green', attrs=['blink'])
