@@ -32,36 +32,42 @@ class Limeaide:
             automate GNU/Linux memory forensics')
         parser.add_argument("remote", help="IP address of remote host. Use \
             'local' in place of IP to run locally")
+
+        # LiMEaide Options
         parser.add_argument("-u", "--user", help="use a sudo user instead \
             default: root")
         parser.add_argument(
             "-s", "--socket", help="Use a TCP socket instead of a SFTP session \
             to transfer data. Does not write the memory image to disk, but \
             will transfer other needed files")
-        parser.add_argument(
-            "-N", "--no-profiler", action="store_true",
-            help="Do NOT run profiler and force compile new module/profile for \
-            client")
-        parser.add_argument(
-            "-p", "--profile", nargs=3, metavar=('disto', 'kver', 'arch'),
-            help="Skip the profiler by providing the distribution, kernel\
-            version, and architecture of the remote client.")
-        parser.add_argument(
-            "-C", "--compress", action="store_true", help="Compress\
-            dump into Bzip2 format on host")
-        parser.add_argument("-o", "--output", help="Name the output file")
-        parser.add_argument("-f", "--format", help="Change the format")
-        parser.add_argument("-d", "--digest", help="Use a different digest\
-             algorithm. Use 'None' to disable")
         parser.add_argument("-c", "--case", help="Append case number to output\
             dir")
-        parser.add_argument("--delay-pickup", action="store_true", help="Used \
-            to store job for future pickup")
-        parser.add_argument("-P", "--pickup", help="Enter stored job file")
         parser.add_argument("-v", "--verbose", action="store_true", help="Prod\
             uce verbose output from remote client")
         parser.add_argument("--force-clean", action="store_true", help="Force \
             clean client after failed deployment")
+
+        # LiME Options
+        parser.add_argument("-o", "--output", help="Name the output file")
+        parser.add_argument("-f", "--format", help="Change the format")
+        parser.add_argument("-d", "--digest", help="Use a different digest\
+             algorithm. Use 'None' to disable")
+
+        profiler_group = parser.add_mutually_exclusive_group()
+        profiler_group.add_argument(
+            "-N", "--no-profiler", action="store_true",
+            help="Do NOT run profiler and force compile new module/profile for \
+            client")
+        profiler_group.add_argument(
+            "-p", "--profile", nargs=3, metavar=('disto', 'kver', 'arch'),
+            help="Skip the profiler by providing the distribution, kernel\
+            version, and architecture of the remote client.")
+
+        pickup_group = parser.add_mutually_exclusive_group()
+        pickup_group.add_argument("--delay-pickup", action="store_true",
+                                  help="Used to store job for future pickup")
+        pickup_group.add_argument("-P", "--pickup", help="Enter stored job \
+            file")
 
         return parser.parse_args()
 
@@ -69,21 +75,31 @@ class Limeaide:
     def __get_client__(args, config):
         """Return instantiated client.
 
-        Config will provide global overrides.
+        Args will override global config defaults.
         """
+
         client = Client()
         client.ip = args.remote
+
+        # Check args for remote/local issues
+        if client.ip == 'local':
+            if args.socket:
+                sys.exit(colored("Can not use socket on local machine", 'red'))
+            elif args.delay_pickup:
+                sys.exit(
+                    colored("Can not delay pickup on local machine", 'red'))
+
         if args.socket:
-            if client.ip == 'local':
-                sys.exit(colored("Can not conduct direct transfer " +
-                    "on local machine", 'red'))
+            if args.delay_pickup:
+                sys.exit(colored(
+                    "Can not delay pickup on while using TCP client", 'red'))
             else:
                 client.port = int(args.socket)
 
         if args.case:
             client.job_name = args.case
         else:
-            client.job_name = "{0}-{1}-worker".format(
+            client.job_name = "{0}-{1}".format(
                 client.ip, config.date)
 
         if args.user:
@@ -104,28 +120,20 @@ class Limeaide:
         else:
             client.digest = config.digest
 
-        # if args.delay_pickup:
-        #     if client.ip == 'local':
-        #         sys.exit(colored("Can not delay raw or local sessions.\
-        #              Please remove raw or local arguments", 'red'))
-        #     else:
-        #         client.delay_pickup = args.delay_pickup
+        if args.delay_pickup:
+            client.delay_pickup = args.delay_pickup
 
         if args.output:
             client.output = args.output
         else:
             client.output = config.output
 
-        if args.compress:
-            client.compress = True
-        else:
-            client.compress = config.compress
-
         client.output_dir = "{0}{1}/".format(
             config.output_dir, client.job_name)
 
         cprint("> Establishing secure connection {0}@{1}".format(
             client.user, client.ip), 'blue')
+
         client.pass_ = getpass.getpass()
 
         return client
