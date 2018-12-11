@@ -85,7 +85,10 @@ class LimeDeploy(object):
         # Build the correct instructions
         path = "path="
         format = "format={}".format(self.client.format)
-        digest = ""  # "digest={}".format(self.client.digest)
+        digest = ""
+
+        if self.client.digest:
+            digest = "digest={}".format(self.client.digest)
 
         if self.client.port:
             path += "tcp:{0}".format(self.client.port)
