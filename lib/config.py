@@ -37,7 +37,7 @@ class Config:
         self.digest = None
 
     def set_date(self):
-        self.date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S_%f")
+        self.date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S")
 
     def setup_logging(self):
         """Setup logging to file and initial logger"""

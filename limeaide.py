@@ -99,7 +99,7 @@ class Limeaide:
         if args.case:
             client.job_name = args.case
         else:
-            client.job_name = "{0}-{1}".format(
+            client.job_name = "{0}_{1}".format(
                 client.ip, config.date)
 
         if args.user:
