@@ -112,6 +112,8 @@ class LimeDeploy(object):
         self.logger.info("LiME installing")
         self.session.exec_cmd(cmd, priv=True)
 
+        # TODO check the queue for transfer
+
     def __install_lime__(self, path, format, digest):
         cprint(">> {}".format(path), 'blue')
         cprint(">> {}".format(format), 'blue')
@@ -156,6 +158,7 @@ class LimeDeploy(object):
             None, self.client.output_dir, remote_file)
 
         if self.client.digest:
+            print("grab digest")
             self.session.transfer.pull(
                 None, self.client.output_dir, remote_file_hash)
 

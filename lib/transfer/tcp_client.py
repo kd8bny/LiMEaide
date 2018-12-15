@@ -35,7 +35,7 @@ class TCP_CLIENT(threading.Thread):
         self.port = port
         self.output = output
 
-        self.timeout = 2
+        self.timeout = 10
 
     def __handle_client__(self, sock):
         buffer_size = 4096
@@ -84,8 +84,47 @@ class TCP_CLIENT(threading.Thread):
 
     def run(self):
         retry = True
-        # timeout
+
         while retry:
+            self.logger.info("Failed Connection, retrying")
             retry = self.connect()
             time.sleep(self.timeout)
-            # Event timeout
+            # TODO Event timeout
+
+
+class CONNECTION_MANAGER(threading.Thread):
+    """docstring for TCP_CLIENT"""
+
+    def __init__(self):
+        super(CONNECTION_MANAGER, self).__init__()
+        self.logger = logging.getLogger(__name__)
+
+        self.kill = False
+        self.client = None
+        self.queue = []
+
+        def add_connection(self, ip, port, output):
+            client = TCP_CLIENT(ip, port, output)
+            self.queue.append(client)
+            self.logger.info(
+                "Connection added to queue {0} {1} {2}".format(
+                    ip, port, output))
+
+        def kill(self):
+            self.kill = True
+
+        def __set_client_queue__(self):
+            self.client = None
+            if len(self.queue) > 0:
+                self.client = self.queue[0]
+                self.client.start()
+
+        def run(self):
+            while not self.kill:
+                time.sleep(5)
+                if not self.client:
+                    continue
+                elif self.client.is_alive():
+                    continue
+                else:
+                    self.__set_client_queue__()

@@ -20,10 +20,9 @@
 
 import functools
 from threading import Event, Thread
-import queue
 
 from lib.transfer.transfer import Transfer
-from lib.transfer.tcp_client import TCP_CLIENT
+from lib.transfer.tcp_client import CONNECTION_MANAGER
 
 
 class Network(Transfer):
@@ -34,7 +33,8 @@ class Network(Transfer):
         self.paramiko_session = paramiko_session
         self.ip = ip
         self.port = port
-        self.queue = None
+
+        self.conn_man = None
 
     def pull(self, remote_dir, local_dir, filename):
         """This is a raw pull, create a TCP server.
@@ -60,13 +60,13 @@ class Network(Transfer):
         :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
-        if not self.queue:
-            self.queue = queue.Queue()
-        self.queue.join
-
         output = local_dir + filename
-        client = TCP_CLIENT(ip, port, output)
-        client.start()
+
+        if not self.conn_man:
+            self.conn_man = CONNECTION_MANAGER()
+            self.conn_man.start()
+
+        self.conn_man.add_connection(ip, port, output)
 
     def __pull_sftp__(self, remote_dir, local_dir, filename):
         """Called when data needs to be pulled from remote system.
@@ -125,3 +125,8 @@ class Network(Transfer):
         # TODO Catch error
         # TODO check threads
         self.paramiko_session.close()
+
+        if self.conn_man:
+            self.conn_man.kill()
+            self.conn_man.join()
+            self.logger.info("Connection Manager closed")
