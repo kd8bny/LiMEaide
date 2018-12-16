@@ -72,19 +72,6 @@ class Session:
             cprint("> DIGEST MISMATCH (sha1) \nlocal  {0} \nremote {1}".format(
                 sha1, remote_sha1), 'red')
 
-    def disconnect(self):
-        """Call to end session and remove files from remote client."""
-        cprint("> Cleaning up...", 'blue')
-        if self.transfer.file_stat(self.config.lime_rdir, ''):
-            self.exec_cmd('rm -rf {0}'.format(
-                self.config.lime_rdir), True, False)
-
-        #TODO Check lsmod for lime before removing
-        cprint("> Removing LKM...standby", 'blue')
-        self.exec_cmd('rmmod lime.ko', True, False)
-
-        self.transfer.close()
-
     def exec_cmd(self, cmd, priv=False, disconnect_on_fail=True):
         """Called to exec command on remote system.
 
@@ -98,4 +85,8 @@ class Session:
     def connect(self):
         """Call to set connection with remote client."""
 
+        pass
+
+    def disconnect(self):
+        """Call to end session and remove files from remote client."""
         pass

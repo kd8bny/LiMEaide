@@ -78,3 +78,16 @@ class Local(Session):
 
         self.transfer = local.Local()
         self.transfer.connect()
+
+    def disconnect(self):
+        """Call to end session and remove files from remote client."""
+        cprint("> Cleaning up...", 'blue')
+        if self.transfer.file_stat(self.config.lime_rdir, ''):
+            self.exec_cmd('rm -rf {0}'.format(
+                self.config.lime_rdir), True, False)
+
+        if self.exec_cmd("lsmod | grep lime"):
+            cprint("> Removing LKM...standby", 'blue')
+            self.exec_cmd('rmmod lime.ko', True, False)
+
+        self.transfer.close()
