@@ -38,6 +38,7 @@ class TCP_CLIENT(threading.Thread):
         self.timeout = 10
 
     def __handle_client__(self, sock):
+
         buffer_size = 4096
 
         while True:
@@ -49,6 +50,7 @@ class TCP_CLIENT(threading.Thread):
                 break
 
             self.__write_out__(file_buffer)
+        self.logger.info("File saved")
 
     def __write_out__(self, data):
         try:
@@ -57,12 +59,15 @@ class TCP_CLIENT(threading.Thread):
 
         except Exception as e:
             self.logger.error("Unable to save output: {}".format(e))
+            # TODO this is a thread, doesnt kill main
             sys.exit("Unable to save output")
 
-    def connect(self):
+    def __connect__(self):
         self.logger.info("Connecting to Socket")
+        retry = False
         try:
             srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            srv.setblocking(False)
             srv.connect((self.ip, self.port))
 
             self.logger.info("Connection Successful")
@@ -70,61 +75,54 @@ class TCP_CLIENT(threading.Thread):
             self.__handle_client__(srv)
 
         except ConnectionRefusedError as e:
-            return True
+            retry = True
+            #return True
 
         except socket.error as e:
+            print(e)
+            retry = True
             self.logger.error(e)
             # Exit application, failed transfer
 
         finally:
             self.logger.info("Socket Closed")
-            srv.close()
-
-        return False
+            srv.shutdown(socket.SHUT_RDWR)
+            print(srv.close())
+        return retry
 
     def run(self):
         retry = True
 
         while retry:
-            self.logger.info("Failed Connection, retrying")
-            retry = self.connect()
             time.sleep(self.timeout)
+            self.logger.info("Failed Connection, retrying")
+            retry = self.__connect__()
             # TODO Event timeout
+
+        print("thread compte")
 
 
 class CONNECTION_MANAGER(threading.Thread):
     """docstring for TCP_CLIENT"""
 
-    def __init__(self):
+    def __init__(self, q, e):
         super(CONNECTION_MANAGER, self).__init__()
         self.logger = logging.getLogger(__name__)
+        self.event_kill = e
+        self.queue = q
 
-        self.kill = False
-        self.client = None
-        self.queue = []
+    def __start_client__(self, conn):
+        client = TCP_CLIENT(conn[0], conn[1], conn[2])
+        client.start()
+        client.join()
 
-        def add_connection(self, ip, port, output):
-            client = TCP_CLIENT(ip, port, output)
-            self.queue.append(client)
-            self.logger.info(
-                "Connection added to queue {0} {1} {2}".format(
-                    ip, port, output))
-
-        def kill(self):
-            self.kill = True
-
-        def __set_client_queue__(self):
-            self.client = None
-            if len(self.queue) > 0:
-                self.client = self.queue[0]
-                self.client.start()
-
-        def run(self):
-            while not self.kill:
-                time.sleep(5)
-                if not self.client:
-                    continue
-                elif self.client.is_alive():
-                    continue
-                else:
-                    self.__set_client_queue__()
+    def run(self):
+        while not self.event_kill.is_set():
+            time.sleep(3)
+            if self.queue.empty():
+                continue
+            else:
+                print(self.queue)
+                connection = self.queue.get()
+                print(connection)
+                self.__start_client__(connection)

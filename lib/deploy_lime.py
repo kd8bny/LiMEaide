@@ -158,9 +158,9 @@ class LimeDeploy(object):
             None, self.client.output_dir, remote_file)
 
         if self.client.digest:
-            print("grab digest")
-            self.session.transfer.pull(
-                None, self.client.output_dir, remote_file_hash)
+            pass
+            #self.session.transfer.pull(
+            #    None, self.client.output_dir, remote_file_hash)
 
     def __transfer_image__(self):
         remote_file = self.client.output
