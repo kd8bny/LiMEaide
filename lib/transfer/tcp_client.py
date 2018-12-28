@@ -18,11 +18,15 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import socket
-import sys
+
 import logging
-import threading
 import time
+import threading
+import selectors
+import socket
+import struct
+import sys
+import queue
 
 
 class TCP_CLIENT(threading.Thread):
@@ -35,22 +39,19 @@ class TCP_CLIENT(threading.Thread):
         self.port = port
         self.output = output
 
-        self.timeout = 10
+    def __handle_client__(self, key, mask):
+        sock = key.fileobj
+        if mask & selectors.EVENT_READ:
+            recv_data = sock.recv(1024)
 
-    def __handle_client__(self, sock):
-
-        buffer_size = 4096
-
-        while True:
-            file_buffer = b''
-            data = sock.recv(buffer_size)
-            if data:
-                file_buffer += data
+            if recv_data:
+                self.__write_out__(recv_data)
             else:
-                break
+                self.logger.info("File saved")
 
-            self.__write_out__(file_buffer)
-        self.logger.info("File saved")
+                return False
+
+        return True
 
     def __write_out__(self, data):
         try:
@@ -63,47 +64,33 @@ class TCP_CLIENT(threading.Thread):
             sys.exit("Unable to save output")
 
     def __connect__(self):
-        self.logger.info("Connecting to Socket")
-        retry = False
-        try:
-            srv = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            srv.setblocking(False)
-            srv.connect((self.ip, self.port))
-
-            self.logger.info("Connection Successful")
-
-            self.__handle_client__(srv)
-
-        except ConnectionRefusedError as e:
-            retry = True
-            #return True
-
-        except socket.error as e:
-            print(e)
-            retry = True
-            self.logger.error(e)
-            # Exit application, failed transfer
-
-        finally:
-            self.logger.info("Socket Closed")
-            srv.shutdown(socket.SHUT_RDWR)
-            print(srv.close())
-        return retry
-
-    def run(self):
         retry = True
 
-        while retry:
-            time.sleep(self.timeout)
-            self.logger.info("Failed Connection, retrying")
-            retry = self.__connect__()
-            # TODO Event timeout
+        self.logger.info("Connecting to Socket")
+        sel = selectors.DefaultSelector()
+        conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        conn.setsockopt(
+            socket.SOL_SOCKET, socket.SO_LINGER, struct.pack('ii', 1, 0))
+        conn.setblocking(False)
+        conn.connect_ex((self.ip, self.port))
+        sel.register(conn, selectors.EVENT_READ, data=None)
 
-        print("thread compte")
+        while retry:
+            events = sel.select()
+            for key, mask in events:
+                retry = self.__handle_client__(key, mask)
+
+        sel.unregister(conn)
+        conn.shutdown(socket.SHUT_RDWR)
+
+        self.logger.info("Socket Closed")
+
+    def run(self):
+        self.__connect__()
 
 
 class CONNECTION_MANAGER(threading.Thread):
-    """docstring for TCP_CLIENT"""
+    """docstring for CONNECTION_MANAGER"""
 
     def __init__(self, q, e):
         super(CONNECTION_MANAGER, self).__init__()
@@ -122,7 +109,14 @@ class CONNECTION_MANAGER(threading.Thread):
             if self.queue.empty():
                 continue
             else:
-                print(self.queue)
                 connection = self.queue.get()
-                print(connection)
                 self.__start_client__(connection)
+
+
+if __name__ == '__main__':
+    kill_conn_man = threading.Event()
+    queue = queue.Queue()
+    conn_man = CONNECTION_MANAGER(queue, kill_conn_man)
+    conn_man.start()
+    queue.put(['192.168.1.17', 1337, "test2"])
+    conn_man.join()
