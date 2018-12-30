@@ -18,7 +18,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-
 import logging
 import time
 import threading
@@ -26,32 +25,21 @@ import selectors
 import socket
 import struct
 import sys
-import queue
+from queue import Queue
 
 
 class TCP_CLIENT(threading.Thread):
     """docstring for TCP_CLIENT"""
 
-    def __init__(self, ip, port, output):
+    def __init__(self, qresult, ip, port, output):
         super(TCP_CLIENT, self).__init__()
         self.logger = logging.getLogger(__name__)
+        self.qresult = qresult
         self.ip = ip
         self.port = port
         self.output = output
 
-    def __handle_client__(self, key, mask):
-        sock = key.fileobj
-        if mask & selectors.EVENT_READ:
-            recv_data = sock.recv(1024)
-
-            if recv_data:
-                self.__write_out__(recv_data)
-            else:
-                self.logger.info("File saved")
-
-                return False
-
-        return True
+        self.result = {'success': True, 'terminal': False}
 
     def __write_out__(self, data):
         try:
@@ -60,8 +48,30 @@ class TCP_CLIENT(threading.Thread):
 
         except Exception as e:
             self.logger.error("Unable to save output: {}".format(e))
-            # TODO this is a thread, doesnt kill main
+            self.status['success'] = False
+            self.status['terminal'] = True
             sys.exit("Unable to save output")
+
+    def __handle_client__(self, key, mask, sel):
+        retry = True
+        sock = key.fileobj
+
+        if mask & selectors.EVENT_READ:
+            try:
+                recv_data = sock.recv(1024)
+
+                if recv_data:
+                    self.__write_out__(recv_data)
+                else:
+                    self.logger.info("File saved")
+                    retry = False
+
+            except socket.error as e:
+                self.logger.error(e)
+                self.status['success'] = False
+                retry = False
+
+        return retry
 
     def __connect__(self):
         retry = True
@@ -72,13 +82,14 @@ class TCP_CLIENT(threading.Thread):
         conn.setsockopt(
             socket.SOL_SOCKET, socket.SO_LINGER, struct.pack('ii', 1, 0))
         conn.setblocking(False)
+
         conn.connect_ex((self.ip, self.port))
         sel.register(conn, selectors.EVENT_READ, data=None)
 
         while retry:
             events = sel.select()
             for key, mask in events:
-                retry = self.__handle_client__(key, mask)
+                retry = self.__handle_client__(key, mask, sel)
 
         sel.unregister(conn)
         conn.shutdown(socket.SHUT_RDWR)
@@ -87,6 +98,7 @@ class TCP_CLIENT(threading.Thread):
 
     def run(self):
         self.__connect__()
+        self.qstatus.put(self.status)
 
 
 class CONNECTION_MANAGER(threading.Thread):
@@ -98,8 +110,10 @@ class CONNECTION_MANAGER(threading.Thread):
         self.event_kill = e
         self.queue = q
 
+        self.qstatus = Queue()
+
     def __start_client__(self, conn):
-        client = TCP_CLIENT(conn[0], conn[1], conn[2])
+        client = TCP_CLIENT(self.qstatus, conn[0], conn[1], conn[2])
         client.start()
         client.join()
 
@@ -111,11 +125,17 @@ class CONNECTION_MANAGER(threading.Thread):
             else:
                 connection = self.queue.get()
                 self.__start_client__(connection)
+                status = self.qstatus.get()
+
+                if not status['success']:
+                    self.logger.warning(
+                        "connection failed, adding back to queue")
+                    self.queue.put(connection)
 
 
 if __name__ == '__main__':
     kill_conn_man = threading.Event()
-    queue = queue.Queue()
+    queue = Queue()
     conn_man = CONNECTION_MANAGER(queue, kill_conn_man)
     conn_man.start()
     queue.put(['192.168.1.17', 1337, "test2"])
