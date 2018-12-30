@@ -127,7 +127,6 @@ class Network(Transfer):
 
     def close(self):
         # TODO Catch error
-        # TODO check threads
         self.paramiko_session.close()
 
         if self.conn_man:

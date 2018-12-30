@@ -112,8 +112,6 @@ class LimeDeploy(object):
         self.logger.info("LiME installing")
         self.session.exec_cmd(cmd, priv=True)
 
-        # TODO check the queue for transfer
-
     def __install_lime__(self, path, format, digest):
         cprint(">> {}".format(path), 'blue')
         cprint(">> {}".format(format), 'blue')
