@@ -64,6 +64,7 @@ class Local(Transfer):
 
         try:
             os.stat(remote_dir + filename)
+            file_exists = True
 
         except IOError as e:
             self.logger.warning(e)
