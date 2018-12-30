@@ -48,8 +48,8 @@ class TCP_CLIENT(threading.Thread):
 
         except Exception as e:
             self.logger.error("Unable to save output: {}".format(e))
-            self.status['success'] = False
-            self.status['terminal'] = True
+            self.result['success'] = False
+            self.result['terminal'] = True
             sys.exit("Unable to save output")
 
     def __handle_client__(self, key, mask, sel):
@@ -68,12 +68,12 @@ class TCP_CLIENT(threading.Thread):
 
             except socket.error as e:
                 self.logger.error(e)
-                self.status['success'] = False
+                self.result['success'] = False
                 retry = False
 
         return retry
 
-    def __connect__(self):
+    def run(self):
         retry = True
 
         self.logger.info("Connecting to Socket")
@@ -92,13 +92,11 @@ class TCP_CLIENT(threading.Thread):
                 retry = self.__handle_client__(key, mask, sel)
 
         sel.unregister(conn)
-        conn.shutdown(socket.SHUT_RDWR)
+        if self.result['success']:
+            conn.shutdown(socket.SHUT_RDWR)
 
+        self.qresult.put(self.result)
         self.logger.info("Socket Closed")
-
-    def run(self):
-        self.__connect__()
-        self.qstatus.put(self.status)
 
 
 class CONNECTION_MANAGER(threading.Thread):
@@ -111,6 +109,7 @@ class CONNECTION_MANAGER(threading.Thread):
         self.queue = q
 
         self.qstatus = Queue()
+        self.retry_count = 0
 
     def __start_client__(self, conn):
         client = TCP_CLIENT(self.qstatus, conn[0], conn[1], conn[2])
@@ -128,9 +127,23 @@ class CONNECTION_MANAGER(threading.Thread):
                 status = self.qstatus.get()
 
                 if not status['success']:
-                    self.logger.warning(
-                        "connection failed, adding back to queue")
-                    self.queue.put(connection)
+                    if status['terminal']:
+                        self.logger.warning(
+                            "Failed connection, closing down")
+                        self.event_kill.set()
+
+                    elif self.retry_count > 4:
+                        self.logger.warning(
+                            "Retry count exceeded, closing down")
+                        self.event_kill.set()
+
+                    else:
+                        self.retry_count += 1
+                        self.logger.warning(
+                            "connection failed, adding back to queue")
+                        self.queue.put(connection)
+
+        self.logger.info("Connection manager is finished")
 
 
 if __name__ == '__main__':
