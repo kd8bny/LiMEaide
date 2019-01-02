@@ -25,6 +25,7 @@ import selectors
 import socket
 import struct
 import sys
+from termcolor import colored
 from queue import Queue
 
 
@@ -40,6 +41,17 @@ class TCP_CLIENT(threading.Thread):
         self.output = output
 
         self.result = {'success': True, 'terminal': False}
+        self.byte_count = 0
+
+    def __transfer_status__(self, bytes_len):
+        """Callback to provide status of the files being transfered.
+        Calling function must print new line on return or else line will be
+        overwritten.
+        """
+        self.byte_count += bytes_len
+        print(colored(
+            "Transfer of {0} is at {1:d} bytes".format(
+                self.output, self.byte_count), 'cyan'), end='\r', flush=True)
 
     def __write_out__(self, data):
         try:
@@ -61,6 +73,7 @@ class TCP_CLIENT(threading.Thread):
                 recv_data = sock.recv(1024)
 
                 if recv_data:
+                    self.__transfer_status__(len(recv_data))
                     self.__write_out__(recv_data)
                 else:
                     self.logger.info("File saved")
