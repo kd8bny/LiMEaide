@@ -77,6 +77,7 @@ class TCP_CLIENT(threading.Thread):
                     self.__write_out__(recv_data)
                 else:
                     self.logger.info("File saved")
+                    print("\n")
                     retry = False
 
             except socket.error as e:

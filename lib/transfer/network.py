@@ -48,13 +48,12 @@ class Network(Transfer):
             overwritten.
             """
             percent = int(100 * bytes_so_far / bytes_total)
-            if percent % 10 == 0 and percent not in self.complete_percent:
-                self.complete_percent.append(percent)
-                print(colored(
-                    "Transfer of {0} is at {1:d}/{2:d} ".format(
-                        filename, bytes_so_far, bytes_total) +
-                    "bytes ({0:.0f}%)".format(percent),
-                    'cyan'), end='\r', flush=True)
+            self.complete_percent.append(percent)
+            print(colored(
+                "Transfer of {0} is at {1:d}/{2:d} ".format(
+                    filename, bytes_so_far, bytes_total) +
+                "bytes ({0:.0f}%)".format(percent),
+                'cyan'), end='\r', flush=True)
 
     def pull(self, remote_dir, local_dir, filename):
         """This is a raw pull, create a TCP server.

@@ -53,7 +53,6 @@ class LimeDeploy(object):
 
             self.client.profile = self.profiler.create_profile(
                 self.session)
-            print(self.client.profile["module"])
 
             cprint("> Building loadable kernel module", 'blue')
             self.session.exec_cmd(
@@ -169,7 +168,8 @@ class LimeDeploy(object):
 
         if self.client.digest:
             self.session.transfer.pull(
-                self.config.lime_rdir, self.client.output_dir, remote_file_hash)
+                self.config.lime_rdir, self.client.output_dir,
+                remote_file_hash)
 
     def main(self):
         """Begin the process of transporting LiME and dumping the RAM."""
