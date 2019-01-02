@@ -33,15 +33,6 @@ class Network(Session):
         self.paramiko_session = None
         self.transfer = None
 
-    def __error_check__(self, stdout):
-        """Check for standard errors from stdout"""
-        for line in stdout:
-            if "error" in line.lower():
-                self.logger.error(line)
-                return 1
-
-        return 0
-
     def exec_cmd(self, cmd, priv=False, disconnect_on_fail=True):
         """Called to exec command on remote system.
 
@@ -62,13 +53,19 @@ class Network(Session):
                 cmd, get_pty=True)
 
         output = stdout.readlines()
-        self.__print__(output)
+
         self.logger.info("Command executed: {0}".format(cmd))
 
-        if not stderr or self.__error_check__(stdout):
-            for line in stderr:
-                self.logger.error(line)
-                print(line.strip('\n'))
+        if self.__error_check__(output):
+            self.__print__(output, err=True)
+            cprint("Error deploying LiMEaide :(", 'red')
+        else:
+            self.__print__(output)
+
+        error = stdout.readlines()
+
+        if error:
+            self.__print__(error, err=True)
             cprint("Error deploying LiMEaide :(", 'red')
 
             if disconnect_on_fail:

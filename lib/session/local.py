@@ -55,16 +55,19 @@ class Local(Session):
         output = stdout.decode('utf-8')
         output = output.split("\n")
 
-        self.__print__(output)
         self.logger.info("Command executed: {0}".format(cmd))
+
+        if self.__error_check__(output):
+            self.__print__(output, err=True)
+            cprint("Error deploying LiMEaide :(", 'red')
+        else:
+            self.__print__(output)
 
         error = stderr.decode('utf-8')
         error = error.split("\n")
 
-        if not error or self.__error_check__(output):
-            for line in error:
-                self.logger.error(line)
-                print(line.strip('\n'))
+        if error:
+            self.__print__(error, err=True)
             cprint("Error deploying LiMEaide :(", 'red')
 
             if disconnect_on_fail:
@@ -75,7 +78,6 @@ class Local(Session):
 
     def connect(self):
         """Call to set connection with remote client."""
-
         self.transfer = local.Local()
         self.transfer.connect()
 

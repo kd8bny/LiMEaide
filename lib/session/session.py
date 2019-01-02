@@ -37,17 +37,22 @@ class Session:
         for line in stdout:
             if "error" in line.lower():
                 self.logger.error(line)
-                return 1
 
-        return 0
+                return True
 
-    def __print__(self, stdout):
+        return False
+
+    def __print__(self, stdout, err=False):
         stdout = [line.strip() for line in stdout]
         for line in stdout:
             if line and line != self.client.pass_:
-                self.logger.info(line)
-                if self.is_verbose:
-                    print(line)
+                if not err:
+                    self.logger.info(line)
+                    if self.is_verbose:
+                        print(line)
+                else:
+                    self.logger.error(line)
+                    cprint(line, 'red')
 
     def check_integrity(self):
         BUFF_SIZE = 65536
