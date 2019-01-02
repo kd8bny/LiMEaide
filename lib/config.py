@@ -66,24 +66,6 @@ class Config:
                 self.log_dir, self.date))
         self.logger = logging.getLogger(__name__)
 
-    def __update_config__(self):
-        cprint("Updating Configuration", 'green')
-        # self.logger.info("Updating config file")
-        # self.format = 'lime'
-        # self.digest = 'sha1'
-
-        # default_config = configparser.ConfigParser()
-        # default_config['MANIFEST'] = {}
-        # default_config['MANIFEST']['version'] = str(self.__version__)
-        # default_config.set('DEFAULT', 'volatility', self.volatility_dir)
-        # default_config.set('DEFAULT', 'output', self.output)
-        # default_config.set('DEFAULT', 'compress', self.compress)
-        # default_config.set('DEFAULT', 'format', self.format)
-        # default_config.set('DEFAULT', 'digest', self.digest)
-        # with open('.limeaide', 'w+') as config_file:
-        #     config.write(config_file)
-        pass
-
     def __download_lime__(self):
         cprint("Downloading LiME", 'green')
         try:
@@ -169,19 +151,12 @@ class Config:
 
         default_config = configparser.ConfigParser()
         default_config.read(self.config_file)
-        try:
-            if int(self.__version__) > int(default_config['MANIFEST']['version']):
-                self.__update_config__()
 
-            else:
-                self.volatility_dir = default_config['DEFAULT']['volatility']
-                self.output = default_config['DEFAULT']['output']
-                self.compress = default_config['DEFAULT']['compress']
-                self.format = default_config['DEFAULT']['format']
-                self.digest = default_config['DEFAULT']['digest']
-
-        except KeyError:
-            self.__update_config__()
+        self.volatility_dir = default_config['DEFAULT']['volatility']
+        self.output = default_config['DEFAULT']['output']
+        self.compress = default_config['DEFAULT']['compress']
+        self.format = default_config['DEFAULT']['format']
+        self.digest = default_config['DEFAULT']['digest']
 
         if self.volatility_dir != 'None':
             if not self.volatility_dir or not os.path.isdir(
