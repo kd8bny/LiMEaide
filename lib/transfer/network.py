@@ -21,6 +21,7 @@
 import functools
 from threading import Event
 from queue import Queue
+from termcolor import colored
 
 from lib.transfer.transfer import Transfer
 from lib.transfer.tcp_client import CONNECTION_MANAGER
@@ -38,6 +39,22 @@ class Network(Transfer):
         self.conn_man = None
         self.kill_conn_man = None
         self.Queue = None
+
+        self.complete_percent = []
+
+    def __transfer_status__(self, filename, bytes_so_far, bytes_total):
+            """Callback to provide status of the files being transfered.
+            Calling function must print new line on return or else line will be
+            overwritten.
+            """
+            percent = int(100 * bytes_so_far / bytes_total)
+            if percent % 10 == 0 and percent not in self.complete_percent:
+                self.complete_percent.append(percent)
+                print(colored(
+                    "Transfer of {0} is at {1:d}/{2:d} ".format(
+                        filename, bytes_so_far, bytes_total) +
+                    "bytes ({0:.0f}%)\r".format(percent),
+                    'cyan'), end='\r', flush=True)
 
     def pull(self, remote_dir, local_dir, filename):
         """This is a raw pull, create a TCP server.
@@ -81,8 +98,6 @@ class Network(Transfer):
         :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
-
-        self.complete_percent = []
         if self.file_stat(remote_dir, filename):
             status = functools.partial(self.__transfer_status__, filename)
             self.SFTP.get(
