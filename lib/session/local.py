@@ -60,6 +60,11 @@ class Local(Session):
         if self.__error_check__(output):
             self.__print__(output, err=True)
             cprint("Error deploying LiMEaide :(", 'red')
+
+            if disconnect_on_fail:
+                self.disconnect()
+                sys.exit()
+
         else:
             self.__print__(output)
 
