@@ -59,6 +59,7 @@ class Local(Session):
 
         if self.__error_check__(output):
             self.__print__(output, err=True)
+            print(output)
             cprint("Error deploying LiMEaide :(", 'red')
 
             if disconnect_on_fail:
@@ -69,9 +70,9 @@ class Local(Session):
             self.__print__(output)
 
         error = stderr.decode('utf-8')
-        error = error.split("\n")
 
         if error:
+            error = error.split("\n")
             self.__print__(error, err=True)
             cprint("Error deploying LiMEaide :(", 'red')
 
