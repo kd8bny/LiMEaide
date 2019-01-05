@@ -57,6 +57,7 @@ class Limeaide:
         # LiMEaide Options
         parser.add_argument("-u", "--user", help="use a sudo user instead \
             default: root")
+        parser.add_argument("-k", "--key", help="use a SSH Key to connect")
         parser.add_argument(
             "-s", "--socket", help="Use a TCP socket instead of a SFTP session \
             to transfer data. Does not write the memory image to disk, but \
@@ -154,8 +155,10 @@ class Limeaide:
 
         cprint("> Establishing secure connection {0}@{1}".format(
             client.user, client.ip), 'blue')
-
-        client.pass_ = getpass.getpass()
+        if args.key:
+            client.key = args.key
+        else:
+            client.pass_ = getpass.getpass()
 
         return client
 

@@ -18,6 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
+
 class Client:
     """All client attributes including the profile.
 
@@ -38,6 +39,7 @@ class Client:
         self.port = None
         self.user = None
         self.pass_ = None
+        self.key = None
 
         # LiME options
         self.output = None

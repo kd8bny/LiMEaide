@@ -96,12 +96,18 @@ class Network(Session):
             self.paramiko_session = paramiko.SSHClient()
             self.paramiko_session.set_missing_host_key_policy(
                 paramiko.AutoAddPolicy())
+
             self.paramiko_session.connect(
                 self.client.ip, username=self.client.user,
-                password=self.client.pass_)
+                password=self.client.pass_, key_filename=self.client.key,
+                allow_agent=True)
 
         except (paramiko.AuthenticationException,
                 paramiko.ssh_exception.NoValidConnectionsError) as e:
+            self.logger.error(e)
+            sys.exit(colored("> {}".format(e), 'red'))
+
+        except paramiko.SSHException as e:
             self.logger.error(e)
             sys.exit(colored("> {}".format(e), 'red'))
 
