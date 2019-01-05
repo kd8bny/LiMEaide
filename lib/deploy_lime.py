@@ -135,7 +135,8 @@ class LimeDeploy(object):
         """Retrieve files from remote client."""
         cprint("> Beam me up Scotty", 'blue')
         os.mkdir(self.client.output_dir)
-        # TODO Sym link logs
+        os.symlink('../.' + self.config.log_dir + self.config.date + '.log',
+                   self.client.output_dir + self.config.date + '.log')
 
         if self.client.port:
             self.__transfer_image_sock__()
