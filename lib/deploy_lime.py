@@ -182,7 +182,7 @@ class LimeDeploy(object):
 
         if self.client.delay_pickup:
             self.transfer_image()
-        # self.check_integrity()
+        self.session.check_integrity()
 
         cprint("> Memory extraction is complete", 'blue')
         cprint("{0} is in {1}".format(

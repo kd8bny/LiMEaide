@@ -19,6 +19,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import logging
+import hashlib
 from termcolor import cprint
 
 
@@ -53,7 +54,7 @@ class Session:
 
     def check_integrity(self):
         BUFF_SIZE = 65536
-        digest = hashlib.sha1()
+        digest = hashlib.new(self.client.digest)
 
         cprint("> Computing message digest of image", 'blue')
         with open(self.client.output_dir + self.client.output, 'rb') as f:
@@ -62,17 +63,18 @@ class Session:
                 if not data:
                     break
                 digest.update(data)
-        sha1 = digest.hexdigest()
+        hash = digest.hexdigest()
 
         with open(self.client.output_dir +
-                  self.client.output + '.sha1', 'r') as f:
-            remote_sha1 = f.read()
+                  self.client.output + '.' + self.client.digest, 'r') as f:
+            remote_hash = f.read()
 
-        if sha1 == remote_sha1:
-            cprint("> Digest complete (sha1) {}".format(sha1), 'green')
+        if hash == remote_hash:
+            cprint("> Digest complete {0} {1}".format(
+                self.client.digest, hash), 'green')
         else:
-            cprint("> DIGEST MISMATCH (sha1) \nlocal  {0} \nremote {1}".format(
-                sha1, remote_sha1), 'red')
+            cprint("> DIGEST MISMATCH {0} \nlocal  {1} \nremote {2}".format(
+                self.client.digest, hash, remote_hash), 'red')
 
     def exec_cmd(self, cmd, priv=False, disconnect_on_fail=True):
         """Called to exec command on remote system.
