@@ -69,7 +69,7 @@ class LimeDeploy(object):
         # Use an old profile
         else:
             self.session.transfer.put(
-                self.profiles_dir, self.config.lime_rdir,
+                self.config.profile_dir, self.config.lime_rdir,
                 self.client.profile["module"])
 
             self.logger.info(
