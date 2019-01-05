@@ -42,7 +42,8 @@ class VolDeploy(object):
         cprint("> Obtaining system.map", 'blue')
 
         self.session.exec_cmd("cp /boot/{0} {1}".format(
-            self.map, self.config.lime_rdir), priv=True)
+            self.map, self.config.lime_rdir), priv=True,
+            disconnect_on_fail=False)
         self.session.exec_cmd("chmod 744 {0}{1}".format(
             self.config.lime_rdir, self.map), priv=True)
 

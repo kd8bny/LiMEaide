@@ -43,7 +43,7 @@ class LimeDeploy(object):
                     'Makefile']
 
         self.session.exec_cmd(
-            'mkdir -p {}'.format(self.config.lime_rdir))
+            "mkdir -p {}".format(self.config.lime_rdir))
 
         # Generate information to create a new profile
         if self.new_profile:
@@ -56,7 +56,8 @@ class LimeDeploy(object):
 
             cprint("> Building loadable kernel module", 'blue')
             self.session.exec_cmd(
-                'cd {}; make debug'.format(self.config.lime_rdir))
+                "cd {}; make debug".format(
+                    self.config.lime_rdir), disconnect_on_fail=False)
             self.session.exec_cmd("mv {0}lime-{1}.ko {0}{2}".format(
                 self.config.lime_rdir, self.client.profile["kver"],
                 self.client.profile["module"]))

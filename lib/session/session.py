@@ -42,16 +42,13 @@ class Session:
 
         return False
 
-    def __print__(self, stdout, err=False):
-        stdout = [line.strip() for line in stdout]
-        for line in stdout:
-            if line and line != self.client.pass_:
+    def __print__(self, text, err=False):
+        for line in text:
+            if self.client.pass_ not in text:
                 if not err:
-                    self.logger.info(line)
                     if self.is_verbose:
                         print(line)
                 else:
-                    self.logger.error(line)
                     cprint(line, 'red')
 
     def check_integrity(self):

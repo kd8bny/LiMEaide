@@ -52,33 +52,37 @@ class Local(Session):
                 cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE, shell=True)
             stdout, stderr = popen.communicate()
 
-        output = stdout.decode('utf-8')
-        output = output.split("\n")
+        sstdout = stdout.decode('utf-8')
+        output = sstdout.split()
 
         self.logger.info("Command executed: {0}".format(cmd))
 
         if self.__error_check__(output):
             self.__print__(output, err=True)
-            print(output)
-            cprint("Error deploying LiMEaide :(", 'red')
+            self.logger.error(output)
 
             if disconnect_on_fail:
                 self.disconnect()
-                sys.exit()
+                sys.exit(colored("Error deploying LiMEaide :(", 'red'))
+            else:
+                cprint("Non-fatal error - continuing", 'magenta')
 
         else:
             self.__print__(output)
+            self.logger.info(output)
 
         error = stderr.decode('utf-8')
 
         if error:
-            error = error.split("\n")
+            error = error.split('\n')
+            self.logger.error(error)
             self.__print__(error, err=True)
-            cprint("Error deploying LiMEaide :(", 'red')
 
             if disconnect_on_fail:
                 self.disconnect()
-                sys.exit()
+                sys.exit(colored("Error deploying LiMEaide :(", 'red'))
+            else:
+                cprint("Non-fatal error - continuing", 'magenta')
 
         return output
 

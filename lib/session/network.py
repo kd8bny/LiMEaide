@@ -52,30 +52,40 @@ class Network(Session):
             stdin, stdout, stderr = self.paramiko_session.exec_command(
                 cmd, get_pty=True)
 
-        output = stdout.readlines()
+        lstdout = stdout.readlines()
+        output = []
+        if lstdout:
+            for line in lstdout:
+                line.strip('\r\n')
+                output += line.split()
 
         self.logger.info("Command executed: {0}".format(cmd))
 
-        if self.__error_check__(output):
-            self.__print__(output, err=True)
-            cprint("Error deploying LiMEaide :(", 'red')
+        if self.__error_check__(lstdout):
+            self.__print__(lstdout, err=True)
+            self.logger.error(lstdout)
 
             if disconnect_on_fail:
                 self.disconnect()
-                sys.exit()
+                sys.exit(colored("Error deploying LiMEaide :(", 'red'))
+            else:
+                cprint("Non-fatal error - continuing", 'magenta')
 
         else:
             self.__print__(output)
+            self.logger.info(lstdout)
 
         error = stdout.readlines()
 
         if error:
             self.__print__(error, err=True)
-            cprint("Error deploying LiMEaide :(", 'red')
+            self.logger.error(lstdout)
 
             if disconnect_on_fail:
                 self.disconnect()
-                sys.exit()
+                sys.exit(colored("Error deploying LiMEaide :(", 'red'))
+            else:
+                cprint("Non-fatal error - continuing", 'magenta')
 
         return output
 

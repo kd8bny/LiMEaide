@@ -126,7 +126,6 @@ class Profiler(object):
         """
         distro, kver, arch = '', '', ''
         releases = remote_session.exec_cmd("cd /etc/; ls *-release")
-        releases = releases[0].split()
 
         if len(releases) > 0:
             if 'os-release' in releases:
@@ -160,7 +159,8 @@ class Profiler(object):
                                    "enter distribution name: ", 'red'))
 
         uname = remote_session.exec_cmd('uname -rm')
-        kver, arch = uname[0].split()
+        kver = uname[0]
+        arch = uname[1]
 
         profile = {
             "distro": distro,
