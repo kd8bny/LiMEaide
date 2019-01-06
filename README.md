@@ -1,23 +1,33 @@
 # LiMEaide
-## v1.5.0
+## v2.0.0 Beta
 ## by Daryl Bennett - kd8bny
 
 ## About
-LiMEaide is a python application designed to remotely dump RAM of a Linux client and create a volatility profile for later analysis on your local host. I hope that this will simplify Linux digital forensics in a remote environment. In order to use LiMEaide all you need to do is feed a remote Linux client IP address, sit back, and consume your favorite caffeinated beverage.
+LiMEaide is a python application designed to remotely or locally dump RAM of a Linux client and create a volatility profile for later analysis on your local host. I hope that this will simplify Linux digital forensics in a remote environment. In order to use LiMEaide all you need to do is feed a remote Linux client IP address, sit back, and consume your favorite caffeinated beverage.
+
+LiMEaide has 3 primary modes of operation
+
+1. Remote - Initiates connection with SSH and transfers data over SFTP
+2. Socket - Initiates a connection with SSH but transfers the memory image over a TCP socket. This means that the image is NOT written to disk. Tools are still transfered over SFTP.
+3. Locally - Have a copy of LiMEiade on a flash drive or other device. Does not transfer any data to the client, maintain execution in its working directory. All transfers are completed with internal methods and no network sockets are opened.
+
+## Wiki
+For more detailed usage checkout the [wiki](https://github.com/kd8bny/LiMEaide/wiki)
 
 ## How To
 ### TL;DR
+#### Remote
 ```
 python3 limeaide.py <IP>
 ```
 and magic happens.
+#### Local
+```
+python3 limeaide.py local
+```
+and local magic happens.
 
-- For more detailed usage checkout the [wiki](https://github.com/kd8bny/LiMEaide/wiki)
-- For editing the configuration file see [here](https://github.com/kd8bny/LiMEaide/wiki/The-Config-File)
-- Import old modules or external modules, just copy the module `*.ko` into the profiles directory.
-```
-./profiles/
-```
+local transfer requires the machine to have python 3 installed and dependencies. I recommend using python3-virtualenv to provide dependencies without installing on the system.
 
 ### Detailed usage
 ```
@@ -27,15 +37,30 @@ limeaide.py [OPTIONS] REMOTE_IP
 
 -u, --user : <user>
     Execute memory grab as sudo user. This is useful when root privileges are not granted.
+-k, --key : <path to key> 
+    Use a SSH Key to connect
+
+-s, --socket : <port> 
+    Use a TCP socket instead of a SFTP session to transfer data. Does not write the memory image to disk, but will transfer other needed files.
+
+-o, --output : <Name desired for output> 
+    Name the output file
+
+-f, --format : <Format for LiME>
+    Change the output format. Valid options are raw|lime|padded
+
+-d, --digest : <digest>
+    Use a different digest algorithm. See LiME docs for valid options
+    Use 'None' to disable. 
+
+-C, --compress
+    Compress transfer over the wire. This will not work with socket or local transfers.
 
 -p, --profile : <distro> <kernel version> <arch>
     Skip the profiler by providing the distribution, kernel version, and architecture of the remote client.
 
 -N, --no-profiler
     Do NOT run profiler and force the creation of a new module/profile for the client.
-
--C, --dont-compress
-    Do not compress memory file. By default memory is compressed on host. If you experience issues, toggle this flag. In my tests I see a ~60% reduction in file size
 
 --delay-pickup
     Execute a job to create a RAM dump on target system that you will retrieve later.  The stored job
@@ -46,14 +71,22 @@ limeaide.py [OPTIONS] REMOTE_IP
     The file that follows this switch is located in the scheduled_jobs/ directory
     and ends in .dat
 
--o, --output : <name>
-    Change name of output file. Default is dump.bin
-
 -c, --case : <case num>
     Append case number to front of output directory.
 
+-v, --verbose
+    Display verbose output
+
 --force-clean
     If previous attempt failed then clean up client
+```
+
+- For more detailed usage checkout the [wiki](https://github.com/kd8bny/LiMEaide/wiki)
+- For editing the configuration file see [here](https://github.com/kd8bny/LiMEaide/wiki/The-Config-File)
+- To import modules or external modules, just copy the module `*.ko` into the profiles directory. After you copy run LiMEaide and the profiler will recognize the new profile.
+
+```
+./profiles/
 ```
 
 ## Set-up
@@ -103,7 +136,7 @@ How to...
 ## Limits at this time
 - Only supports bash. Use other shells at your own risk
 - Modules must be built on remote client. Therefore remote client must have proper headers installed.
-  - Unless you follow [this](https://github.com/kd8bny/LiMEaide/wiki/Building-Out-of-Tree-Modules) guide for compiling external kernel modules
+  - Unless you follow [this](https://github.com/kd8bny/LiMEaide/wiki/Building-Out-of-Tree-Modules) guide for compiling external kernel modules. Once compiled, copy module to profile directory.
 
 ## Special Thanks and Notes
 * The idea for this application was built upon the concept dreamed up by and the [Linux Memory Grabber](https://github.com/halpomeranz/lmg) project
