@@ -62,6 +62,9 @@ class Limeaide:
             "-s", "--socket", help="Use a TCP socket instead of a SFTP session \
             to transfer data. Does not write the memory image to disk, but \
             will transfer other needed files")
+        parser.add_argument(
+            "-C", "--compress", action="store_true", help="Compress transfer \
+            over the wire. This will not work with socket or local transfers")
         parser.add_argument("-c", "--case", help="Append case number to output\
             dir")
         parser.add_argument("-v", "--verbose", action="store_true", help="Prod\
@@ -107,14 +110,20 @@ class Limeaide:
         if client.ip == 'local':
             if args.socket:
                 sys.exit(colored("Can not use socket on local machine", 'red'))
+            elif args.compress:
+                sys.exit(colored(
+                    "Can not compress with local transfer", 'red'))
             elif args.delay_pickup:
-                sys.exit(
-                    colored("Can not delay pickup on local machine", 'red'))
+                sys.exit(colored(
+                    "Can not delay pickup on local machine", 'red'))
 
         if args.socket:
             if args.delay_pickup:
                 sys.exit(colored(
                     "Can not delay pickup on while using TCP client", 'red'))
+            elif args.compress:
+                sys.exit(colored(
+                    "Can not compress with socket usage transfer", 'red'))
             else:
                 client.port = int(args.socket)
 
@@ -149,6 +158,8 @@ class Limeaide:
             client.output = args.output
         else:
             client.output = config.output
+
+        client.compress = args.compress
 
         client.output_dir = "{0}{1}/".format(
             config.output_dir, client.job_name)

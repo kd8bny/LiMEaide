@@ -100,7 +100,7 @@ class Network(Session):
             self.paramiko_session.connect(
                 self.client.ip, username=self.client.user,
                 password=self.client.pass_, key_filename=self.client.key,
-                allow_agent=True)
+                allow_agent=True, compress=self.client.compress)
 
         except (paramiko.AuthenticationException,
                 paramiko.ssh_exception.NoValidConnectionsError) as e:
