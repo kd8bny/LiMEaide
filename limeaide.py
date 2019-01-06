@@ -157,8 +157,9 @@ class Limeaide:
             client.user, client.ip), 'blue')
         if args.key:
             client.key = args.key
-        else:
-            client.pass_ = getpass.getpass()
+            cprint("> Please enter key pass phrase", 'blue')
+
+        client.pass_ = getpass.getpass()
 
         return client
 
