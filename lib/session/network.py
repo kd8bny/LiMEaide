@@ -20,9 +20,11 @@
 
 import sys
 import paramiko
+
 from termcolor import colored, cprint
-from lib.transfer import network
+
 from lib.session.session import Session
+from lib.transfer import network
 
 
 class Network(Session):
@@ -37,10 +39,10 @@ class Network(Session):
         """Called to exec command on remote system.
 
         :param cmd The actual bash command to run on remote
-        :param requires_privlege Does this command require elevated privileges
-        :If command fails disconnect session
-        :return stdout
-        """
+        :param priv Does this command require elevated privileges
+        :param disconnect_on_fail If command fails then disconnect session
+        :return stdout"""
+
         stdout, stderr = None, None
         if self.client.user is not 'root' and priv:
             cmd = "sudo -S -p ' ' {0}".format(cmd)
@@ -117,6 +119,7 @@ class Network(Session):
 
     def disconnect(self):
         """Call to end session and remove files from remote client."""
+
         cprint("> Cleaning up...", 'blue')
         if self.transfer.file_stat(self.config.lime_rdir, ''):
             self.exec_cmd('rm -rf {0}'.format(

@@ -19,26 +19,29 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import sys
+
 from subprocess import Popen, PIPE
 from termcolor import colored, cprint
-from lib.transfer import local
+
 from lib.session.session import Session
+from lib.transfer import local
 
 
 class Local(Session):
     """Session will take care of all the backend communications."""
 
     def __init__(self, config, client, is_verbose=False):
-        super(Local, self).__init__(config, client, is_verbose)
+        Session.__init__(self, config, client, is_verbose)
+        self.transfer = None
 
     def exec_cmd(self, cmd, priv=False, disconnect_on_fail=True):
         """Called to exec command on remote system.
 
         :param cmd The actual bash command to run on remote
         :param priv Does this command require elevated privileges
-        :If command fails disconnect session
-        :return stdout
-        """
+        :param disconnect_on_fail If command fails then disconnect session
+        :return stdout"""
+
         popen = None
         stdout, stderr = None, None
         if self.client.user is not 'root' and priv:
@@ -88,11 +91,13 @@ class Local(Session):
 
     def connect(self):
         """Call to set connection with remote client."""
+
         self.transfer = local.Local()
         self.transfer.connect()
 
     def disconnect(self):
         """Call to end session and remove files from remote client."""
+
         cprint("> Cleaning up...", 'blue')
         if self.transfer.file_stat(self.config.lime_rdir, ''):
             self.exec_cmd('rm -rf {0}'.format(

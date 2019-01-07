@@ -34,7 +34,11 @@ class Session:
         self.is_verbose = is_verbose
 
     def __error_check__(self, stdout):
-        """Check for standard errors from stdout"""
+        """Check for mentions of error from stdout
+
+        :param stdout list of text split at new line
+        :return bool error found"""
+
         for line in stdout:
             if "error" in line.lower():
                 self.logger.error(line)
@@ -44,15 +48,22 @@ class Session:
         return False
 
     def __print__(self, text, err=False):
+        """Format and print output from session commands.
+
+        :param text list of text split at new line
+        :param err Text to print is from stderr"""
+
         for line in text:
             if self.client.pass_ not in text:
-                if not err:
+                if err:
+                    cprint(line, 'red')
+                else:
                     if self.is_verbose:
                         print(line)
-                else:
-                    cprint(line, 'red')
 
     def check_integrity(self):
+        """Compute the digest of an image and compare to the digest file"""
+
         BUFF_SIZE = 65536
         digest = hashlib.new(self.client.digest)
 
@@ -63,6 +74,7 @@ class Session:
                 if not data:
                     break
                 digest.update(data)
+
         hash = digest.hexdigest()
 
         with open(self.client.output_dir +
@@ -76,14 +88,19 @@ class Session:
             cprint("> DIGEST MISMATCH {0} \nlocal  {1} \nremote {2}".format(
                 self.client.digest, hash, remote_hash), 'red')
 
+    """
+    Override the following methods in a child class for each session.
+    """
+
     def exec_cmd(self, cmd, priv=False, disconnect_on_fail=True):
         """Called to exec command on remote system.
 
         :param cmd The actual bash command to run on remote
-        :param requires_privlege Does this command require elevated privileges
-        :If command fails disconnect session
+        :param priv Does this command require elevated privileges
+        :param disconnect_on_fail If command fails then disconnect session
         :return stdout
         """
+
         pass
 
     def connect(self):
