@@ -18,15 +18,17 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-from datetime import datetime
+
 import configparser
-from termcolor import cprint, colored
+import logging
 import os
+import shutil
 import sys
 import urllib.request
 import zipfile
-import shutil
-import logging
+
+from datetime import datetime
+from termcolor import cprint, colored
 
 
 class Config:
@@ -35,6 +37,7 @@ class Config:
 
     def __init__(self):
         super(Config, self).__init__()
+
         # Internal Resources
         self.lime_version = '1.8.0.1'
         self.config_file = '.limeaide'
@@ -61,12 +64,15 @@ class Config:
 
     def setup_logging(self):
         """Setup logging to file and initial logger"""
+
         logging.basicConfig(
             level=logging.INFO, filename='{0}{1}.log'.format(
                 self.log_dir, self.date))
         self.logger = logging.getLogger(__name__)
 
     def __download_lime__(self):
+        """Download LiME from GitHub"""
+
         cprint("Downloading LiME", 'green')
         try:
             urllib.request.urlretrieve(
@@ -84,6 +90,8 @@ class Config:
                 " or place manually", 'red'))
 
     def __write_new_config__(self):
+        """Write a new configuration file on first run."""
+
         default_config = configparser.ConfigParser()
         default_config['MANIFEST'] = {}
         default_config['MANIFEST']['version'] = self.__version__
@@ -96,6 +104,8 @@ class Config:
             default_config.write(configfile)
 
     def __update_vol_dir__(self):
+        """Check if Volatility exists. If not prompt the user."""
+
         cprint("Volatility directory missing.", 'red')
         cprint("Please provide a path to your Volatility directory." +
                "\ne.g. '~/volatility/'" +
@@ -126,6 +136,8 @@ class Config:
             default_config.write(configfile)
 
     def check_directories(self):
+        """Create necessary directories."""
+
         if not os.path.isdir(self.output_dir):
             os.mkdir(self.output_dir)
 
@@ -146,6 +158,7 @@ class Config:
 
     def read_config(self):
         """Read default configuration."""
+
         if not os.path.isfile(self.config_file):
             self.__write_new_config__()
 
@@ -164,6 +177,8 @@ class Config:
                 self.__update_vol_dir__()
 
     def configure(self):
+        """Configure LiMEaide."""
+
         self.set_date()
         self.check_directories()
         self.setup_logging()
