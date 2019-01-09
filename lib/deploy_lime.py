@@ -20,6 +20,7 @@
 
 import logging
 import os
+
 from termcolor import cprint
 
 
@@ -38,6 +39,7 @@ class LimeDeploy(object):
 
     def send_lime(self):
         """Send LiME to remote client. Uses pre-compiled module if supplied."""
+
         cprint("> Sending LiME src to remote client", 'blue')
         lime_src = ['main.c', 'disk.c', 'tcp.c', 'hash.c', 'lime.h',
                     'Makefile']
@@ -80,6 +82,7 @@ class LimeDeploy(object):
 
     def install_lime(self):
         """Will install LiME and dump RAM."""
+
         cprint("> Installing LiME and retrieving RAM", 'blue')
 
         # Build the correct instructions
@@ -99,6 +102,8 @@ class LimeDeploy(object):
             self.__install_lime__(path, format, digest)
 
     def __install_lime_sock__(self, path, format, digest):
+        """Install LiME and connect to the open socket."""
+
         cprint(">> {}".format(path), 'blue')
         cprint(">> {}".format(format), 'blue')
         cprint(">> {}".format(digest), 'blue')
@@ -113,6 +118,8 @@ class LimeDeploy(object):
         self.session.exec_cmd(cmd, priv=True)
 
     def __install_lime__(self, path, format, digest):
+        """Install LiME and transfer with SFTP."""
+
         cprint(">> {}".format(path), 'blue')
         cprint(">> {}".format(format), 'blue')
         cprint(">> {}".format(digest), 'blue')
@@ -133,6 +140,7 @@ class LimeDeploy(object):
 
     def transfer_image(self):
         """Retrieve files from remote client."""
+
         cprint("> Beam me up Scotty", 'blue')
         os.mkdir(self.client.output_dir)
         os.symlink('../.' + self.config.log_dir + self.config.date + '.log',
@@ -149,6 +157,8 @@ class LimeDeploy(object):
                 self.client.profile['module'])
 
     def __transfer_image_sock__(self):
+        """Retrieve files over TCP."""
+
         remote_file = self.client.output
         remote_file_hash = "{}.{}".format(
             self.client.output, self.client.digest)
@@ -161,6 +171,8 @@ class LimeDeploy(object):
                 None, self.client.output_dir, remote_file_hash)
 
     def __transfer_image__(self):
+        """Retrieve files with SFTP."""
+
         remote_file = self.client.output
         remote_file_hash = "{}.{}".format(
             self.client.output, self.client.digest)
@@ -175,6 +187,7 @@ class LimeDeploy(object):
 
     def main(self):
         """Begin the process of transporting LiME and dumping the RAM."""
+
         if self.client.profile is None:
             self.new_profile = True
 
@@ -183,6 +196,7 @@ class LimeDeploy(object):
 
         if self.client.delay_pickup:
             self.transfer_image()
+
         self.session.check_integrity()
 
         cprint("> Memory extraction is complete", 'blue')

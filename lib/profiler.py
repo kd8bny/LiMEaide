@@ -18,12 +18,13 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import os
-import logging
-import re
 import fnmatch
 import json
+import logging
+import os
+import re
 import shutil
+
 from termcolor import colored, cprint
 
 
@@ -108,6 +109,7 @@ class Profiler(object):
 
     def load_profiles(self):
         """Load dict from JSON manifest."""
+
         try:
             self.profiles = json.load(
                 open(self.profiles_dir + self.manifest, 'r'))
@@ -124,6 +126,7 @@ class Profiler(object):
         Look through the output of uname and lsb_release to determine
         versions.
         """
+
         distro, kver, arch = '', '', ''
         releases = remote_session.exec_cmd("cd /etc/; ls *-release")
 
@@ -179,6 +182,7 @@ class Profiler(object):
 
         :return None to exit, otherwise it returns a json profile
         """
+
         num_profiles = len(self.profiles)
         if num_profiles > 0:
             while True:
@@ -201,6 +205,7 @@ class Profiler(object):
 
     def select_profile(self, distro, kver, arch):
         """Select a profile to have the client use."""
+
         num_profiles = len(self.profiles)
         if num_profiles > 0:
             for profile in self.profiles:

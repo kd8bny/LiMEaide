@@ -21,11 +21,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-import sys
-import logging
 import argparse
 import getpass
+import logging
 import pickle
+import sys
+
 from termcolor import colored, cprint
 
 from lib.config import Config
@@ -49,6 +50,7 @@ class Limeaide:
     @staticmethod
     def __get_args__():
         """Take a look at those args."""
+
         parser = argparse.ArgumentParser(description='Utility designed to \
             automate GNU/Linux memory forensics')
         parser.add_argument("remote", help="IP address of remote host. Use \

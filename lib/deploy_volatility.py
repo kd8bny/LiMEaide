@@ -20,6 +20,7 @@
 
 import logging
 import shutil
+
 from subprocess import Popen
 from termcolor import cprint
 
@@ -38,6 +39,7 @@ class VolDeploy(object):
 
     def get_maps(self):
         """Grab system maps from remote client."""
+
         cprint("> Attempting to grab files for volatility profile", 'blue')
         cprint("> Obtaining system.map", 'blue')
 
@@ -52,6 +54,7 @@ class VolDeploy(object):
 
     def get_profile(self):
         """Obtain symbols from module and zip the profile."""
+
         cprint("> Obtaining symbols", 'blue')
 
         dwarf_file = open(
@@ -64,14 +67,17 @@ class VolDeploy(object):
         sp.wait()
         dwarf_file.flush()
 
-        pf = Popen(['zip', '-j',
-            self.client.output_dir + self.client.profile['profile'],
-            self.client.output_dir + self.client.profile['kver'] + '.dwarf',
-            self.client.output_dir + self.map])
+        pf = Popen(
+            ['zip', '-j',
+                self.client.output_dir + self.client.profile['profile'],
+                self.client.output_dir +
+                    self.client.profile['kver'] + '.dwarf',
+                self.client.output_dir + self.map])
         pf.wait()
 
     def main(self, vol_dir):
         """Start building a Volatility profile."""
+
         self.get_maps()
         self.get_profile()
 
