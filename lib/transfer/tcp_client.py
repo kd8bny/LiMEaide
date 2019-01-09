@@ -19,18 +19,19 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 import logging
-import time
-import threading
 import selectors
 import socket
 import struct
 import sys
+import time
+import threading
+
 from termcolor import colored
 from queue import Queue
 
 
 class TCP_CLIENT(threading.Thread):
-    """docstring for TCP_CLIENT"""
+    """Non-blocking Client to transfer files from server"""
 
     def __init__(self, qresult, ip, port, output):
         super(TCP_CLIENT, self).__init__()
@@ -44,16 +45,20 @@ class TCP_CLIENT(threading.Thread):
         self.byte_count = 0
 
     def __transfer_status__(self, bytes_len):
-        """Callback to provide status of the files being transfered.
-        Calling function must print new line on return or else line will be
-        overwritten.
-        """
+        """Provide status of the files being transfered.
+
+        :param Length of bytes received """
+
         self.byte_count += bytes_len
         print(colored(
             "Transfer of {0} is at {1:d} bytes".format(
                 self.output, self.byte_count), 'cyan'), end='\r', flush=True)
 
     def __write_out__(self, data):
+        """Write data to file by appending
+
+        :param data to append"""
+
         try:
             with open(self.output, 'ab') as f:
                 f.write(data)
@@ -62,9 +67,14 @@ class TCP_CLIENT(threading.Thread):
             self.logger.error("Unable to save output: {}".format(e))
             self.result['success'] = False
             self.result['terminal'] = True
-            sys.exit("Unable to save output")
+            sys.exit(colored("Unable to save output", 'red'))
 
     def __handle_client__(self, key, mask, sel):
+        """Connect to client using a selector
+
+        :return Should client retry to connect
+        """
+
         retry = True
         sock = key.fileobj
 
@@ -114,7 +124,7 @@ class TCP_CLIENT(threading.Thread):
 
 
 class CONNECTION_MANAGER(threading.Thread):
-    """docstring for CONNECTION_MANAGER"""
+    """Handle all client connections and attempts"""
 
     def __init__(self, q, e):
         super(CONNECTION_MANAGER, self).__init__()
@@ -126,6 +136,8 @@ class CONNECTION_MANAGER(threading.Thread):
         self.retry_count = 0
 
     def __start_client__(self, conn):
+        """Start a new client thread"""
+
         client = TCP_CLIENT(self.qstatus, conn[0], conn[1], conn[2])
         client.start()
         client.join()
@@ -158,12 +170,3 @@ class CONNECTION_MANAGER(threading.Thread):
                         self.queue.put(connection)
 
         self.logger.info("Connection manager is finished")
-
-
-if __name__ == '__main__':
-    kill_conn_man = threading.Event()
-    queue = Queue()
-    conn_man = CONNECTION_MANAGER(queue, kill_conn_man)
-    conn_man.start()
-    queue.put(['192.168.1.17', 1337, "test2"])
-    conn_man.join()
