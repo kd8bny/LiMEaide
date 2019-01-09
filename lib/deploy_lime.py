@@ -58,7 +58,7 @@ class LimeDeploy(object):
 
             cprint("> Building loadable kernel module", 'blue')
             self.session.exec_cmd(
-                "cd {}; make debug".format(
+                "cd {}; make".format(
                     self.config.lime_rdir), disconnect_on_fail=False)
             self.session.exec_cmd("mv {0}lime-{1}.ko {0}{2}".format(
                 self.config.lime_rdir, self.client.profile["kver"],
