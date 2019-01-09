@@ -20,6 +20,7 @@
 
 import os
 import shutil
+
 from lib.transfer.transfer import Transfer
 
 
@@ -27,8 +28,7 @@ class Local(Transfer):
     """Transfer method to deploy locally"""
 
     def __init__(self):
-        super(Local, self).__init__()
-        pass
+        Transfer.__init__(self)
 
     def pull(self, remote_dir, local_dir, filename):
         """Called when data needs to be pulled from remote system.
@@ -39,6 +39,7 @@ class Local(Transfer):
         :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
+
         if self.file_stat(remote_dir, filename):
             shutil.move(remote_dir + filename, local_dir + filename)
 
@@ -51,6 +52,7 @@ class Local(Transfer):
         :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
+
         shutil.copy(local_dir + filename, remote_dir)
 
     def file_stat(self, remote_dir, filename):
@@ -60,6 +62,7 @@ class Local(Transfer):
         :param filename File to Check
         :return If the file exists
         """
+
         file_exists = False
 
         try:

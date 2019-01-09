@@ -93,7 +93,7 @@ class Local(Session):
         """Call to set connection with remote client."""
 
         self.transfer = local.Local()
-        self.transfer.connect()
+        self.transfer.open()
 
     def disconnect(self):
         """Call to end session and remove files from remote client."""

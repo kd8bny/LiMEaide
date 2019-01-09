@@ -115,7 +115,7 @@ class Network(Session):
 
         self.transfer = network.Network(
             self.paramiko_session, self.client.ip, self.client.port)
-        self.transfer.connect()
+        self.transfer.open()
 
     def disconnect(self):
         """Call to end session and remove files from remote client."""

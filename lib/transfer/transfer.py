@@ -28,6 +28,10 @@ class Transfer:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
+    """
+    Override the following methods in a child class for each transfer.
+    """
+
     def pull(self, remote_dir, local_dir, filename):
         """Called when data needs to be pulled from remote system.
 
@@ -62,10 +66,12 @@ class Transfer:
 
         pass
 
-    def connect(self):
+    def open(self):
+        """Call to set connection with remote client."""
 
         pass
 
     def close(self):
+        """Call to end session and remove files from remote client."""
 
         pass

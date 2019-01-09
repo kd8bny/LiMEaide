@@ -47,6 +47,7 @@ class Network(Transfer):
             Calling function must print new line on return or else line will be
             overwritten.
             """
+
             percent = int(100 * bytes_so_far / bytes_total)
             self.complete_percent.append(percent)
             print(colored(
@@ -64,6 +65,7 @@ class Network(Transfer):
         :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
+
         if remote_dir is None:
             self.__pull_tcp__(self.ip, self.port, local_dir, filename)
         else:
@@ -79,6 +81,7 @@ class Network(Transfer):
         :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
+
         output = local_dir + filename
         if not self.conn_man:
             self.queue = Queue()
@@ -97,6 +100,7 @@ class Network(Transfer):
         :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
+
         if self.file_stat(remote_dir, filename):
             status = functools.partial(self.__transfer_status__, filename)
             self.SFTP.get(
@@ -112,9 +116,8 @@ class Network(Transfer):
         :param local_dir path to output dir on local machine
         :param filename file to transfer
         """
-        self.SFTP.put(local_dir + filename, remote_dir + filename)
 
-        return
+        self.SFTP.put(local_dir + filename, remote_dir + filename)
 
     def file_stat(self, remote_dir, filename):
         """Check to see if remote file exists and size is greater than 0.
@@ -123,6 +126,7 @@ class Network(Transfer):
         :param filename File to Check
         :return If the file exists
         """
+
         file_exists = False
 
         try:
@@ -135,15 +139,15 @@ class Network(Transfer):
 
         return file_exists
 
-    def connect(self):
-        # TODO Catch error
+    def open(self):
+        """Call to set connection with remote client."""
         self.SFTP = self.paramiko_session.open_sftp()
 
     def close(self):
-        # TODO Catch error
+        """Call to end session and remove files from remote client."""
         self.paramiko_session.close()
 
         if self.conn_man:
             self.kill_conn_man.set()
             self.conn_man.join()
-            self.logger.info("Connection Manager closed")
+            self.logger.info("Connection manager closed")
