@@ -62,15 +62,6 @@ limeaide.py [OPTIONS] REMOTE_IP
 -N, --no-profiler
     Do NOT run profiler and force the creation of a new module/profile for the client.
 
---delay-pickup
-    Execute a job to create a RAM dump on target system that you will retrieve later.  The stored job
-    is located in the scheduled_jobs/ dir that ends in .dat
-
--P, --pickup <path to job file .dat>
-    Pick up a job you previously ran with the --delayed-pickup switch.
-    The file that follows this switch is located in the scheduled_jobs/ directory
-    and ends in .dat
-
 -c, --case : <case num>
     Append case number to front of output directory.
 
@@ -141,4 +132,3 @@ How to...
 ## Special Thanks and Notes
 * The idea for this application was built upon the concept dreamed up by and the [Linux Memory Grabber](https://github.com/halpomeranz/lmg) project
 * And of course none of this could be possible without the amazing [LiME](https://github.com/504ensicsLabs/LiME) project
-

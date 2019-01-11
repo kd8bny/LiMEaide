@@ -47,7 +47,6 @@ class Config:
         self.output_dir = './output/'
         self.profile_dir = './profiles/'
         self.log_dir = './logs/'
-        self.scheduled_pickup_dir = './scheduled_jobs/'
 
         # External Resources
         self.lime_rdir = './.limeaide_working/'

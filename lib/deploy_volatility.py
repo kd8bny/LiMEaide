@@ -75,16 +75,16 @@ class VolDeploy(object):
                 self.client.output_dir + self.map])
         pf.wait()
 
-    def main(self, vol_dir):
+    def deploy(self):
         """Start building a Volatility profile."""
 
         self.get_maps()
         self.get_profile()
 
-        if vol_dir != 'None':
+        if self.config.volatility_dir:
             shutil.copy(
                 self.client.output_dir + self.client.profile['profile'],
-                vol_dir + self.client.profile['profile'])
+                self.config.volatility_dir + self.client.profile['profile'])
 
         cprint("Profile generation complete run 'vol.py --info | " +
                "grep Linux' to see your profile", 'green', attrs=['blink'])

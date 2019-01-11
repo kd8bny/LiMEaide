@@ -50,5 +50,4 @@ class Client:
         self.profile = None
         self.output_dir = None
         self.compress = None
-        self.delay_pickup = None
         self.job_name = None

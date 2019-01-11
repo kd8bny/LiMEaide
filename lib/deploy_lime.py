@@ -185,7 +185,7 @@ class LimeDeploy(object):
                 self.config.lime_rdir, self.client.output_dir,
                 remote_file_hash)
 
-    def main(self):
+    def deploy(self):
         """Begin the process of transporting LiME and dumping the RAM."""
 
         if self.client.profile is None:
@@ -193,10 +193,7 @@ class LimeDeploy(object):
 
         self.send_lime()
         self.install_lime()
-
-        if self.client.delay_pickup:
-            self.transfer_image()
-
+        self.transfer_image()
         self.session.check_integrity()
 
         cprint("> Memory extraction is complete", 'blue')

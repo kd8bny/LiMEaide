@@ -24,7 +24,6 @@
 import argparse
 import getpass
 import logging
-import pickle
 import sys
 
 from termcolor import colored, cprint
@@ -90,12 +89,6 @@ class Limeaide:
             help="Skip the profiler by providing the distribution, kernel\
             version, and architecture of the remote client.")
 
-        pickup_group = parser.add_mutually_exclusive_group()
-        pickup_group.add_argument("--delay-pickup", action="store_true",
-                                  help="Used to store job for future pickup")
-        pickup_group.add_argument("-P", "--pickup", help="Enter stored job \
-            file")
-
         return parser.parse_args()
 
     @staticmethod
@@ -115,15 +108,9 @@ class Limeaide:
             elif args.compress:
                 sys.exit(colored(
                     "Can not compress with local transfer", 'red'))
-            elif args.delay_pickup:
-                sys.exit(colored(
-                    "Can not delay pickup on local machine", 'red'))
 
         if args.socket:
-            if args.delay_pickup:
-                sys.exit(colored(
-                    "Can not delay pickup on while using TCP client", 'red'))
-            elif args.compress:
+            if args.compress:
                 sys.exit(colored(
                     "Can not compress with socket usage transfer", 'red'))
             else:
@@ -153,9 +140,6 @@ class Limeaide:
         else:
             client.digest = config.digest
 
-        if args.delay_pickup:
-            client.delay_pickup = args.delay_pickup
-
         if args.output:
             client.output = args.output
         else:
@@ -175,37 +159,6 @@ class Limeaide:
         client.pass_ = getpass.getpass()
 
         return client
-
-    def save_job(self, client, jobname):
-        """Save client with pickle.
-
-        Format will be <date>-worker.dat
-        """
-        # pickle.dump(client, open(("{0}{1}.dat".format(
-        #     self.scheduled_pickup_dir, jobname)), 'wb'))
-        pass
-
-    def finish_saved_job(self, jobname):
-        pass
-        """Restore client with pickle. Transfer dump."""
-        # restored_client = pickle.load(open(jobname, 'rb'))
-        # cprint("Client restored!", 'green')
-        # cprint(
-        #     'Retrieving RAM dump "{}"'.format(restored_client.output), 'blue')
-
-        # if not os.path.isdir(restored_client.output_dir):
-        #     os.mkdir(restored_client.output_dir)
-
-        # saved_session = Session(restored_client)
-        # saved_session.connect()
-        # delayed_profiler = Profiler()
-        # LimeDeploy(saved_session, delayed_profiler).transfer_dump()
-        # VolDeploy(saved_session).main(self.volatility_profile_dir)
-        # cprint(
-        #     "Job {} pickup has been completed!".format(
-        #         restored_client.output), 'green')
-        # saved_session.disconnect()
-        # os.remove(jobname)
 
     def display_header(self):
         cprint(
@@ -239,10 +192,6 @@ class Limeaide:
 
         args = self.__get_args__()
         client = self.__get_client__(args, config)
-
-        if args.pickup:
-            self.finish_saved_job(args.pickup)
-            sys.exit()
 
         # Start session
         session = None
@@ -282,20 +231,13 @@ class Limeaide:
                 else:
                     client.profile = profile
 
-        lime_deploy = LimeDeploy(config, session, profiler)
-        lime_deploy.main()
+        lime = LimeDeploy(config, session, profiler)
+        volatility = VolDeploy(config, session)
 
-        if args.delay_pickup:
-            self.save_job(client, client.jobname)
-            cprint("> RAM dump retrieval is postponed", 'green')
-            cprint(
-                "> To retrieve, run LiMEaide with" +
-                '"-P scheduled_jobs/{}.dat"'.format(client.jobname), 'yellow')
-        else:
-            # Now that's taken care of, lets do work on Volatility
-            VolDeploy(config, session).main(config.volatility_dir)
-            session.disconnect()
+        lime.deploy()
+        volatility.deploy()
 
+        session.disconnect()
         logging.shutdown()
 
 
