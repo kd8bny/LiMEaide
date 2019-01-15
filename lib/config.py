@@ -146,9 +146,6 @@ class Config:
         if not os.path.isdir(self.tools_dir):
             os.mkdir(self.tools_dir)
 
-        if not os.path.isdir(self.scheduled_pickup_dir):
-            os.mkdir(self.scheduled_pickup_dir)
-
         if not os.path.isdir(self.log_dir):
             os.mkdir(self.log_dir)
 
