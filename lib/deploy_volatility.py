@@ -35,13 +35,15 @@ class VolDeploy(object):
         self.client = session.client
         self.session = session
 
-        self.map = 'System.map-{}'.format(self.client.profile['kver'])
+        self.map = None
 
     def get_maps(self):
         """Grab system maps from remote client."""
 
         cprint("> Attempting to grab files for volatility profile", 'blue')
         cprint("> Obtaining system.map", 'blue')
+
+        self.map = 'System.map-{}'.format(self.client.profile['kver'])
 
         self.session.exec_cmd("cp /boot/{0} {1}".format(
             self.map, self.config.lime_rdir), priv=True,
