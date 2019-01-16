@@ -193,7 +193,6 @@ class LimeDeploy(object):
 
         self.send_lime()
         self.install_lime()
-        self.transfer_image()
         self.session.check_integrity()
 
         cprint("> Memory extraction is complete", 'blue')
