@@ -20,8 +20,9 @@
 
 import logging
 import os
+import sys
 
-from termcolor import cprint
+from termcolor import colored, cprint
 
 
 class LimeDeploy(object):
@@ -36,6 +37,32 @@ class LimeDeploy(object):
         self.profiler = profiler
 
         self.new_profile = False
+
+    def check_constraints(self):
+        # free | awk '/^Mem/ {print($2);}'
+        # df . | awk '{if ($4 != "Available") print($4);}'
+        stdout = self.session.exec_cmd(
+            "free | awk '/^Mem/ {print($2);}'", disconnect_on_fail=False)
+        ram_size = int(stdout[0])
+
+        stdout = self.session.exec_cmd(
+            """df . | awk '{if ($4 != "Available") print($4);}'""",
+            disconnect_on_fail=False)
+        disk_free = int(stdout[0])
+
+        if not self.client.port:
+            if ram_size > disk_free:
+                self.logger.error("Insufficient Disk space to capture memory")
+                sys.exit(colored(
+                    "Insufficient Disk space to capture memory. " +
+                    "Try using the -s option for network transfer", 'red'))
+            else:
+                cprint("Image will occupy " +
+                       "{0} bytes of {1} bytes available".format(
+                           ram_size, disk_free), 'green')
+        else:
+            cprint("Image will occupy {0} bytes of space".format(
+                ram_size), 'green')
 
     def send_lime(self):
         """Send LiME to remote client. Uses pre-compiled module if supplied."""
@@ -191,6 +218,7 @@ class LimeDeploy(object):
         if self.client.profile is None:
             self.new_profile = True
 
+        self.check_constraints()
         self.send_lime()
         self.install_lime()
         self.session.check_integrity()
