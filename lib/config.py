@@ -39,7 +39,7 @@ class Config:
         super(Config, self).__init__()
 
         # Internal Resources
-        self.lime_version = '1.8.0.1'
+        self.lime_version = '1.8.1'
         self.config_file = '.limeaide'
         self.manifest = 'manifest.json'
         self.lime_dir = './tools/LiME/src/'
@@ -75,7 +75,7 @@ class Config:
         cprint("Downloading LiME", 'green')
         try:
             urllib.request.urlretrieve(
-                "https://github.com/kd8bny/LiME/archive/" +
+                "https://github.com/504ensicsLabs/LiME/archive/" +
                 "v{}.zip".format(
                     self.lime_version), filename="./tools/lime_master.zip")
             zip_lime = zipfile.ZipFile("./tools/lime_master.zip", 'r')
