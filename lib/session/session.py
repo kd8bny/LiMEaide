@@ -77,16 +77,22 @@ class Session:
 
         hash = digest.hexdigest()
 
-        with open(self.client.output_dir +
-                  self.client.output + '.' + self.client.digest, 'r') as f:
-            remote_hash = f.read()
+        try:
+            with open(self.client.output_dir +
+                      self.client.output + '.' + self.client.digest, 'r') as f:
+                remote_hash = f.read()
 
-        if hash == remote_hash:
-            cprint("> Digest complete {0} {1}".format(
-                self.client.digest, hash), 'green')
-        else:
-            cprint("> DIGEST MISMATCH {0} \nlocal  {1} \nremote {2}".format(
-                self.client.digest, hash, remote_hash), 'red')
+            if hash == remote_hash:
+                cprint("> Digest complete {0} {1}".format(
+                    self.client.digest, hash), 'green')
+            else:
+                cprint(
+                    "> DIGEST MISMATCH {0} \nlocal  {1} \nremote {2}".format(
+                        self.client.digest, hash, remote_hash), 'red')
+
+        except FileNotFoundError as e:
+            self.logger.error("Digest not found on disk:" + str(e))
+            cprint("> Digest not found on disk", 'red')
 
     """
     Override the following methods in a child class for each session.
