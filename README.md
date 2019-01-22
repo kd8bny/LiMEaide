@@ -37,6 +37,7 @@ limeaide.py [OPTIONS] REMOTE_IP
 
 -u, --user : <user>
     Execute memory grab as sudo user. This is useful when root privileges are not granted.
+
 -k, --key : <path to key> 
     Use a SSH Key to connect
 
