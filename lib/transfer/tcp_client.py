@@ -50,9 +50,10 @@ class TCP_CLIENT(threading.Thread):
         :param Length of bytes received """
 
         self.byte_count += bytes_len
+        mbytes_so_far = int(self.byte_count / float(1 << 20))
         print(colored(
-            "Transfer of {0} is at {1:d} bytes".format(
-                self.output, self.byte_count), 'cyan'), end='\r', flush=True)
+            "Transfer of {0} is at {1:d} MiB".format(
+                self.output, mbytes_so_far), 'cyan'), end='\r', flush=True)
 
     def __write_out__(self, data):
         """Write data to file by appending
