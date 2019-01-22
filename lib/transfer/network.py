@@ -49,14 +49,24 @@ class Network(Transfer):
             """
 
             percent = int(100 * bytes_so_far / bytes_total)
-            mbytes_so_far = int(bytes_so_far / float(1 << 20))
-            mbytes_total = int(bytes_total / float(1 << 20))
+            so_far = ''
+            total = ''
+
+            if (bytes_total >= 1024 ^ 2):
+                mbytes_so_far = int(bytes_so_far / float(1 << 20))
+                mbytes_total = int(bytes_total / float(1 << 20))
+
+                so_far = str(mbytes_so_far) + ' MiB'
+                total = str(mbytes_total) + ' MiB'
+            else:
+                so_far = str(bytes_so_far) + ' B'
+                total = str(bytes_total) + ' B'
 
             self.complete_percent.append(percent)
             print(colored(
-                "Transfer of {0} is at {1:d}/{2:d} ".format(
-                    filename, mbytes_so_far, mbytes_total) +
-                "MiB ({0:.0f}%)".format(percent),
+                "Transfer of {0} is at {1}/{2} ".format(
+                    filename, so_far, total) +
+                " ({0:.0f}%)".format(percent),
                 'cyan'), end='\r', flush=True)
 
     def pull(self, remote_dir, local_dir, filename):
