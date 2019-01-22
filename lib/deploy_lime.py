@@ -39,29 +39,34 @@ class LimeDeploy(object):
         self.new_profile = False
 
     def check_constraints(self):
-        # free | awk '/^Mem/ {print($2);}'
-        # df . | awk '{if ($4 != "Available") print($4);}'
+        """Check available space on client. If space isn't available suggest
+        alternative transfer method.
+        """
+
         stdout = self.session.exec_cmd(
-            "free | awk '/^Mem/ {print($2);}'", disconnect_on_fail=False)
-        ram_size = int(stdout[0])
+            "free -b | awk '/^Mem/ {print($2);}'", disconnect_on_fail=False)
+        ram_size = int(int(stdout[0]) / float(1 << 20))
 
         stdout = self.session.exec_cmd(
             """df . | awk '{if ($4 != "Available") print($4);}'""",
             disconnect_on_fail=False)
-        disk_free = int(stdout[0])
+        disk_free = int(int(stdout[0]) / float(1 << 10))
 
         if not self.client.port:
             if ram_size > disk_free:
-                self.logger.error("Insufficient Disk space to capture memory")
+                self.logger.error("Insufficient disk space to capture memory")
+                cprint("> Image will occupy approximately " +
+                       "{0} of {1} MiB available".format(
+                           ram_size, disk_free), 'green')
                 sys.exit(colored(
                     "Insufficient Disk space to capture memory. " +
                     "Try using the -s option for network transfer", 'red'))
             else:
-                cprint("Image will occupy " +
-                       "{0} bytes of {1} bytes available".format(
+                cprint("> Image will occupy approximately " +
+                       "{0} of {1} MiB available".format(
                            ram_size, disk_free), 'green')
         else:
-            cprint("Image will occupy {0} bytes of space".format(
+            cprint("> Image will occupy approximately {0} MiB".format(
                 ram_size), 'green')
 
     def send_lime(self):
