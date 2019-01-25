@@ -54,7 +54,7 @@ class Session:
         :param err Text to print is from stderr"""
 
         for line in text:
-            if self.client.pass_ not in text:
+            if self.client.pass_ not in line:
                 if err:
                     cprint(line, 'red')
                 else:
