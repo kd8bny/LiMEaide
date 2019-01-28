@@ -53,14 +53,14 @@ class Network(Transfer):
             total = ''
 
             if (bytes_total >= 1024 ^ 2):
-                mbytes_so_far = int(bytes_so_far / float(1 << 20))
-                mbytes_total = int(bytes_total / float(1 << 20))
+                mbytes_so_far = bytes_so_far / float(1 << 20)
+                mbytes_total = bytes_total / float(1 << 20)
 
-                so_far = str(mbytes_so_far) + ' MiB'
-                total = str(mbytes_total) + ' MiB'
+                so_far = '{:0.2f} MiB'.format(mbytes_so_far)
+                total = '{:0.2f} MiB'.format(mbytes_total)
             else:
-                so_far = str(bytes_so_far) + ' B'
-                total = str(bytes_total) + ' B'
+                so_far = '{:0.2f} B'.format(bytes_so_far)
+                total = '{:0.2f} B'.format(bytes_total)
 
             self.complete_percent.append(percent)
             print(colored(
