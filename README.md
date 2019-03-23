@@ -1,6 +1,6 @@
 # LiMEaide
-## v2.0.0 Beta
-## by Daryl Bennett - kd8bny
+## v2.0.0
+## by Daryl Bennett - kd8bny[at]gmail[dot]com
 
 ## About
 LiMEaide is a python application designed to remotely or locally dump RAM of a Linux client and create a volatility profile for later analysis on your local host. I hope that this will simplify Linux digital forensics in a remote environment. In order to use LiMEaide all you need to do is feed a remote Linux client IP address, sit back, and consume your favorite caffeinated beverage.
@@ -27,7 +27,7 @@ python3 limeaide.py local
 ```
 and local magic happens.
 
-local transfer requires the machine to have python 3 installed and dependencies. I recommend using python3-virtualenv to provide dependencies without installing on the system.
+Local transfer requires the machine to have python 3 installed and dependencies. I recommend using python3-virtualenv to provide dependencies without installing on the system.
 
 ### Detailed usage
 ```
@@ -115,20 +115,19 @@ sudo yum install libdwarf-tools
 By default LiMEaide will automatically download and place LiME in the correct directory. However, if you are disconnected from a network proceed with manual installation method in the section below.
 ##### Manually install LiME
 In order to use LiME you must download and move the source into the **LiMEaide/tools** directory. Make sure the the LiME folder is named **LiME**. The full path should be as follows:
-NOTE: If you would like to build Volatility profiles, you must use my forked version of LiME. This provides debugging symbols used by dwarfdump.
 ```
 LiMEaide/tools/LiME/
 ```
 How to...
 
- 1. Download [LiME v1.7.8.2](https://github.com/kd8bny/LiME/archive/v1.7.8.2.zip)
+ 1. Download [LiME v1.8.1](https://github.com/504ensicsLabs/LiME/archive/v1.8.1.zip)
  2. Extract into `LiMEaide/tools/`
  3. Rename folder to `LiME`
 
 ## Limits at this time
 - Only supports bash. Use other shells at your own risk
 - Modules must be built on remote client. Therefore remote client must have proper headers installed.
-  - Unless you follow [this](https://github.com/kd8bny/LiMEaide/wiki/Building-Out-of-Tree-Modules) guide for compiling external kernel modules. Once compiled, copy module to profile directory.
+  - Unless you follow [this](https://github.com/kd8bny/LiMEaide/wiki/Building-Out-of-Tree-Modules) guide for compiling external kernel modules. Once compiled, copy module **.ko** to LiMEaide profiles directory.
 
 ## Special Thanks and Notes
 * The idea for this application was built upon the concept dreamed up by and the [Linux Memory Grabber](https://github.com/halpomeranz/lmg) project
