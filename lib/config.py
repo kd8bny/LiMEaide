@@ -118,12 +118,17 @@ class Config:
                 path = 'None'
                 path_ext = ''
                 break
-            elif os.path.isdir(path):
-                break
-            else:
+            elif not os.path.isdir(path):
                 cprint(
                     "Entered directory does not exist. Please enter" +
                     " again", 'red')
+            elif not os.path.isdir(path + path_ext):
+                cprint(
+                    "This is a directory but it".format(path) +
+                    "doesn't include the required " +
+                    "subdirectories: \n{0}".format(path_ext), 'red')
+            else:
+                break
 
         self.volatility_dir = path + path_ext
 
