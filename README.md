@@ -1,5 +1,5 @@
 # LiMEaide
-## v2.0.0
+## v2.0
 ## by Daryl Bennett - kd8bny[at]gmail[dot]com
 
 ## About
