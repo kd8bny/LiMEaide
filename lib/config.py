@@ -39,7 +39,7 @@ class Config:
         super(Config, self).__init__()
 
         # Internal Resources
-        self.lime_version = '1.8.1'
+        self.lime_version = '1.9.1'
         self.config_file = '.limeaide'
         self.manifest = 'manifest.json'
         self.lime_dir = './tools/LiME/src/'
