@@ -40,7 +40,7 @@ class VolDeploy(object):
     def get_maps(self):
         """Grab system maps from remote client."""
 
-        cprint("> Attempting to grab files for volatility profile", 'blue')
+        cprint("> Attempting to create volatility profile", 'blue')
         cprint("> Obtaining system.map", 'blue')
 
         self.map = 'System.map-{}'.format(self.client.profile['kver'])
@@ -83,7 +83,7 @@ class VolDeploy(object):
         self.get_maps()
         self.get_profile()
 
-        if self.config.volatility_dir:
+        if self.config.volatility_dir != 'None':
             shutil.copy(
                 self.client.output_dir + self.client.profile['profile'],
                 self.config.volatility_dir + self.client.profile['profile'])
