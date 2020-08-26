@@ -54,9 +54,6 @@ limeaide.py [OPTIONS] REMOTE_IP
     Use a different digest algorithm. See LiME docs for valid options
     Use 'None' to disable. 
 
--C, --compress
-    Compress transfer over the wire. This will not work with socket or local transfers.
-
 -p, --profile : <distro> <kernel version> <arch>
     Skip the profiler by providing the distribution, kernel version, and architecture of the remote client.
 
@@ -68,6 +65,9 @@ limeaide.py [OPTIONS] REMOTE_IP
 
 -v, --verbose
     Display verbose output
+
+-z, --zlib
+    Compress the memory image during imaging using LiME zlib. This will speed up imaging and transfer by compressng the image during paging. See Compression below for more information.
 
 --force-clean
     If previous attempt failed then clean up client
@@ -120,9 +120,23 @@ LiMEaide/tools/LiME/
 ```
 How to...
 
- 1. Download [LiME v1.8.1](https://github.com/504ensicsLabs/LiME/archive/v1.8.1.zip)
+ 1. Download [LiME v1.9.1](https://github.com/504ensicsLabs/LiME/archive/v1.8.1.zip)
  2. Extract into `LiMEaide/tools/`
  3. Rename folder to `LiME`
+
+## Compression
+
+Compression can reduce significantly the time required to acquire a memory capture. It can achieve the speedup of 4x over uncompressed transfers with a few memory overhead (~ 24 KB).
+
+The RAM file will be in the zlib format, which is different from the gzip or zip formats. The reason is that the deflate library embedded in the kernel do not support them.
+
+To decompress it you can use [pigz](https://zlib.net/pigz/) or any zlib-compatible library.
+
+```
+$ nc localhost 4444 | unpigz > ram.lime
+```
+
+Note that only the RAM file is compressed. The digest file is not compressed, and the hash value will match the uncompressed data.
 
 ## Limits at this time
 - Only supports bash. Use other shells at your own risk

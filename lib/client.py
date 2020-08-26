@@ -49,5 +49,5 @@ class Client:
         # Profile and options
         self.profile = None
         self.output_dir = None
-        self.compress = None
+        self.zlib = None
         self.job_name = None

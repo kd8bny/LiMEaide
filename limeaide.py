@@ -63,13 +63,11 @@ class Limeaide:
             "-s", "--socket", help="Use a TCP socket instead of a SFTP session \
             to transfer data. Does not write the memory image to disk, but \
             will transfer other needed files")
+        parser.add_argument("-c", "--case", help="Append case title or number \
+            to the output directory")
         parser.add_argument(
-            "-C", "--compress", action="store_true", help="Compress transfer \
-            over the wire. This will not work with socket or local transfers")
-        parser.add_argument("-c", "--case", help="Append case number to output\
-            dir")
-        parser.add_argument("-v", "--verbose", action="store_true", help="Prod\
-            uce verbose output from remote client")
+            "-v", "--verbose", action="store_true", help="Produce verbose \
+            output from remote client")
         parser.add_argument("--force-clean", action="store_true", help="Force \
             clean client after failed deployment")
 
@@ -77,7 +75,12 @@ class Limeaide:
         parser.add_argument("-o", "--output", help="Name the output file")
         parser.add_argument("-f", "--format", help="Change the format")
         parser.add_argument("-d", "--digest", help="Use a different digest\
-             algorithm. Use 'None' to disable")
+             algorithm. Default is 'sha1', use 'None' to disable")
+        parser.add_argument(
+            "-z", "--zlib", action="store_true", help="Compress the \
+            memory image during imaging using LiME zlib. This will speed \
+            up imaging and transfer by compressng the image during paging. \
+            See README for decompression")
 
         profiler_group = parser.add_mutually_exclusive_group()
         profiler_group.add_argument(
@@ -105,16 +108,9 @@ class Limeaide:
         if client.ip == 'local':
             if args.socket:
                 sys.exit(colored("Can not use socket on local machine", 'red'))
-            elif args.compress:
-                sys.exit(colored(
-                    "Can not compress with local transfer", 'red'))
 
         if args.socket:
-            if args.compress:
-                sys.exit(colored(
-                    "Can not compress with socket usage transfer", 'red'))
-            else:
-                client.port = int(args.socket)
+            client.port = int(args.socket)
 
         if args.case:
             client.job_name = args.case
@@ -145,7 +141,8 @@ class Limeaide:
         else:
             client.output = config.output
 
-        client.compress = args.compress
+        if args.zlib:
+            client.zlib = args.zlib
 
         client.output_dir = "{0}{1}/".format(
             config.output_dir, client.job_name)

@@ -73,8 +73,8 @@ class LimeDeploy(object):
         """Send LiME to remote client. Uses pre-compiled module if supplied."""
 
         cprint("> Sending LiME src to remote client", 'blue')
-        lime_src = ['main.c', 'disk.c', 'tcp.c', 'hash.c', 'lime.h',
-                    'Makefile']
+        lime_src = ['main.c', 'disk.c', 'tcp.c', 'hash.c', 'deflate.c',
+                    'lime.h', 'Makefile']
 
         self.session.exec_cmd(
             "mkdir -p {}".format(self.config.lime_rdir))
@@ -112,53 +112,63 @@ class LimeDeploy(object):
             self.client.profile["distro"], self.client.profile["kver"],
             self.client.profile["arch"]), 'blue')
 
-    def install_lime(self):
-        """Will install LiME and dump RAM."""
+    def __build_lime_args__(self):
+        """Build the LiME arguments"""
 
-        cprint("> Installing LiME and retrieving RAM", 'blue')
-
-        # Build the correct instructions
         path = "path="
         format = "format={}".format(self.client.format)
         digest = ""
+        compress = ""
 
         if self.client.digest:
             digest = "digest={}".format(self.client.digest)
+        if self.client.zlib:
+            compress = "compress=1"
 
         if self.client.port:
             path += "tcp:{0}".format(self.client.port)
-            self.__install_lime_sock__(path, format, digest)
         else:
             path += "{0}{1}".format(
                 self.config.lime_rdir, self.client.output)
-            self.__install_lime__(path, format, digest)
 
-    def __install_lime_sock__(self, path, format, digest):
+        lime_args = "{0} {1} {2} {3}".format(path, format, digest, compress)
+
+        cprint("> LiME arguments: {}".format(lime_args), 'blue')
+
+        return lime_args
+
+
+    def install_lime(self):
+        """Will install LiME and page virtual memory."""
+
+        cprint("> Installing LiME and paging virtual memory", 'blue')
+        lime_args = self.__build_lime_args__()
+
+        # Determine xfer method based on if the port is declared
+        if self.client.port:
+            self.__install_lime_sock__(lime_args)
+        else:
+            self.__install_lime__(lime_args)
+
+
+    def __install_lime_sock__(self, lime_args):
         """Install LiME and connect to the open socket."""
 
-        cprint(">> {}".format(path), 'blue')
-        cprint(">> {}".format(format), 'blue')
-        cprint(">> {}".format(digest), 'blue')
-
-        cmd = "insmod {0}{1} '{2} {3} {4}'".format(
-            self.config.lime_rdir, self.client.profile["module"],
-            path, format, digest)
+        cmd = "insmod {0}{1} '{2}'".format(
+            self.config.lime_rdir, self.client.profile["module"], 
+            lime_args)
 
         # Open Socket
         self.transfer_image()
-        self.logger.info("LiME installing")
         self.session.exec_cmd(cmd, priv=True)
+        self.logger.info("LiME installed")
 
-    def __install_lime__(self, path, format, digest):
+    def __install_lime__(self, lime_args):
         """Install LiME and transfer with SFTP."""
 
-        cprint(">> {}".format(path), 'blue')
-        cprint(">> {}".format(format), 'blue')
-        cprint(">> {}".format(digest), 'blue')
-
-        cmd = "insmod {0}{1} '{2} {3} {4}'".format(
+        cmd = "insmod {0}{1} '{2}'".format(
             self.config.lime_rdir, self.client.profile["module"],
-            path, format, digest)
+            lime_args)
 
         self.session.exec_cmd(cmd, priv=True)
         self.logger.info("LiME installed")
