@@ -33,7 +33,7 @@ from termcolor import cprint, colored
 
 class Config:
 
-    __version__ = "1"
+    __version__ = "2"
 
     def __init__(self):
         super(Config, self).__init__()
@@ -52,11 +52,12 @@ class Config:
         self.lime_rdir = './.limeaide_working/'
 
         self.date = None
+        self.user = None
         self.volatility_dir = None
         self.output = None
-        self.compress = None
         self.format = None
         self.digest = None
+        self.zlib = None
 
     def set_date(self):
         self.date = datetime.strftime(datetime.today(), "%Y_%m_%dT%H_%M_%S")
@@ -92,13 +93,14 @@ class Config:
         """Write a new configuration file on first run."""
 
         default_config = configparser.ConfigParser()
-        default_config['MANIFEST'] = {}
-        default_config['MANIFEST']['version'] = self.__version__
+        default_config.add_section('MANIFEST')
+        default_config.set('MANIFEST', 'version', self.__version__)
+        default_config.set('DEFAULT', 'user', 'root')
         default_config.set('DEFAULT', 'volatility', '')
         default_config.set('DEFAULT', 'output', 'dump.lime')
-        default_config.set('DEFAULT', 'compress', 'False')
         default_config.set('DEFAULT', 'format', 'lime')
         default_config.set('DEFAULT', 'digest', 'sha1')
+        default_config.set('DEFAULT', 'zlib', 'False')
         with open(self.config_file, 'w') as configfile:
             default_config.write(configfile)
 
@@ -166,11 +168,12 @@ class Config:
         default_config = configparser.ConfigParser()
         default_config.read(self.config_file)
 
-        self.volatility_dir = default_config['DEFAULT']['volatility']
-        self.output = default_config['DEFAULT']['output']
-        self.compress = default_config['DEFAULT']['compress']
-        self.format = default_config['DEFAULT']['format']
-        self.digest = default_config['DEFAULT']['digest']
+        self.user = default_config.get('DEFAULT', 'user')
+        self.volatility_dir = default_config.get('DEFAULT', 'volatility')
+        self.output = default_config.get('DEFAULT', 'output')
+        self.format = default_config.get('DEFAULT', 'format')
+        self.digest = default_config.get('DEFAULT', 'digest')
+        self.zlib = default_config.getboolean('DEFAULT', 'zlib')
 
         if self.volatility_dir != 'None':
             if not self.volatility_dir or not os.path.isdir(

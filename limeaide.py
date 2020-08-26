@@ -121,7 +121,7 @@ class Limeaide:
         if args.user:
             client.user = args.user
         else:
-            client.user = 'root'
+            client.user = config.user
 
         if args.format:
             client.format = args.format
@@ -143,6 +143,8 @@ class Limeaide:
 
         if args.zlib:
             client.zlib = args.zlib
+        else:
+            client.zlib = config.zlib
 
         client.output_dir = "{0}{1}/".format(
             config.output_dir, client.job_name)
