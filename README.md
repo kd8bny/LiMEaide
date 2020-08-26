@@ -120,7 +120,7 @@ LiMEaide/tools/LiME/
 ```
 How to...
 
- 1. Download [LiME v1.9.1](https://github.com/504ensicsLabs/LiME/archive/v1.8.1.zip)
+ 1. Download [LiME v1.9.1](https://github.com/504ensicsLabs/LiME/archive/v1.9.1.zip)
  2. Extract into `LiMEaide/tools/`
  3. Rename folder to `LiME`
 
