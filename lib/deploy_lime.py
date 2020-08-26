@@ -55,7 +55,7 @@ class LimeDeploy(object):
         if not self.client.port:
             if ram_size > disk_free:
                 self.logger.error("Insufficient disk space to capture memory")
-                cprint("> Image will occupy approximately " +
+                cprint("> Image will occupy up to " +
                        "{0} of {1} MiB available".format(
                            ram_size, disk_free), 'green')
                 sys.exit(colored(
