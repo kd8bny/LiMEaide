@@ -46,27 +46,24 @@ class LimeDeploy(object):
         stdout = self.session.exec_cmd(
             "free -b | awk '/^Mem/ {print($2);}'", disconnect_on_fail=False)
         ram_size = int(int(stdout[0]) / float(1 << 20))
-
         stdout = self.session.exec_cmd(
             """df . | awk '{if ($4 != "Available") print($4);}'""",
             disconnect_on_fail=False)
         disk_free = int(int(stdout[0]) / float(1 << 10))
 
         if not self.client.port:
-            if ram_size > disk_free:
-                self.logger.error("Insufficient disk space to capture memory")
-                cprint("> Image will occupy up to " +
+            cprint("> Image will occupy up to " +
                        "{0} of {1} MiB available".format(
                            ram_size, disk_free), 'green')
+
+            if ram_size > disk_free:
+                self.logger.error("Insufficient disk space to capture memory")
                 sys.exit(colored(
                     "Insufficient Disk space to capture memory. " +
                     "Try using the -s option for network transfer", 'red'))
-            else:
-                cprint("> Image will occupy approximately " +
-                       "{0} of {1} MiB available".format(
-                           ram_size, disk_free), 'green')
+
         else:
-            cprint("> Image will occupy approximately {0} MiB".format(
+            cprint("> Image will occupy up to {0} MiB".format(
                 ram_size), 'green')
 
     def send_lime(self):
@@ -213,7 +210,7 @@ class LimeDeploy(object):
                 None, self.client.output_dir, remote_file_hash)
 
     def __transfer_image__(self):
-        """Retrieve files with SFTP."""
+        """Retrieve files over SFTP."""
 
         remote_file = self.client.output
         remote_file_hash = "{}.{}".format(
